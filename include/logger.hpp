@@ -5,9 +5,10 @@
  * @brief Contains common functions related to output and logging
  */
 
-#include <stdarg.h>
+#include <cstdarg>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
+#include <unistd.h>
 
 #ifdef NCURSES
 #include <ncurses.h>
@@ -15,7 +16,7 @@
 
 namespace jaffarCommon
 {
-  
+
 // If we use NCurses, define the following useful functions
 #ifdef NCURSES
 
