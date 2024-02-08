@@ -9,16 +9,79 @@
 #include <stdexcept>
 #include <stdio.h>
 
-// If we use NCurses, we need to use the appropriate printing function
 #ifdef NCURSES
-  #include <ncurses.h>
-  #define LOG printw
-#else
-  #define LOG printf
+#include <ncurses.h>
 #endif
 
 namespace jaffarCommon
 {
+  
+// If we use NCurses, define the following useful functions
+#ifdef NCURSES
+
+// Function to check for keypress taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
+inline int kbhit()
+{
+  int ch, r;
+
+  // turn off getch() blocking and echo
+  nodelay(stdscr, TRUE);
+  noecho();
+
+  // check for input
+  ch = getch();
+  if (ch == ERR) // no input
+    r = FALSE;
+  else // input
+  {
+    r = TRUE;
+    ungetch(ch);
+  }
+
+  // restore block and echo
+  echo();
+  nodelay(stdscr, FALSE);
+
+  return (r);
+}
+
+inline int getKeyPress()
+{
+  while (!kbhit())
+  {
+    usleep(100000ul);
+    refresh();
+  }
+  return getch();
+}
+
+inline void initializeTerminal()
+{
+  // Initializing ncurses screen
+  initscr();
+  cbreak();
+  noecho();
+  nodelay(stdscr, TRUE);
+  scrollok(stdscr, TRUE);
+}
+
+inline void clearTerminal()
+{
+  clear();
+}
+
+inline void finalizeTerminal()
+{
+  endwin();
+}
+
+inline void refreshTerminal()
+{
+  refresh();
+}
+
+#endif // NCURSES
+
   
 #ifdef EXIT_WITH_ERROR
 #undef EXIT_WITH_ERROR
