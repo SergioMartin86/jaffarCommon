@@ -5,8 +5,8 @@
  * @brief Contains common function related to hashing
  */
 
-#include <metrohash128/metrohash128.h>
-#include <sha1/sha1.hpp>
+#include "../extern/metrohash128/metrohash128.h"
+#include "../extern/sha1/sha1.hpp"
 #include <string>
 #include <cstdio>
 

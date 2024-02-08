@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include <xdelta3/xdelta3.h>
+#include "../extern/xdelta3/xdelta3.h"
 
 namespace jaffarCommon
 {

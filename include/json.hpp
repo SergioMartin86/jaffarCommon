@@ -6,7 +6,7 @@
  */
 
 #include <cstdlib>
-#include <json/single_include/nlohmann/json.hpp>
+#include "../extern/json/single_include/nlohmann/json.hpp"
 #include "logger.hpp"
 
 namespace jaffarCommon
