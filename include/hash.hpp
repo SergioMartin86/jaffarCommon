@@ -1,16 +1,16 @@
 #pragma once
 
-#include <metrohash128/metrohash128.h>
-#include <sha1/sha1.hpp>
-#include <string>
-#include <cstdio>
-
 /**
  * @file hash.hpp
  * @brief Contains common function related to hashing
  */
 
-namespace jaffarPlus
+#include <metrohash128/metrohash128.h>
+#include <sha1/sha1.hpp>
+#include <string>
+#include <cstdio>
+
+namespace jaffarCommon
 {
 
 typedef _uint128_t hash_t;

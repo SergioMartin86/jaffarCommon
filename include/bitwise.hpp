@@ -1,14 +1,14 @@
 #pragma once
 
-#include <stddef.h>
-#include <cstdint>
-
 /**
  * @file bitwise.hpp
  * @brief Contains common functions related to bitwise operations
  */
 
-namespace jaffarPlus
+#include <stddef.h>
+#include <cstdint>
+
+namespace jaffarCommon
 {
   
   uint8_t bitMaskTable[8] =
@@ -109,4 +109,4 @@ namespace jaffarPlus
         ((idx == 0) && (value & 0b00000001))) return true;
     return false;
   }
-} // namespace jaffarPlus
+} // namespace jaffarCommon

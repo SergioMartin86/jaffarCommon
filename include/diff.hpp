@@ -1,17 +1,17 @@
 #pragma once
 
+/**
+ * @file diff.hpp
+ * @brief Contains common functions related to serialization and deserialization when using differential compression
+ */
+
 #include <stdexcept>
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
 #include <xdelta3/xdelta3.h>
 
-/**
- * @file diff.hpp
- * @brief Contains common functions related to serialization and deserialization when using differential compression
- */
-
-namespace jaffarPlus
+namespace jaffarCommon
 {
 
 inline void serializeContiguousData(

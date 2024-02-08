@@ -1,10 +1,15 @@
 #pragma once
 
+/**
+ * @file file.hpp
+ * @brief Contains common functions related to file manipulation
+ */
+
 #include <fstream>
 #include <sstream>
 #include <string>
 
-namespace jaffarPlus
+namespace jaffarCommon
 {
 
 // Taken from https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c/116220#116220
@@ -44,4 +49,4 @@ static inline bool saveStringToFile(const std::string &src, const std::string& f
   return false;
 }
 
-} // namespace jaffarPlus
+} // namespace jaffarCommon

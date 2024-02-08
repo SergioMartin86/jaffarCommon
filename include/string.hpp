@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 /**
  * @file string.hpp
  * @brief Contains common functions related to manipulating strings
  */
 
-namespace jaffarPlus
+#include <string>
+#include <vector>
+
+namespace jaffarCommon
 {
 
 // Function to split a vector into n mostly fair chunks
@@ -50,4 +50,4 @@ static inline std::vector<std::string> split(const std::string &s, char delim)
  return elems;
 }
 
-} // namespace jaffarPlus
+} // namespace jaffarCommon

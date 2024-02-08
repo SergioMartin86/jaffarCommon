@@ -1,13 +1,13 @@
 #pragma once
 
+/**
+ * @file logger.hpp
+ * @brief Contains common functions related to output and logging
+ */
+
 #include <stdarg.h>
 #include <stdexcept>
 #include <stdio.h>
-
-/**
- * @file json.hpp
- * @brief Contains common functions related to output and logging
- */
 
 // If we use NCurses, we need to use the appropriate printing function
 #ifdef NCURSES
@@ -17,14 +17,14 @@
   #define LOG printf
 #endif
 
-namespace jaffarPlus
+namespace jaffarCommon
 {
   
 #ifdef EXIT_WITH_ERROR
 #undef EXIT_WITH_ERROR
 #endif 
 
-#define EXIT_WITH_ERROR(...) jaffarPlus::exitWithError(__FILE__, __LINE__, __VA_ARGS__)
+#define EXIT_WITH_ERROR(...) jaffarCommon::exitWithError(__FILE__, __LINE__, __VA_ARGS__)
 inline void exitWithError [[noreturn]] (const char *fileName, const int lineNumber, const char *format, ...)
 {
   char *outstr = 0;
@@ -44,4 +44,4 @@ inline void exitWithError [[noreturn]] (const char *fileName, const int lineNumb
   throw std::runtime_error(outString.c_str());
 }
 
-} // namespace jaffarPlus
+} // namespace jaffarCommon

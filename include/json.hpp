@@ -1,13 +1,18 @@
 #pragma once
 
+/**
+ * @file json.hpp
+ * @brief Contains common functions related to JSON manipulation
+ */
+
 #include <cstdlib>
 #include <json/single_include/nlohmann/json.hpp>
 #include "logger.hpp"
 
-namespace jaffarPlus
+namespace jaffarCommon
 {
 
-#define JSON_GET_STRING(JSON, ENTRY) jaffarPlus::jsonGetString(JSON, ENTRY)
+#define JSON_GET_STRING(JSON, ENTRY) jaffarCommon::jsonGetString(JSON, ENTRY)
 static inline const std::string jsonGetString(const nlohmann::json& json, const std::string& entry)
 {
   if (json.is_object() == false) EXIT_WITH_ERROR("[Error] JSON passed is not a key/value object. Happened when trying to obtain string entry '%s'. JSON Dump: %s\n", entry.c_str(), json.dump(2).c_str());
@@ -16,7 +21,7 @@ static inline const std::string jsonGetString(const nlohmann::json& json, const 
   return json.at(entry).get<std::string>();
 }
 
-#define JSON_GET_OBJECT(JSON, ENTRY) jaffarPlus::jsonGetObject(JSON, ENTRY)
+#define JSON_GET_OBJECT(JSON, ENTRY) jaffarCommon::jsonGetObject(JSON, ENTRY)
 static inline const nlohmann::json& jsonGetObject(const nlohmann::json& json, const std::string& entry)
 {
   if (json.is_object() == false) EXIT_WITH_ERROR("[Error] JSON passed is not a key/value object. Happened when trying to obtain string entry '%s'. JSON Dump: %s\n", entry.c_str(), json.dump(2).c_str());
@@ -25,7 +30,7 @@ static inline const nlohmann::json& jsonGetObject(const nlohmann::json& json, co
   return json.at(entry);
 }
 
-#define JSON_GET_ARRAY(JSON, ENTRY) jaffarPlus::jsonGetArray(JSON, ENTRY)
+#define JSON_GET_ARRAY(JSON, ENTRY) jaffarCommon::jsonGetArray(JSON, ENTRY)
 static inline const nlohmann::json& jsonGetArray(const nlohmann::json& json, const std::string& entry)
 {
   if (json.is_object() == false) EXIT_WITH_ERROR("[Error] JSON passed is not a key/value object. Happened when trying to obtain string entry '%s'. JSON Dump: %s\n", entry.c_str(), json.dump(2).c_str());
@@ -34,7 +39,7 @@ static inline const nlohmann::json& jsonGetArray(const nlohmann::json& json, con
   return json.at(entry);
 }
 
-#define JSON_GET_NUMBER(T, JSON, ENTRY) jaffarPlus::jsonGetNumber<T>(JSON, ENTRY)
+#define JSON_GET_NUMBER(T, JSON, ENTRY) jaffarCommon::jsonGetNumber<T>(JSON, ENTRY)
 template <typename T> static inline const T jsonGetNumber(const nlohmann::json& json, const std::string& entry)
 {
   if (json.is_object() == false) EXIT_WITH_ERROR("[Error] JSON passed is not a key/value object. Happened when trying to obtain string entry '%s'. JSON Dump: %s\n", entry.c_str(), json.dump(2).c_str());
@@ -43,7 +48,7 @@ template <typename T> static inline const T jsonGetNumber(const nlohmann::json& 
   return json.at(entry).get<T>();
 }
 
-#define JSON_GET_BOOLEAN(JSON, ENTRY) jaffarPlus::jsonGetBoolean(JSON, ENTRY)
+#define JSON_GET_BOOLEAN(JSON, ENTRY) jaffarCommon::jsonGetBoolean(JSON, ENTRY)
 static inline const bool jsonGetBoolean(const nlohmann::json& json, const std::string& entry)
 {
   if (json.is_object() == false) EXIT_WITH_ERROR("[Error] JSON passed is not a key/value object. Happened when trying to obtain string entry '%s'. JSON Dump: %s\n", entry.c_str(), json.dump(2).c_str());
