@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
+#include <limits>
 #include "../extern/xdelta3/xdelta3.h"
 
 namespace jaffarCommon
@@ -168,5 +169,107 @@ inline void deserializeDifferentialData(
   // Finally, increasing reference data position pointer
   *referenceDataPos += outputDataSize;
 }
+
+class Serializer final
+{
+  public:
+
+  Serializer(
+    void* __restrict__ outputDataBuffer = nullptr, 
+    const size_t outputDataBufferSize = std::numeric_limits<uint32_t>::max(),
+    const void* __restrict__ referenceDataBuffer = nullptr,
+    const size_t referenceDataBufferSize = 0,
+    const bool useZlib = false
+  ) :
+   _outputDataBuffer((uint8_t*)outputDataBuffer),
+   _outputDataBufferSize(outputDataBufferSize),
+   _referenceDataBuffer((const uint8_t*)referenceDataBuffer),
+   _referenceDataBufferSize(referenceDataBufferSize),
+   _useZlib(useZlib)
+  {
+
+  }
+
+  ~Serializer() = default;
+
+  void pushData(const void* const __restrict__ inputData, const size_t inputDataSize)
+  {
+    if (_referenceDataBuffer == nullptr) pushContiguousData(inputData, inputDataSize);
+    if (_referenceDataBuffer != nullptr) pushDifferentialData(inputData, inputDataSize);
+  }
+
+  void pushContiguousData(const void* const __restrict__ inputData, const size_t inputDataSize)
+  {
+    // Only perform memcpy if the output block is not null
+    if (_outputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
+
+    // Moving output data pointer position
+    _outputDataBufferPos += inputDataSize;
+
+    // Making sure we do not exceed the maximum size estipulated
+    if (_outputDataBufferPos > _outputDataBufferSize) throw std::runtime_error("Maximum output data position reached before contiguous serialization");
+
+    // Moving reference data pointer position
+    _referenceDataBufferPos += inputDataSize;
+    if (_referenceDataBufferPos > _referenceDataBufferSize) throw std::runtime_error("[Error] Maximum reference data position exceeded on contiguous deserialization");
+  }
+
+  void pushDifferentialData(const void* const __restrict__ inputData, const size_t inputDataSize)
+  {
+    // If output data buffer is null, then we simply ignore differential data.
+    if (_outputDataBuffer != nullptr) return;
+
+    // Check that we don't exceed reference data size
+    if (_referenceDataBufferPos + inputDataSize > _referenceDataBufferSize) throw std::runtime_error("[Error] Differential compression size exceeds reference data buffer size.");
+
+    // Variable to store difference count 
+    auto diffCount = (usize_t*)&_outputDataBuffer[_outputDataBufferPos];
+
+    // Advancing position pointer to store the difference counter
+    _outputDataBufferPos += sizeof(usize_t);
+
+    // If we reached maximum output, stop here
+    if (_outputDataBufferPos >= _outputDataBufferSize) throw std::runtime_error("[Error] Maximum output data position reached before differential encode");
+
+    // Encoding differential
+    int ret = xd3_encode_memory(
+      (const uint8_t*)inputData,
+      inputDataSize,
+      &_referenceDataBuffer[_referenceDataBufferPos],
+      inputDataSize,
+      &_outputDataBuffer[_outputDataBufferPos],
+      diffCount,
+      _outputDataBufferSize - _outputDataBufferPos,
+      _useZlib ? 0 : XD3_NOCOMPRESS
+    );
+
+    // If an error happened, print it here
+    if (ret != 0) throw std::runtime_error("[Error] unexpected error while encoding differential compression.");
+
+    // Increasing output data position pointer
+    _outputDataBufferPos += *diffCount;
+
+    // If exceeded size, report it
+    if (_outputDataBufferPos > _outputDataBufferSize) throw std::runtime_error("[Error] Differential compression size exceeded output maximum size.");
+
+    // Finally, increasing reference data position pointer
+    _referenceDataBufferPos += inputDataSize;
+  }
+
+  size_t getOutputSize() const { return _outputDataBufferPos; }
+  
+  private:
+
+  uint8_t* __restrict__ const _outputDataBuffer;
+  const size_t _outputDataBufferSize;
+  size_t _outputDataBufferPos = 0;
+
+  const uint8_t* __restrict__ const _referenceDataBuffer;
+  const size_t _referenceDataBufferSize;
+  size_t _referenceDataBufferPos = 0;
+
+  const bool _useZlib;
+};
+
 
 }

@@ -11,10 +11,7 @@
 #include <unistd.h>
 
 #ifdef NCURSES
- #include <ncurses.h>
- #define LOG printw
-#else
- #define LOG printf
+#include <ncurses.h>
 #endif
 
 namespace jaffarCommon
