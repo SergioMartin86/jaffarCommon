@@ -12,6 +12,9 @@
 
 #ifdef NCURSES
 #include <ncurses.h>
+#define LOG printw
+#else
+#define LOG printf
 #endif
 
 namespace jaffarCommon
