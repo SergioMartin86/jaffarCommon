@@ -49,7 +49,7 @@ inline int kbhit()
   return (r);
 }
 
-inline int getKeyPress()
+inline int waitForKeyPress()
 {
   while (!kbhit())
   {
@@ -57,6 +57,20 @@ inline int getKeyPress()
     refresh();
   }
   return getch();
+}
+
+inline int getKeyPress()
+{
+  nodelay(stdscr, TRUE);
+  noecho();
+    
+  int ch = getch();
+
+  // restore block and echo
+  echo();
+  nodelay(stdscr, FALSE);
+
+  return ch;
 }
 
 inline void initializeTerminal()
@@ -86,7 +100,8 @@ inline void refreshTerminal()
 
 #else
 
-inline int getKeyPress() { return getchar(); }
+inline int waitForKeyPress() { return getchar(); }
+inline int getKeyPress() { return 0; };
 inline void initializeTerminal(){}
 inline void clearTerminal(){}
 inline void finalizeTerminal(){}
