@@ -84,6 +84,14 @@ inline void refreshTerminal()
   refresh();
 }
 
+#else
+
+inline int getKeyPress() { return getchar(); }
+inline void initializeTerminal(){}
+inline void clearTerminal(){}
+inline void finalizeTerminal(){}
+inline void refreshTerminal(){}
+
 #endif // NCURSES
 
   
