@@ -69,7 +69,7 @@ template <class T> class concurrentDeque
    _mutex.unlock();
  }
 
- bool pop_back_get(T& element)
+ inline bool pop_back_get(T& element)
  {
    _mutex.lock();
 
@@ -84,6 +84,28 @@ template <class T> class concurrentDeque
    
    _mutex.unlock();
    return true;
+ }
+
+ inline bool pop_front_get(T& element)
+ {
+   _mutex.lock();
+
+   if (_internalDeque.empty())
+   {
+    _mutex.unlock();
+     return false;
+   }
+
+   element = _internalDeque.front();
+   _internalDeque.pop_front();
+   
+   _mutex.unlock();
+   return true;
+ }
+
+ inline size_t wasSize() const
+ {
+   return _internalDeque.size();
  }
 
  private:
