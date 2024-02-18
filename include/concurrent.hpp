@@ -17,7 +17,7 @@ namespace jaffarCommon
 template <class T> using atomicQueue_t = atomic_queue::AtomicQueueB<T>;
 template <class V> using HashSet_t = phmap::parallel_flat_hash_set<V, phmap::priv::hash_default_hash<V>, phmap::priv::hash_default_eq<V>, std::allocator<V>, 4, std::mutex>;
 template <class K, class V> using HashMap_t = phmap::parallel_flat_hash_map<K, V, phmap::priv::hash_default_hash<K>, phmap::priv::hash_default_eq<K>, std::allocator<std::pair<const K, V>>, 4, std::mutex>;
-template <class K, class V> using concurrentMultimap_t = oneapi::tbb::concurrent_multimap<K,V>; 
+template <class K, class V> using concurrentMultimap_t = oneapi::tbb::concurrent_multimap<K,V, std::greater<K>>; 
 
 template <class T> class concurrentDeque
 {
@@ -39,20 +39,27 @@ template <class T> class concurrentDeque
    _mutex.unlock();
  }
 
- inline T front() 
+  inline void push_front_no_lock(T& element)
+ {
+   _internalDeque.push_front(element);
+ }
+
+
+ inline void push_front(T& element)
  {
    _mutex.lock();
-   auto element = _internalDeque.front();
-   _mutex.unlock(); 
-   return element;
+   _internalDeque.push_front(element);
+   _mutex.unlock();
+ }
+
+ inline T front() const
+ {
+   return _internalDeque.front();
  }
  
- inline T back() 
+ inline T back() const
  {
-   _mutex.lock();
-   auto element = _internalDeque.back();
-   _mutex.unlock(); 
-   return element;
+   return _internalDeque.back();
  }
 
  inline void pop_front()
