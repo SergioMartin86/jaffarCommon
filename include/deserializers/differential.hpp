@@ -22,9 +22,9 @@ class Differential final : public deserializer::Base
   public:
 
   Differential(
-    const void* __restrict__ inputDataBuffer = nullptr, 
+    const void* __restrict inputDataBuffer = nullptr, 
     const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max(),
-    const void* __restrict__ referenceDataBuffer = nullptr,
+    const void* __restrict referenceDataBuffer = nullptr,
     const size_t referenceDataBufferSize = std::numeric_limits<uint32_t>::max(),
     const bool useZlib = false
   ) : deserializer::Base(inputDataBuffer, inputDataBufferSize),
@@ -37,7 +37,7 @@ class Differential final : public deserializer::Base
 
   ~Differential() = default;
 
-  inline void popContiguous(void* const __restrict__ outputDataBuffer, const size_t outputDataSize) override
+  inline void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos + outputDataSize > _inputDataBufferSize) throw std::runtime_error("Maximum input data position reached before contiguous deserialization");
@@ -53,7 +53,7 @@ class Differential final : public deserializer::Base
     if (_referenceDataBufferPos > _referenceDataBufferSize) throw std::runtime_error("[Error] Maximum reference data position exceeded on contiguous deserialization");
   }
 
-  inline void pop(void* const __restrict__ outputDataBuffer, const size_t outputDataSize) override
+  inline void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     // Reading differential count
     usize_t diffCount = *(usize_t*) &_inputDataBuffer[_inputDataBufferPos];
@@ -97,7 +97,7 @@ class Differential final : public deserializer::Base
   
   private:
 
-  const uint8_t* __restrict__ const _referenceDataBuffer;
+  const uint8_t* __restrict const _referenceDataBuffer;
   const size_t _referenceDataBufferSize;
   size_t _referenceDataBufferPos = 0;
 

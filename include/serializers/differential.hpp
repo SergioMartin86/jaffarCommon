@@ -22,9 +22,9 @@ class Differential final : public serializer::Base
   public:
 
   Differential(
-    void* __restrict__ outputDataBuffer = nullptr, 
+    void* __restrict outputDataBuffer = nullptr, 
     const size_t outputDataBufferSize = std::numeric_limits<uint32_t>::max(),
-    const void* __restrict__ referenceDataBuffer = nullptr,
+    const void* __restrict referenceDataBuffer = nullptr,
     const size_t referenceDataBufferSize = std::numeric_limits<uint32_t>::max(),
     const bool useZlib = false
   ) : serializer::Base(outputDataBuffer, outputDataBufferSize),
@@ -37,7 +37,7 @@ class Differential final : public serializer::Base
 
   ~Differential() = default;
 
-  inline void pushContiguous(const void* const __restrict__ inputData, const size_t inputDataSize) override
+  inline void pushContiguous(const void* const __restrict inputData, const size_t inputDataSize) override
   {
     // Only perform memcpy if the output block is not null
     if (_outputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
@@ -53,7 +53,7 @@ class Differential final : public serializer::Base
     if (_referenceDataBufferPos > _referenceDataBufferSize) throw std::runtime_error("[Error] Maximum reference data position exceeded on contiguous deserialization");
   }
 
-  inline void push(const void* const __restrict__ inputData, const size_t inputDataSize) override
+  inline void push(const void* const __restrict inputData, const size_t inputDataSize) override
   {
     // If output data buffer is null, then we simply ignore differential data.
     if (_outputDataBuffer == nullptr) return;
@@ -99,7 +99,7 @@ class Differential final : public serializer::Base
   
   private:
 
-  const uint8_t* __restrict__ const _referenceDataBuffer;
+  const uint8_t* __restrict const _referenceDataBuffer;
   const size_t _referenceDataBufferSize;
   size_t _referenceDataBufferPos = 0;
 
