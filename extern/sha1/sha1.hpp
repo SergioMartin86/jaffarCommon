@@ -302,7 +302,7 @@ std::string final()
 }
 
 
-static std::string GetHash(uint8_t* data, size_t size)
+static std::string GetHash(const uint8_t* data, const size_t size)
 {
 	std::stringstream ss;
 	ss.write((char*)data, size);
