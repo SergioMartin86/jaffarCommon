@@ -26,11 +26,12 @@ template <class T> class concurrentDeque
  concurrentDeque() = default;
  ~concurrentDeque() = default;
 
+ inline auto& getInternalStorage() { return _internalDeque; }
+
  inline void push_back_no_lock(T& element)
  {
    _internalDeque.push_back(element);
  }
-
 
  inline void push_back(T& element)
  {
