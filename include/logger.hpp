@@ -9,19 +9,30 @@
 #include <stdexcept>
 #include <cstdio>
 #include <unistd.h>
+#include "string.hpp"
 
 #ifdef NCURSES
 #include <ncurses.h>
-#define LOG printw
-#else
-#define LOG printf
 #endif
+
+
 
 namespace jaffarCommon
 {
 
 // If we use NCurses, define the following useful functions
 #ifdef NCURSES
+
+#define LOG jaffarCommon::_ncursesLog
+
+static bool _useNCurses = false;
+
+template<typename... Args> void _ncursesLog(const char * f, Args... args)
+{
+  auto string = jaffarCommon::formatString(f, args...);
+  if (_useNCurses == true)  printw("%s", string.c_str());
+  if (_useNCurses == false) printf("%s", string.c_str());
+}
 
 // Function to check for keypress taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
 inline int kbhit()
@@ -51,6 +62,8 @@ inline int kbhit()
 
 inline int waitForKeyPress()
 {
+  if (_useNCurses == false)  return getchar(); 
+
   while (!kbhit())
   {
     usleep(100000ul);
@@ -61,6 +74,8 @@ inline int waitForKeyPress()
 
 inline int getKeyPress()
 {
+  if (_useNCurses == false) return 0; 
+
   nodelay(stdscr, TRUE);
   noecho();
     
@@ -75,6 +90,9 @@ inline int getKeyPress()
 
 inline void initializeTerminal()
 {
+  // Instructing the log function to use printw
+  _useNCurses = true;
+  
   // Initializing ncurses screen
   initscr();
   cbreak();
@@ -85,21 +103,25 @@ inline void initializeTerminal()
 
 inline void clearTerminal()
 {
-  clear();
+ if (_useNCurses == true) clear();
 }
 
 inline void finalizeTerminal()
 {
+  // Instructing the log function to use printf
+  _useNCurses = false;
+
   endwin();
 }
 
 inline void refreshTerminal()
 {
-  refresh();
+  if (_useNCurses == true) refresh();
 }
 
 #else
 
+#define LOG printf
 inline int waitForKeyPress() { return getchar(); }
 inline int getKeyPress() { return 0; };
 inline void initializeTerminal(){}

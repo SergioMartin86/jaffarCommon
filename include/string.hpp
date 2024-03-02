@@ -5,8 +5,10 @@
  * @brief Contains common functions related to manipulating strings
  */
 
+#include <sstream>
 #include <string>
 #include <vector>
+#include <cstdarg>
 
 namespace jaffarCommon
 {
@@ -41,13 +43,26 @@ inline void split(const std::string &s, char delim, Out result)
   }
 }
 
-static inline std::vector<std::string> split(const std::string &s, char delim)
+inline std::vector<std::string> split(const std::string &s, char delim)
 {
  std::string newString = s;
  std::replace(newString.begin(), newString.end(), '\n', ' ');
  std::vector<std::string> elems;
  split(newString, delim, std::back_inserter(elems));
  return elems;
+}
+
+inline std::string formatString (const char *format, ...)
+{
+  char *outstr = 0;
+  va_list ap;
+  va_start(ap, format);
+  int ret = vasprintf(&outstr, format, ap);
+  if (ret < 0) exit(-1);
+
+  std::string outString = outstr;
+  free(outstr);
+  return outString;
 }
 
 } // namespace jaffarCommon
