@@ -15,9 +15,10 @@
 #include <ncurses.h>
 #endif
 
-
-
 namespace jaffarCommon
+{
+
+namespace logger
 {
 
 // If we use NCurses, define the following useful functions
@@ -136,7 +137,7 @@ __INLINE__ void refreshTerminal(){}
 #undef EXIT_WITH_ERROR
 #endif 
 
-#define EXIT_WITH_ERROR(...) jaffarCommon::exitWithError(__FILE__, __LINE__, __VA_ARGS__)
+#define EXIT_WITH_ERROR(...) jaffarCommon::logger::exitWithError(__FILE__, __LINE__, __VA_ARGS__)
 __INLINE__ void exitWithError [[noreturn]] (const char *fileName, const int lineNumber, const char *format, ...)
 {
   char *outstr = 0;
@@ -155,5 +156,7 @@ __INLINE__ void exitWithError [[noreturn]] (const char *fileName, const int line
 
   throw std::runtime_error(outString.c_str());
 }
+
+} // namespace logger
 
 } // namespace jaffarCommon

@@ -13,6 +13,9 @@
 namespace jaffarCommon
 {
 
+namespace timing
+{
+
 // Function to split a vector into n mostly fair chunks
 template <typename T>
 std::vector<T> splitVector(const T size, const T n)
@@ -64,5 +67,7 @@ __INLINE__ std::string formatString (const char *format, ...)
   free(outstr);
   return outString;
 }
+
+} // namespace timing
 
 } // namespace jaffarCommon

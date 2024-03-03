@@ -12,6 +12,9 @@
 namespace jaffarCommon
 {
 
+namespace json
+{
+
 #define JSON_GET_STRING(JSON, ENTRY) jaffarCommon::jsonGetString(JSON, ENTRY)
 __INLINE__ const std::string jsonGetString(const nlohmann::json& json, const std::string& entry)
 {
@@ -57,4 +60,6 @@ __INLINE__ const bool jsonGetBoolean(const nlohmann::json& json, const std::stri
   return json.at(entry).get<bool>();
 }
 
-}
+} // namespace json
+
+} // namespace jaffarCommon

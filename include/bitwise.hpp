@@ -10,6 +10,9 @@
 
 namespace jaffarCommon
 {
+
+namespace bitwise
+{
   
   uint8_t bitMaskTable[8] =
   {
@@ -80,21 +83,23 @@ namespace jaffarCommon
     return byteStorageSize;
   }
 
-  __INLINE__ void setBitValue(uint8_t* dst, const size_t idx, const bool value)
+  __INLINE__ void setBitValue(void* dst, const size_t idx, const bool value)
   {
     size_t dstPosByte = idx / 8;
     uint8_t dstPosBit = idx % 8;
+    auto dstPtr = (uint8_t*) dst;
     
-    if (value == false) dst[dstPosByte] = dst[dstPosByte] & bitNotMaskTable[dstPosBit];
-    if (value == true)  dst[dstPosByte] = dst[dstPosByte] | bitMaskTable[dstPosBit];
+    if (value == false) dstPtr[dstPosByte] = dstPtr[dstPosByte] & bitNotMaskTable[dstPosBit];
+    if (value == true)  dstPtr[dstPosByte] = dstPtr[dstPosByte] | bitMaskTable[dstPosBit];
   }
 
-  __INLINE__ bool getBitValue(const uint8_t* dst, const size_t idx)
+  __INLINE__ bool getBitValue(const void* src, const size_t idx)
   {
-    size_t dstPosByte = idx / 8;
-    uint8_t dstPosBit = idx % 8;
+    size_t srcPosByte = idx / 8;
+    uint8_t srcPosBit = idx % 8;
+    auto srcPtr = (const uint8_t*) src;
     
-    return (dst[dstPosByte] & bitMaskTable[dstPosBit]) > 0;
+    return (srcPtr[srcPosByte] & bitMaskTable[srcPosBit]) > 0;
   }
 
   __INLINE__ bool getBitFlag(const uint8_t value, const uint8_t idx)
@@ -109,4 +114,7 @@ namespace jaffarCommon
         ((idx == 0) && (value & 0b00000001))) return true;
     return false;
   }
+
+} // namespace bitwise
+
 } // namespace jaffarCommon

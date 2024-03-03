@@ -19,7 +19,7 @@ jobs:
       run: mkdir build
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
-    - name: Installing gtest
+    - name: Installing apt packages
       run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev
     - name: Run meson configuration
       run: meson setup build -Db_coverage=true

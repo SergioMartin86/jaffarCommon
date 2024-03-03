@@ -11,7 +11,10 @@
 namespace jaffarCommon
 {
 
-__INLINE__ std::chrono::time_point<std::chrono::high_resolution_clock> now() { return std::chrono::high_resolution_clock::now(); };
+namespace timing
+{
+
+__INLINE__ auto now() { return std::chrono::high_resolution_clock::now(); };
 
 
 __INLINE__ double timeDeltaSeconds(
@@ -23,5 +26,7 @@ __INLINE__ size_t timeDeltaNanoseconds(
    const std::chrono::time_point<std::chrono::high_resolution_clock> end,
    const std::chrono::time_point<std::chrono::high_resolution_clock> start) 
    { return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count(); };
+
+} // namespace timing
 
 } // namespace jaffarCommon
