@@ -1,10 +1,16 @@
 testCommonCppArgs = [ '-Wfatal-errors', '-Wall', '-Werror' ]
 testCommonLinkArgs = [ '-lgtest_main', '-lgtest' ]
 
+# Code coverage configuration
+if get_option('b_coverage')
+  testCommonCppArgs += ['-fno-inline','-Wno-error=cpp' ]
+endif
+
 testSet = [
   'unit.bitwise',
   'unit.exceptions',
   'unit.file',
+  'unit.hash',
   'coverage.includes'
 ]
 

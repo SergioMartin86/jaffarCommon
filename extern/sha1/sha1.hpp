@@ -30,6 +30,9 @@
 #include <iomanip>
 #include <fstream>
 
+namespace sha1
+{
+
 static const size_t BLOCK_INTS = 16;  /* number of 32bit integers per SHA1 block */
 static const size_t BLOCK_BYTES = BLOCK_INTS * 4;
 
@@ -333,3 +336,5 @@ private:
     uint64_t transforms;
 };
 
+
+} // namespace sha1

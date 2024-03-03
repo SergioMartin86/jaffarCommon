@@ -15,7 +15,10 @@ namespace jaffarCommon
 
 namespace hash
 {
+
 typedef _uint128_t hash_t;
+
+__INLINE__ std::string getSHA1String(const std::string& string) { return sha1::SHA1::GetHash((const uint8_t*)string.data(), string.size()); }
 
 __INLINE__ hash_t calculateMetroHash(const void *data, size_t size)
 {
@@ -35,6 +38,8 @@ __INLINE__ std::string hashToString(const hash_t hash)
 }
 
 __INLINE__ hash_t hashString(const std::string& string) { return calculateMetroHash(string.data(), string.size()); }
+
+
 
 } // namespace hash
 
