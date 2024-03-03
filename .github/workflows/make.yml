@@ -20,15 +20,25 @@ jobs:
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
     - name: Installing gtest
-      run: sudo apt install libgtest-dev
+      run: sudo apt install libgtest-dev gcovr
     - name: Run meson configuration
-      run: meson setup build
+      run: meson setup build -Db_coverage=true
     - name: Building project
       run: ninja -C build
     - name: Running tests
       run: ninja test -C build
+    - name: Running tests
+      run: ninja test -C build
+    - name: Running tests
+      run: ninja coverage -C build
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: SergioMartin86/jaffarCommon
+        fail_ci_if_error: true
+        files: build/meson-logs/coverage.xml
     - uses: actions/upload-artifact@v4
       with:
         name: meson-logs
         path: build/meson-logs/
-        
