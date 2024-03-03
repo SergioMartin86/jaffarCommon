@@ -3,6 +3,7 @@ testCommonLinkArgs = [ '-lgtest_main', '-lgtest' ]
 
 testSet = [
   'unit.bitwise',
+  'unit.exceptions',
   'coverage.includes'
 ]
 
