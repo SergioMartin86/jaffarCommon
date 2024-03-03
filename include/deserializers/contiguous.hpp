@@ -28,7 +28,7 @@ class Contiguous final : public deserializer::Base
 
   ~Contiguous() = default;
 
-  inline void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   { 
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos  + outputDataSize> _inputDataBufferSize) throw std::runtime_error("Maximum input data position reached before contiguous deserialization");
@@ -40,7 +40,7 @@ class Contiguous final : public deserializer::Base
     _inputDataBufferPos += outputDataSize;
   }
 
-  inline void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     popContiguous(outputDataBuffer, outputDataSize);
   }

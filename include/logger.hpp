@@ -35,7 +35,7 @@ template<typename... Args> void _ncursesLog(const char * f, Args... args)
 }
 
 // Function to check for keypress taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
-inline int kbhit()
+__INLINE__ int kbhit()
 {
   int ch, r;
 
@@ -60,7 +60,7 @@ inline int kbhit()
   return (r);
 }
 
-inline int waitForKeyPress()
+__INLINE__ int waitForKeyPress()
 {
   if (_useNCurses == false)  return getchar(); 
 
@@ -72,7 +72,7 @@ inline int waitForKeyPress()
   return getch();
 }
 
-inline int getKeyPress()
+__INLINE__ int getKeyPress()
 {
   if (_useNCurses == false) return 0; 
 
@@ -88,7 +88,7 @@ inline int getKeyPress()
   return ch;
 }
 
-inline void initializeTerminal()
+__INLINE__ void initializeTerminal()
 {
   // Instructing the log function to use printw
   _useNCurses = true;
@@ -101,12 +101,12 @@ inline void initializeTerminal()
   scrollok(stdscr, TRUE);
 }
 
-inline void clearTerminal()
+__INLINE__ void clearTerminal()
 {
  if (_useNCurses == true) clear();
 }
 
-inline void finalizeTerminal()
+__INLINE__ void finalizeTerminal()
 {
   // Instructing the log function to use printf
   _useNCurses = false;
@@ -114,7 +114,7 @@ inline void finalizeTerminal()
   endwin();
 }
 
-inline void refreshTerminal()
+__INLINE__ void refreshTerminal()
 {
   if (_useNCurses == true) refresh();
 }
@@ -122,12 +122,12 @@ inline void refreshTerminal()
 #else
 
 #define LOG printf
-inline int waitForKeyPress() { return getchar(); }
-inline int getKeyPress() { return 0; };
-inline void initializeTerminal(){}
-inline void clearTerminal(){}
-inline void finalizeTerminal(){}
-inline void refreshTerminal(){}
+__INLINE__ int waitForKeyPress() { return getchar(); }
+__INLINE__ int getKeyPress() { return 0; };
+__INLINE__ void initializeTerminal(){}
+__INLINE__ void clearTerminal(){}
+__INLINE__ void finalizeTerminal(){}
+__INLINE__ void refreshTerminal(){}
 
 #endif // NCURSES
 
@@ -137,7 +137,7 @@ inline void refreshTerminal(){}
 #endif 
 
 #define EXIT_WITH_ERROR(...) jaffarCommon::exitWithError(__FILE__, __LINE__, __VA_ARGS__)
-inline void exitWithError [[noreturn]] (const char *fileName, const int lineNumber, const char *format, ...)
+__INLINE__ void exitWithError [[noreturn]] (const char *fileName, const int lineNumber, const char *format, ...)
 {
   char *outstr = 0;
   va_list ap;

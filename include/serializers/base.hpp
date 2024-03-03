@@ -5,6 +5,9 @@
  * @brief Contains the base class for the data serializers
  */
 
+#include <cstddef>
+#include <cstdint>
+
 namespace jaffarCommon
 {
 
@@ -27,8 +30,8 @@ class Base
 
   virtual void push(const void* const __restrict inputData, const size_t inputDataSize) = 0;
   virtual void pushContiguous(const void* const __restrict inputData, const size_t inputDataSize) = 0;
-  inline size_t getOutputSize() const { return _outputDataBufferPos; }
-  inline uint8_t* getOutputDataBuffer() const { return _outputDataBuffer; }
+  __INLINE__ size_t getOutputSize() const { return _outputDataBufferPos; }
+  __INLINE__ uint8_t* getOutputDataBuffer() const { return _outputDataBuffer; }
 
   protected:
 

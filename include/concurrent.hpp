@@ -26,58 +26,58 @@ template <class T> class concurrentDeque
  concurrentDeque() = default;
  ~concurrentDeque() = default;
 
- inline auto& getInternalStorage() { return _internalDeque; }
+ __INLINE__ auto& getInternalStorage() { return _internalDeque; }
 
- inline void push_back_no_lock(T& element)
+ __INLINE__ void push_back_no_lock(T& element)
  {
    _internalDeque.push_back(element);
  }
 
- inline void push_back(T& element)
+ __INLINE__ void push_back(T& element)
  {
    _mutex.lock();
    _internalDeque.push_back(element);
    _mutex.unlock();
  }
 
-  inline void push_front_no_lock(T& element)
+  __INLINE__ void push_front_no_lock(T& element)
  {
    _internalDeque.push_front(element);
  }
 
 
- inline void push_front(T& element)
+ __INLINE__ void push_front(T& element)
  {
    _mutex.lock();
    _internalDeque.push_front(element);
    _mutex.unlock();
  }
 
- inline T front() const
+ __INLINE__ T front() const
  {
    return _internalDeque.front();
  }
  
- inline T back() const
+ __INLINE__ T back() const
  {
    return _internalDeque.back();
  }
 
- inline void pop_front()
+ __INLINE__ void pop_front()
  {
    _mutex.lock();
    _internalDeque.pop_front();
    _mutex.unlock();
  }
 
- inline void pop_back()
+ __INLINE__ void pop_back()
  {
    _mutex.lock();
    _internalDeque.pop_back();
    _mutex.unlock();
  }
 
- inline bool pop_back_get(T& element)
+ __INLINE__ bool pop_back_get(T& element)
  {
    _mutex.lock();
 
@@ -94,7 +94,7 @@ template <class T> class concurrentDeque
    return true;
  }
 
- inline bool pop_front_get(T& element)
+ __INLINE__ bool pop_front_get(T& element)
  {
    _mutex.lock();
 
@@ -111,7 +111,7 @@ template <class T> class concurrentDeque
    return true;
  }
 
- inline size_t wasSize() const
+ __INLINE__ size_t wasSize() const
  {
    return _internalDeque.size();
  }

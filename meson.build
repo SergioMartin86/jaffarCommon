@@ -16,6 +16,20 @@ commonSources = [
    'extern/xdelta3/xdelta3.c',
    ]
 
+# Common dependencies
+commonDependencies = [
+  dependency('openmp', required: true),
+  dependency('numa', required: true),
+  dependency('tbb', required: true)
+]
+
+jaffarCommonDependency = declare_dependency(
+  compile_args        : commonCppArgs,
+  include_directories : commonIncludes,
+  sources             : commonSources,
+  dependencies        : commonDependencies
+ )
+
 # Do not build any targets if this is a subproject
 if meson.is_subproject() == false
 

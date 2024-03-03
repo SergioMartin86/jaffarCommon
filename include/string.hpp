@@ -33,7 +33,7 @@ std::vector<T> splitVector(const T size, const T n)
 // By Evan Teran
 
 template <typename Out>
-inline void split(const std::string &s, char delim, Out result)
+__INLINE__ void split(const std::string &s, char delim, Out result)
 {
   std::istringstream iss(s);
   std::string item;
@@ -43,7 +43,7 @@ inline void split(const std::string &s, char delim, Out result)
   }
 }
 
-inline std::vector<std::string> split(const std::string &s, char delim)
+__INLINE__ std::vector<std::string> split(const std::string &s, char delim)
 {
  std::string newString = s;
  std::replace(newString.begin(), newString.end(), '\n', ' ');
@@ -52,7 +52,7 @@ inline std::vector<std::string> split(const std::string &s, char delim)
  return elems;
 }
 
-inline std::string formatString (const char *format, ...)
+__INLINE__ std::string formatString (const char *format, ...)
 {
   char *outstr = 0;
   va_list ap;

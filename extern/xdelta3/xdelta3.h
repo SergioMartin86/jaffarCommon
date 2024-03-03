@@ -163,17 +163,17 @@ typedef uint32_t usize_t;
 typedef uint64_t xoff_t;
 /* Note: The following generates benign warnings in a mingw
  * cross-compiler */
-#define Q "I64"
+#define __XDELTA3_Q__ "I64"
 #elif SIZEOF_UNSIGNED_LONG == 8
 typedef unsigned long xoff_t;
-#define Q "l"
+#define __XDELTA3_Q__ "l"
 #elif SIZEOF_SIZE_T == 8
 typedef size_t xoff_t;
-#define Q "z"
+#define __XDELTA3_Q__ "z"
 #elif SIZEOF_UNSIGNED_LONG_LONG == 8
 typedef unsigned long long xoff_t;
-#define Q "ll"
-#endif /* #define Q */
+#define __XDELTA3_Q__ "ll"
+#endif /* #define __XDELTA3_Q__ */
 
 #define SIZEOF_XOFF_T 8
 
@@ -188,7 +188,7 @@ typedef uint32_t xoff_t;
 #endif /* xoff_t is 32 bits */
 
 #define SIZEOF_XOFF_T 4
-#define Q
+#define __XDELTA3_Q__
 #endif /* 64 vs 32 bit xoff_t */
 
 /* Note: This gets modified in the 64bithash branch. */

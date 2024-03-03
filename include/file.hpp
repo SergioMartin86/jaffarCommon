@@ -13,14 +13,14 @@ namespace jaffarCommon
 {
 
 // Taken from https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c/116220#116220
-static inline std::string slurp(std::ifstream &in)
+static __INLINE__ std::string slurp(std::ifstream &in)
 {
   std::ostringstream sstr;
   sstr << in.rdbuf();
   return sstr.str();
 }
 
-static inline bool loadStringFromFile(std::string &dst, const std::string& fileName)
+static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string& fileName)
 {
   std::ifstream fi(fileName);
 
@@ -37,7 +37,7 @@ static inline bool loadStringFromFile(std::string &dst, const std::string& fileN
 }
 
 // Save string to a file
-static inline bool saveStringToFile(const std::string &src, const std::string& fileName)
+static __INLINE__ bool saveStringToFile(const std::string &src, const std::string& fileName)
 {
   FILE *fid = fopen(fileName.c_str(), "w");
   if (fid != NULL)
