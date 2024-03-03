@@ -94,3 +94,24 @@ TEST(bitwise, getBitValueDecrement)
     decrement >>= 1;
   }
 }
+
+TEST(bitwise, getEncodingBitsForElementCount)
+{
+  size_t expectedBitCount = 0;
+  size_t maxElements = 1;
+  for (size_t elementCount = 0; elementCount < 1024; elementCount++)
+  {
+    if (elementCount > maxElements) { expectedBitCount++; maxElements <<= 1; }
+    ASSERT_EQ(getEncodingBitsForElementCount(elementCount), expectedBitCount);
+  }
+}
+
+TEST(bitwise, getByteStorageForBitCount)
+{
+  for (size_t byteId = 0; byteId < 1024; byteId++)
+  {
+    ASSERT_EQ(getByteStorageForBitCount(byteId * 8), byteId);
+    for (size_t bitId = 1; bitId < 8; bitId++)
+     ASSERT_EQ(getByteStorageForBitCount(byteId * 8 + bitId), byteId + 1);
+  }
+}
