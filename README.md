@@ -1,3 +1,6 @@
+[![Build and Run Tests](https://github.com/SergioMartin86/jaffarCommon/actions/workflows/make.yml/badge.svg)](https://github.com/SergioMartin86/jaffarCommon/actions/workflows/make.yml)
+[![codecov](https://codecov.io/github/SergioMartin86/jaffarCommon/graph/badge.svg?token=ORDHS8JP70)](https://codecov.io/github/SergioMartin86/jaffarCommon)
+
 # jaffarCommon
 Library of common functionalities used throughout most of my repositories
 
