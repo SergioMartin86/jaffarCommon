@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <cstdint>
+#include "../include/exceptions.hpp"
 
 namespace jaffarCommon
 {
@@ -103,7 +104,9 @@ namespace bitwise
   }
 
   __INLINE__ bool getBitFlag(const uint8_t value, const uint8_t idx)
-  {
+  { 
+    if (idx > 7) JAFFAR_THROW_LOGIC("Provided bit index higher than 7 for a an 8-bit value");
+
     if (((idx == 7) && (value & 0b10000000)) ||
         ((idx == 6) && (value & 0b01000000)) ||
         ((idx == 5) && (value & 0b00100000)) ||

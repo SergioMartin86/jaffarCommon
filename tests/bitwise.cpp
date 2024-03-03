@@ -1,5 +1,5 @@
-#include "../include/bitwise.hpp"
 #include "gtest/gtest.h"
+#include "../include/bitwise.hpp"
 
 using namespace jaffarCommon::bitwise;
 
@@ -114,4 +114,25 @@ TEST(bitwise, getByteStorageForBitCount)
     for (size_t bitId = 1; bitId < 8; bitId++)
      ASSERT_EQ(getByteStorageForBitCount(byteId * 8 + bitId), byteId + 1);
   }
+}
+
+TEST(bitwise, getBitFlag)
+{
+  ASSERT_FALSE(getBitFlag(0b11111110, 0));
+  ASSERT_FALSE(getBitFlag(0b11111101, 1));
+  ASSERT_FALSE(getBitFlag(0b11111011, 2));
+  ASSERT_FALSE(getBitFlag(0b11110111, 3));
+  ASSERT_FALSE(getBitFlag(0b11101111, 4));
+  ASSERT_FALSE(getBitFlag(0b11011111, 5));
+  ASSERT_FALSE(getBitFlag(0b10111111, 6));
+  ASSERT_FALSE(getBitFlag(0b01111111, 7));
+
+  ASSERT_TRUE(getBitFlag(0b00000001, 0));
+  ASSERT_TRUE(getBitFlag(0b00000010, 1));
+  ASSERT_TRUE(getBitFlag(0b00000100, 2));
+  ASSERT_TRUE(getBitFlag(0b00001000, 3));
+  ASSERT_TRUE(getBitFlag(0b00010000, 4));
+  ASSERT_TRUE(getBitFlag(0b00100000, 5));
+  ASSERT_TRUE(getBitFlag(0b01000000, 6));
+  ASSERT_TRUE(getBitFlag(0b10000000, 7));
 }
