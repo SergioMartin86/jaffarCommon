@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <cstdint>
+#include "definitions.hpp"
 
 namespace jaffarCommon
 {
@@ -35,7 +36,7 @@ namespace jaffarCommon
     0b01111111
   };
 
-  inline void bitcopy(uint8_t* dstBuffer, const size_t dstOffset, const uint8_t* srcBuffer, const size_t srcOffset, const size_t count, const size_t elementBitSize )
+  __INLINE__ void bitcopy(uint8_t* dstBuffer, const size_t dstOffset, const uint8_t* srcBuffer, const size_t srcOffset, const size_t count, const size_t elementBitSize )
   {
     const size_t totalBitCount = count * elementBitSize;
     const size_t dstOffsetBits = dstOffset * elementBitSize;
@@ -63,7 +64,7 @@ namespace jaffarCommon
     }
   }
   
-  inline size_t getEncodingBitsForElementCount(const size_t elementCount)
+  __INLINE__ size_t getEncodingBitsForElementCount(const size_t elementCount)
   {
     // Calculating bit storage for the possible inputs index
     size_t bitEncodingSize = 0;
@@ -72,7 +73,7 @@ namespace jaffarCommon
     return bitEncodingSize;
   }
 
-  inline size_t getByteStorageForBitCount(const size_t bitCount)
+  __INLINE__ size_t getByteStorageForBitCount(const size_t bitCount)
   {
     // Calculating bit storage for the possible inputs index
     size_t byteStorageSize = bitCount / 8;
@@ -80,7 +81,7 @@ namespace jaffarCommon
     return byteStorageSize;
   }
 
-  inline void setBitValue(uint8_t* dst, const size_t idx, const bool value)
+  __INLINE__ void setBitValue(uint8_t* dst, const size_t idx, const bool value)
   {
     size_t dstPosByte = idx / 8;
     uint8_t dstPosBit = idx % 8;
@@ -89,7 +90,7 @@ namespace jaffarCommon
     if (value == true)  dst[dstPosByte] = dst[dstPosByte] | bitMaskTable[dstPosBit];
   }
 
-  inline bool getBitValue(const uint8_t* dst, const size_t idx)
+  __INLINE__ bool getBitValue(const uint8_t* dst, const size_t idx)
   {
     size_t dstPosByte = idx / 8;
     uint8_t dstPosBit = idx % 8;
@@ -97,7 +98,7 @@ namespace jaffarCommon
     return (dst[dstPosByte] & bitMaskTable[dstPosBit]) > 0;
   }
 
-  inline bool getBitFlag(const uint8_t value, const uint8_t idx)
+  __INLINE__ bool getBitFlag(const uint8_t value, const uint8_t idx)
   {
     if (((idx == 7) && (value & 0b10000000)) ||
         ((idx == 6) && (value & 0b01000000)) ||
