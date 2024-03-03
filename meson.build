@@ -5,7 +5,7 @@ project('jaffarCommon','c','cpp',
 )
 
 # Common application flags
-commonCppArgs = [ ]
+commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
 
 # Common includes
 commonIncludes = include_directories(['extern'])

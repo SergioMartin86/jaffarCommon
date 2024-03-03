@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include <cstdint>
-#include "definitions.hpp"
 
 namespace jaffarCommon
 {
