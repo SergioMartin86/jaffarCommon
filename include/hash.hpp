@@ -33,7 +33,7 @@ __INLINE__ std::string hashToString(const hash_t hash)
 {
   // Creating hash string
   char hashStringBuffer[256];
-  sprintf(hashStringBuffer, "0x%lX%lX", hash.first, hash.second);
+  sprintf(hashStringBuffer, "0x%016lX%016lX", hash.first, hash.second);
   return std::string(hashStringBuffer);
 }
 
