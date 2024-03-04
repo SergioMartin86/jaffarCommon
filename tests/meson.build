@@ -19,7 +19,7 @@ unitTestSet = [
 ]
 
 # Only add logger tests if running in an interactive node
-if get_option('testLoggers') == false
+if get_option('testLoggers') == true
  unitTestSet += [ 'loggerStdio', 'loggerNCurses' ]
 endif
 
