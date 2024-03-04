@@ -1,7 +1,7 @@
+#include "../include/bitwise.hpp"
 #include <random>
 #include <cstdint>
 #include "gtest/gtest.h"
-#include "../include/bitwise.hpp"
 
 using namespace jaffarCommon::bitwise;
 

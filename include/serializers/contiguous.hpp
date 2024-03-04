@@ -5,10 +5,10 @@
  * @brief Contains the contiguous data serializer
  */
 
-#include <stdexcept>
 #include <cstring>
 #include <limits>
 #include "base.hpp"
+#include "../exceptions.hpp"
 
 namespace jaffarCommon
 {
@@ -30,14 +30,14 @@ class Contiguous final : public serializer::Base
 
   __INLINE__ void pushContiguous(const void* const __restrict inputData, const size_t inputDataSize) override
   {
+    // Making sure we do not exceed the maximum size estipulated
+    if (_outputDataBufferPos + inputDataSize > _outputDataBufferSize) JAFFAR_THROW_RUNTIME("Maximum output data position (%lu) reached before contiguous serialization from pos (%lu) and input size (%lu)", _outputDataBufferSize, _outputDataBufferPos, inputDataSize);
+
     // Only perform memcpy if the output block is not null
     if (_outputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
 
     // Moving output data pointer position
     _outputDataBufferPos += inputDataSize;
-
-    // Making sure we do not exceed the maximum size estipulated
-    if (_outputDataBufferPos > _outputDataBufferSize) throw std::runtime_error("Maximum output data position reached before contiguous serialization");
   }
 
   __INLINE__ void push(const void* const __restrict inputData, const size_t inputDataSize) override

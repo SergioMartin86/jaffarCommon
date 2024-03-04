@@ -25,9 +25,7 @@ __INLINE__ void throwException [[noreturn]] (const char* exceptionType, const ch
   char *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vasprintf(&outstr, format, ap);
-  if (ret < 0) exit(-1);
-
+  vasprintf(&outstr, format, ap);
   std::string outString = outstr;
   free(outstr);
 

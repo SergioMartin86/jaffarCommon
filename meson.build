@@ -20,7 +20,8 @@ commonSources = [
 commonDependencies = [
   dependency('openmp', required: true),
   dependency('numa', required: true),
-  dependency('tbb', required: true)
+  dependency('tbb', required: true),
+  dependency('ncurses', required: true)
 ]
 
 jaffarCommonDependency = declare_dependency(

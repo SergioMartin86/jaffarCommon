@@ -6,7 +6,6 @@
  */
 
 #include "../../extern/xdelta3/xdelta3.h"
-#include <stdexcept>
 #include <cstring>
 #include <limits>
 #include "base.hpp"

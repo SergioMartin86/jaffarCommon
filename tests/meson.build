@@ -6,20 +6,26 @@ if get_option('b_coverage')
   testCommonCppArgs += ['-fno-inline','-Wno-error=cpp' ]
 endif
 
-testSet = [
-  'unit.bitwise',
-  'unit.exceptions',
-  'unit.file',
-  'unit.hash',
-  'coverage.includes'
+unitTestSet = [
+  'bitwise',
+  'concurrent',
+  'exceptions',
+  'file',
+  'hash',
+  'json',
+  'loggerStdio',
+  'loggerNCurses',
+  'string',
+  'timing',
+  'serialization'
 ]
 
 # Adding tests to the suite
-foreach testFile : testSet
-  testSuite = testFile.split('.')[0]
-  testName = testFile.split('.')[1]
+foreach testFile : unitTestSet
+  testSuite = 'unit'
+  testName = testFile
 
-  exec = executable(testName, 
+  exec = executable('t' + testName, 
   files([testName + '.cpp']),
   dependencies: jaffarCommonDependency,
   link_args: [ testCommonLinkArgs ],

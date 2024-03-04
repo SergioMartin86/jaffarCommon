@@ -13,23 +13,8 @@
 namespace jaffarCommon
 {
 
-namespace timing
+namespace string
 {
-
-// Function to split a vector into n mostly fair chunks
-template <typename T>
-std::vector<T> splitVector(const T size, const T n)
-{
-  std::vector<T> subSizes(n);
-
-  T length = size / n;
-  T remain = size % n;
-
-  for (T i = 0; i < n; i++)
-    subSizes[i] = i < remain ? length + 1 : length;
-
-  return subSizes;
-}
 
 // Function to split a string into a sub-strings delimited by a character
 // Taken from stack overflow answer to https://stackoverflow.com/questions/236129/how-do-i-iterate-over-the-words-of-a-string
@@ -60,8 +45,7 @@ __INLINE__ std::string formatString (const char *format, ...)
   char *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vasprintf(&outstr, format, ap);
-  if (ret < 0) exit(-1);
+  vasprintf(&outstr, format, ap);
 
   std::string outString = outstr;
   free(outstr);
