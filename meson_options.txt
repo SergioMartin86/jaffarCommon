@@ -1,0 +1,7 @@
+option('testLoggers',
+  type : 'boolean',
+  value : false,
+  description : 'Enable logger testing (only for interactive shells, not CI)',
+  yield: true
+)
+

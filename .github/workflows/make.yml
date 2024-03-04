@@ -26,7 +26,7 @@ jobs:
     - name: Building project
       run: ninja -C build
     - name: Running tests
-      run: TERMINFO=/usr/lib/terminfo ninja test -C build
+      run: ninja test -C build
     - name: Running coverage analysis
       run: ninja coverage -C build
     - name: Upload coverage reports to Codecov

@@ -13,12 +13,15 @@ unitTestSet = [
   'file',
   'hash',
   'json',
-  'loggerStdio',
-  'loggerNCurses',
   'string',
   'timing',
   'serialization'
 ]
+
+# Only add logger tests if running in an interactive node
+if get_option('testLoggers') == false
+ unitTestSet += [ 'loggerStdio', 'loggerNCurses' ]
+endif
 
 # Adding tests to the suite
 foreach testFile : unitTestSet
