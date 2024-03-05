@@ -34,7 +34,7 @@ class Contiguous final : public deserializer::Base
     if (_inputDataBufferPos + count > _inputDataBufferSize) JAFFAR_THROW_RUNTIME("Maximum input data position reached (%lu) by current position (%lu) + count (%lu) before contiguous deserialization", _inputDataBufferSize, _inputDataBufferPos, count);
 
     // Only perform memcpy if the input block is not null
-    memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], count);
+    if (outputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], count);
 
     // Moving input data pointer position
     _inputDataBufferPos += count;

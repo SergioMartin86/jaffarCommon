@@ -55,7 +55,7 @@ TEST(json, object)
   EXPECT_TRUE(result.is_object());
 }
 
-TEST(json, array)
+TEST(json, arrayNumber)
 {
   nlohmann::json input = nlohmann::json::parse(std::string("{ \"Array\": [0,1,2,3] }"));
   std::vector<int> result;
@@ -65,6 +65,17 @@ TEST(json, array)
   EXPECT_EQ(result[1], 1);
   EXPECT_EQ(result[2], 2);
   EXPECT_EQ(result[3], 3);
+}
+
+TEST(json, arrayString)
+{
+  nlohmann::json input = nlohmann::json::parse(std::string("{ \"Array\": [ \"Hello,\",\" \", \"World!\" ] }"));
+  std::vector<std::string> result;
+  EXPECT_NO_THROW(result = getArray<std::string>(input, "Array"));
+  EXPECT_EQ(result.size(), 3);
+  EXPECT_EQ(result[0], "Hello,");
+  EXPECT_EQ(result[1], " ");
+  EXPECT_EQ(result[2], "World!");
 }
 
 TEST(json, number)

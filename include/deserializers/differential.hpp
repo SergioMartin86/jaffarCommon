@@ -6,9 +6,9 @@
  */
 
 #include "../../extern/xdelta3/xdelta3.h"
-#include <cstring>
-#include <limits>
+#include "../exceptions.hpp"
 #include "base.hpp"
+
 
 namespace jaffarCommon
 {
@@ -39,7 +39,8 @@ class Differential final : public deserializer::Base
   __INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     // Making sure we do not exceed the maximum size estipulated
-    if (_inputDataBufferPos + outputDataSize > _inputDataBufferSize) throw std::runtime_error("Maximum input data position reached before contiguous deserialization");
+    if (_inputDataBufferPos + outputDataSize > _inputDataBufferSize) JAFFAR_THROW_RUNTIME("Maximum input data position reached before contiguous deserialization of (%lu + %lu > %lu) bytes", _inputDataBufferPos, outputDataSize, _inputDataBufferSize);
+    if (_referenceDataBufferPos + outputDataSize > _referenceDataBufferSize) JAFFAR_THROW_RUNTIME("[Error] Maximum reference data position to be exceeded on contiguous deserialization (%lu + %lu > %lu)", _referenceDataBufferPos, outputDataSize, _referenceDataBufferSize);
 
     // Only perform memcpy if the input block is not null
     if (_inputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], outputDataSize);
@@ -49,22 +50,26 @@ class Differential final : public deserializer::Base
 
     // Moving reference data buffer position
     _referenceDataBufferPos += outputDataSize;
-    if (_referenceDataBufferPos > _referenceDataBufferSize) throw std::runtime_error("[Error] Maximum reference data position exceeded on contiguous deserialization");
   }
 
   __INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
+    if (outputDataBuffer == nullptr) return;
+
     // Reading differential count
     usize_t diffCount = *(usize_t*) &_inputDataBuffer[_inputDataBufferPos];
 
+    // Size of differential buffer size
+    const size_t differentialBufferSize = sizeof(usize_t);
+
+    // If we reached maximum output, stop here
+    if (_inputDataBufferPos + differentialBufferSize >= _inputDataBufferSize) JAFFAR_THROW_RUNTIME("[Error] Maximum input data position reached before differential buffer size decode (%lu + %lu > %lu)", _inputDataBufferPos, differentialBufferSize, _inputDataBufferSize);
+
     // Advancing position pointer to store the difference counter
-    _inputDataBufferPos += sizeof(usize_t);
+    _inputDataBufferPos += differentialBufferSize;
 
     // If we reached maximum output, stop here
-    if (_inputDataBufferPos >= _inputDataBufferSize)  throw std::runtime_error("[Error] Maximum input data position reached before differential decode");
-
-    // If we reached maximum output, stop here
-    if (_referenceDataBufferPos + outputDataSize > _referenceDataBufferSize) throw std::runtime_error("[Error] Maximum reference data position exceeded before differential decode");
+    if (_referenceDataBufferPos + outputDataSize > _referenceDataBufferSize) JAFFAR_THROW_RUNTIME("[Error] Maximum reference data position exceeded before differential decode (%lu + %lu > %lu)", _referenceDataBufferPos, outputDataSize, _referenceDataBufferSize);
 
     // Encoding differential
     usize_t output_size;
@@ -80,26 +85,22 @@ class Differential final : public deserializer::Base
     );
 
     // If an error happened, print it here
-    if (ret != 0) throw std::runtime_error("[Error] unexpected error while decoding differential decompression.");
+    if (ret != 0) JAFFAR_THROW_RUNTIME("[Error] unexpected error while decoding differential decompression. Probably maximum input data position reached after differential decode (%lu + %lu > %lu)", _inputDataBufferPos, diffCount, _inputDataBufferSize);
 
     // Increasing output data position pointer
     _inputDataBufferPos += diffCount;
-
-    // If we reached maximum output, stop here
-    if (_inputDataBufferPos >= _inputDataBufferSize) throw std::runtime_error("[Error] Maximum input data position reached after differential decode");
 
     // Finally, increasing reference data position pointer
     _referenceDataBufferPos += outputDataSize;
   }
 
-  size_t getReferenceSize() const { return _referenceDataBufferPos; }
+  size_t getReferenceDataBufferPos() const { return _referenceDataBufferPos; }
   
   private:
 
   const uint8_t* __restrict const _referenceDataBuffer;
   const size_t _referenceDataBufferSize;
   size_t _referenceDataBufferPos = 0;
-
   const bool _useZlib;
 };
 
