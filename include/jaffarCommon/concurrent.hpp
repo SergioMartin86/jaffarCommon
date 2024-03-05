@@ -7,8 +7,8 @@
 
 #include <mutex>
 #include <deque>
-#include "../extern/phmap/parallel_hashmap/phmap.h"
-#include "../extern/atomic_queue/include/atomic_queue/atomic_queue.h"
+#include <phmap/parallel_hashmap/phmap.h>
+#include <atomic_queue/include/atomic_queue/atomic_queue.h>
 #include <oneapi/tbb/concurrent_map.h>
 
 namespace jaffarCommon

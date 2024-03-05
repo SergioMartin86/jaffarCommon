@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/string.hpp"
+#include <jaffarCommon/string.hpp>
 
 using namespace jaffarCommon::string;
 

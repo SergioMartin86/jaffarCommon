@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/hash.hpp"
+#include <jaffarCommon/hash.hpp>
 
 using namespace jaffarCommon::hash;
 

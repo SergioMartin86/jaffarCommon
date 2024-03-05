@@ -1,4 +1,4 @@
 #include "gtest/gtest.h"
-#include "../include/concurrent.hpp"
+#include <jaffarCommon/concurrent.hpp>
 
 using namespace jaffarCommon::concurrent;

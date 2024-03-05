@@ -25,7 +25,8 @@ __INLINE__ void throwException [[noreturn]] (const char* exceptionType, const ch
   char *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  vasprintf(&outstr, format, ap);
+  int ret = vasprintf(&outstr, format, ap);
+  if (ret == 0) throw std::invalid_argument("Failed processing exception reason");
   std::string outString = outstr;
   free(outstr);
 

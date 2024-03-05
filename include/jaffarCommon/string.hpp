@@ -45,7 +45,8 @@ __INLINE__ std::string formatString (const char *format, ...)
   char *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  vasprintf(&outstr, format, ap);
+  int ret = vasprintf(&outstr, format, ap);
+  if (ret == 0) return "";
 
   std::string outString = outstr;
   free(outstr);

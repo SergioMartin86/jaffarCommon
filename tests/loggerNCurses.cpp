@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/loggers/ncurses.hpp"
+#include <jaffarCommon/loggers/ncurses.hpp>
 
 using namespace jaffarCommon::logger;
 

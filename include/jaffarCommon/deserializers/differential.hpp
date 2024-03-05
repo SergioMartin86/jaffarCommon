@@ -5,7 +5,7 @@
  * @brief Contains the differential data deserializer
  */
 
-#include "../../extern/xdelta3/xdelta3.h"
+#include <xdelta3/xdelta3.h>
 #include "../exceptions.hpp"
 #include "base.hpp"
 

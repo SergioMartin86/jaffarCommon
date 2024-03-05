@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/timing.hpp"
+#include <jaffarCommon/timing.hpp>
 
 using namespace jaffarCommon::timing;
 

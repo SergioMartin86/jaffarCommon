@@ -6,7 +6,7 @@
  */
 
 #include <cstdlib>
-#include "../extern/json/single_include/nlohmann/json.hpp"
+#include <json/single_include/nlohmann/json.hpp>
 #include "exceptions.hpp"
 
 namespace jaffarCommon

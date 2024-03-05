@@ -1,7 +1,7 @@
 #include <fstream>
 #include <cstdio> 
 #include "gtest/gtest.h"
-#include "../include/file.hpp"
+#include <jaffarCommon/file.hpp>
 
 using namespace jaffarCommon::file;
 

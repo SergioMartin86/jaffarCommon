@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 #include <cstdint>
-#include "../include/exceptions.hpp"
+#include "exceptions.hpp"
 
 namespace jaffarCommon
 {

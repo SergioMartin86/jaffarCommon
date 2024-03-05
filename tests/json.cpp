@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/json.hpp"
+#include <jaffarCommon/json.hpp>
 
 using namespace jaffarCommon::json;
 

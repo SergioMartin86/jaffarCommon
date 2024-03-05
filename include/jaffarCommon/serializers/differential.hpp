@@ -5,9 +5,9 @@
  * @brief Contains the differential data serializer
  */
 
-#include "../../extern/xdelta3/xdelta3.h"
 #include <cstring>
 #include <limits>
+#include <xdelta3/xdelta3.h>
 #include "base.hpp"
 
 namespace jaffarCommon

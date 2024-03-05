@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "../include/serializers/contiguous.hpp"
-#include "../include/deserializers/contiguous.hpp"
-#include "../include/serializers/differential.hpp"
-#include "../include/deserializers/differential.hpp"
+#include <jaffarCommon/serializers/contiguous.hpp>
+#include <jaffarCommon/deserializers/contiguous.hpp>
+#include <jaffarCommon/serializers/differential.hpp>
+#include <jaffarCommon/deserializers/differential.hpp>
 
 using namespace jaffarCommon;
 

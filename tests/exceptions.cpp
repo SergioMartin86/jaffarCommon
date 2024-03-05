@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../include/exceptions.hpp"
+#include <jaffarCommon/exceptions.hpp>
 
 TEST(exceptions, runtime)
 {
@@ -12,6 +12,6 @@ TEST(exceptions, logic)
 }
 
 TEST(exceptions, badCall)
-{
+{ 
   ASSERT_THROW(jaffarCommon::exceptions::throwException("", "", 1, ""), std::invalid_argument);
 }

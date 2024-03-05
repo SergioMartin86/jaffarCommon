@@ -8,12 +8,12 @@ project('jaffarCommon','c','cpp',
 commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
 
 # Common includes
-commonIncludes = include_directories(['extern'])
+commonIncludes = include_directories(['third_party', 'include'])
 
 # Common sources
 commonSources = [ 
-   'extern/metrohash128/metrohash128.cpp',
-   'extern/xdelta3/xdelta3.c',
+   'third_party/metrohash128/metrohash128.cpp',
+   'third_party/xdelta3/xdelta3.c',
    ]
 
 # Common dependencies
