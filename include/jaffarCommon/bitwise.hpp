@@ -42,9 +42,9 @@ namespace bitwise
   __INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void* srcBufferPtr, const size_t srcBufferSize, const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
   {
     if (elementBitSize == 0) JAFFAR_THROW_LOGIC("Element bit size must be a positive number greater than zero");
-    if (dstBufferOffset + elementBitSize * count > dstBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow destination buffer");
-    if (srcBufferOffset + elementBitSize * count > srcBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow source buffer");
-
+    if (dstBufferOffset + elementBitSize * count > dstBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow destination buffer (%lu + %lu * %lu > %lu)", dstBufferOffset, elementBitSize, count, dstBufferSize);
+    if (srcBufferOffset + elementBitSize * count > srcBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow source buffer (%lu + %lu * %lu > %lu)", srcBufferOffset, elementBitSize, count, srcBufferSize);
+ 
     uint8_t* dstBuffer = (uint8_t*) dstBufferPtr;
     const uint8_t* srcBuffer = (const uint8_t*) srcBufferPtr;
     const size_t totalBitCount = count * elementBitSize;
