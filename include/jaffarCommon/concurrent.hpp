@@ -22,34 +22,34 @@ template <class V> using HashSet_t = phmap::parallel_flat_hash_set<V, phmap::pri
 template <class K, class V> using HashMap_t = phmap::parallel_flat_hash_map<K, V, phmap::priv::hash_default_hash<K>, phmap::priv::hash_default_eq<K>, std::allocator<std::pair<const K, V>>, 4, std::mutex>;
 template <class K, class V, class C = std::greater<K>> using concurrentMultimap_t = oneapi::tbb::concurrent_multimap<K,V,C>;
 
-template <class T> class concurrentDeque
+template <class T> class Deque
 {
  public: 
 
- concurrentDeque() = default;
- ~concurrentDeque() = default;
+ Deque() = default;
+ ~Deque() = default;
 
  __INLINE__ auto& getInternalStorage() { return _internalDeque; }
 
- __INLINE__ void push_back_no_lock(T& element)
+ __INLINE__ void push_back_no_lock(T element)
  {
    _internalDeque.push_back(element);
  }
 
- __INLINE__ void push_back(T& element)
+ __INLINE__ void push_back(T element)
  {
    _mutex.lock();
    _internalDeque.push_back(element);
    _mutex.unlock();
  }
 
-  __INLINE__ void push_front_no_lock(T& element)
+  __INLINE__ void push_front_no_lock(T element)
  {
    _internalDeque.push_front(element);
  }
 
 
- __INLINE__ void push_front(T& element)
+ __INLINE__ void push_front(T element)
  {
    _mutex.lock();
    _internalDeque.push_front(element);
