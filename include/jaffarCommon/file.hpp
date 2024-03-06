@@ -23,7 +23,7 @@ static __INLINE__ std::string slurp(std::ifstream &in)
   return sstr.str();
 }
 
-static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string& fileName)
+static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string &fileName)
 {
   std::ifstream fi(fileName);
 
@@ -40,7 +40,7 @@ static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string& f
 }
 
 // Save string to a file
-static __INLINE__ bool saveStringToFile(const std::string &src, const std::string& fileName)
+static __INLINE__ bool saveStringToFile(const std::string &src, const std::string &fileName)
 {
   FILE *fid = fopen(fileName.c_str(), "w");
   if (fid != NULL)

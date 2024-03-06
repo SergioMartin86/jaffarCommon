@@ -5,10 +5,9 @@
  * @brief Contains the differential data deserializer
  */
 
-#include <xdelta3/xdelta3.h>
 #include "../exceptions.hpp"
 #include "base.hpp"
-
+#include <xdelta3/xdelta3.h>
 
 namespace jaffarCommon
 {
@@ -19,24 +18,21 @@ namespace deserializer
 class Differential final : public deserializer::Base
 {
   public:
-
   Differential(
-    const void* __restrict inputDataBuffer = nullptr, 
+    const void *__restrict inputDataBuffer = nullptr,
     const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max(),
-    const void* __restrict referenceDataBuffer = nullptr,
+    const void *__restrict referenceDataBuffer = nullptr,
     const size_t referenceDataBufferSize = std::numeric_limits<uint32_t>::max(),
-    const bool useZlib = false
-  ) : deserializer::Base(inputDataBuffer, inputDataBufferSize),
-   _referenceDataBuffer((const uint8_t*)referenceDataBuffer),
-   _referenceDataBufferSize(referenceDataBufferSize),
-   _useZlib(useZlib)
+    const bool useZlib = false) : deserializer::Base(inputDataBuffer, inputDataBufferSize),
+                                  _referenceDataBuffer((const uint8_t *)referenceDataBuffer),
+                                  _referenceDataBufferSize(referenceDataBufferSize),
+                                  _useZlib(useZlib)
   {
-
   }
 
   ~Differential() = default;
 
-  __INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __INLINE__ void popContiguous(void *const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos + outputDataSize > _inputDataBufferSize) JAFFAR_THROW_RUNTIME("Maximum input data position reached before contiguous deserialization of (%lu + %lu > %lu) bytes", _inputDataBufferPos, outputDataSize, _inputDataBufferSize);
@@ -52,12 +48,12 @@ class Differential final : public deserializer::Base
     _referenceDataBufferPos += outputDataSize;
   }
 
-  __INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __INLINE__ void pop(void *const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     if (outputDataBuffer == nullptr) return;
 
     // Reading differential count
-    usize_t diffCount = *(usize_t*) &_inputDataBuffer[_inputDataBufferPos];
+    usize_t diffCount = *(usize_t *)&_inputDataBuffer[_inputDataBufferPos];
 
     // Size of differential buffer size
     const size_t differentialBufferSize = sizeof(usize_t);
@@ -78,11 +74,10 @@ class Differential final : public deserializer::Base
       diffCount,
       &_referenceDataBuffer[_referenceDataBufferPos],
       outputDataSize,
-      (uint8_t*)outputDataBuffer,
+      (uint8_t *)outputDataBuffer,
       &output_size,
       outputDataSize,
-      _useZlib ? 0 : XD3_NOCOMPRESS
-    );
+      _useZlib ? 0 : XD3_NOCOMPRESS);
 
     // If an error happened, print it here
     if (ret != 0) JAFFAR_THROW_RUNTIME("[Error] unexpected error while decoding differential decompression. Probably maximum input data position reached after differential decode (%lu + %lu > %lu)", _inputDataBufferPos, diffCount, _inputDataBufferSize);
@@ -95,10 +90,9 @@ class Differential final : public deserializer::Base
   }
 
   size_t getReferenceDataBufferPos() const { return _referenceDataBufferPos; }
-  
-  private:
 
-  const uint8_t* __restrict const _referenceDataBuffer;
+  private:
+  const uint8_t *__restrict const _referenceDataBuffer;
   const size_t _referenceDataBufferSize;
   size_t _referenceDataBufferPos = 0;
   const bool _useZlib;

@@ -5,12 +5,12 @@
  * @brief Contains common functions related to output and logging using NCurses
  */
 
-#include <cstdarg>
-#include <stdexcept>
-#include <cstdio>
-#include <unistd.h>
 #include "../string.hpp"
+#include <cstdarg>
+#include <cstdio>
 #include <ncurses.h>
+#include <stdexcept>
+#include <unistd.h>
 
 namespace jaffarCommon
 {
@@ -20,10 +20,11 @@ namespace logger
 
 static bool _useNCurses = false;
 
-template<typename... Args> __INLINE__ void log(const char * f, Args... args)
+template <typename... Args>
+__INLINE__ void log(const char *f, Args... args)
 {
   auto string = jaffarCommon::string::formatString(f, args...);
-  if (_useNCurses == true)  printw("%s", string.c_str());
+  if (_useNCurses == true) printw("%s", string.c_str());
   if (_useNCurses == false) printf("%s", string.c_str());
 }
 
@@ -55,7 +56,7 @@ __INLINE__ int kbhit()
 
 __INLINE__ int waitForKeyPress()
 {
-  if (_useNCurses == false)  return getchar(); 
+  if (_useNCurses == false) return getchar();
 
   while (!kbhit())
   {
@@ -67,11 +68,11 @@ __INLINE__ int waitForKeyPress()
 
 __INLINE__ int getKeyPress()
 {
-  if (_useNCurses == false) return 0; 
+  if (_useNCurses == false) return 0;
 
   nodelay(stdscr, TRUE);
   noecho();
-    
+
   int ch = getch();
 
   // restore block and echo
@@ -85,7 +86,7 @@ __INLINE__ void initializeTerminal()
 {
   // Instructing the log function to use printw
   _useNCurses = true;
-  
+
   // Initializing ncurses screen
   initscr();
   cbreak();
@@ -96,7 +97,7 @@ __INLINE__ void initializeTerminal()
 
 __INLINE__ void clearTerminal()
 {
- if (_useNCurses == true) clear();
+  if (_useNCurses == true) clear();
 }
 
 __INLINE__ void finalizeTerminal()
@@ -111,7 +112,6 @@ __INLINE__ void refreshTerminal()
 {
   if (_useNCurses == true) refresh();
 }
-
 
 } // namespace logger
 

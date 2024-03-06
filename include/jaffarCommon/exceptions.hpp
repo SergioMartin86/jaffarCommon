@@ -5,11 +5,11 @@
  * @brief Contains common functions for exception throwing
  */
 
-#include <cstdarg>
-#include <stdexcept>
-#include <cstdio>
-#include <unistd.h>
 #include "string.hpp"
+#include <cstdarg>
+#include <cstdio>
+#include <stdexcept>
+#include <unistd.h>
 
 namespace jaffarCommon
 {
@@ -20,7 +20,7 @@ namespace exceptions
 #define JAFFAR_THROW_RUNTIME(...) jaffarCommon::exceptions::throwException("Runtime", __FILE__, __LINE__, __VA_ARGS__)
 #define JAFFAR_THROW_LOGIC(...) jaffarCommon::exceptions::throwException("Logic", __FILE__, __LINE__, __VA_ARGS__)
 
-__INLINE__ void throwException [[noreturn]] (const char* exceptionType, const char *fileName, const int lineNumber, const char *format, ...)
+__INLINE__ void throwException [[noreturn]] (const char *exceptionType, const char *fileName, const int lineNumber, const char *format, ...)
 {
   char *outstr = 0;
   va_list ap;

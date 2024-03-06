@@ -5,10 +5,10 @@
  * @brief Contains the contiguous data deserializer
  */
 
+#include "../exceptions.hpp"
+#include "base.hpp"
 #include <cstring>
 #include <limits>
-#include "base.hpp"
-#include "../exceptions.hpp"
 
 namespace jaffarCommon
 {
@@ -19,17 +19,16 @@ namespace deserializer
 class Contiguous final : public deserializer::Base
 {
   public:
-
   Contiguous(
-    const void* __restrict inputDataBuffer = nullptr, 
-    const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max()
-  ) : deserializer::Base(inputDataBuffer, inputDataBufferSize)
-  {  }
+    const void *__restrict inputDataBuffer = nullptr,
+    const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max()) : deserializer::Base(inputDataBuffer, inputDataBufferSize)
+  {
+  }
 
   ~Contiguous() = default;
 
-  __INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t count) override
-  { 
+  __INLINE__ void popContiguous(void *const __restrict outputDataBuffer, const size_t count) override
+  {
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos + count > _inputDataBufferSize) JAFFAR_THROW_RUNTIME("Maximum input data position reached (%lu) by current position (%lu) + count (%lu) before contiguous deserialization", _inputDataBufferSize, _inputDataBufferPos, count);
 
@@ -40,13 +39,11 @@ class Contiguous final : public deserializer::Base
     _inputDataBufferPos += count;
   }
 
-  __INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t count) override
+  __INLINE__ void pop(void *const __restrict outputDataBuffer, const size_t count) override
   {
     popContiguous(outputDataBuffer, count);
   }
-
 };
-
 
 } // namespace deserializer
 
