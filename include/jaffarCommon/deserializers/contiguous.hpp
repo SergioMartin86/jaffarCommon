@@ -16,9 +16,22 @@ namespace jaffarCommon
 namespace deserializer
 {
 
+/**
+ * The contiguous deserialization class assumes that both the input buffer and output elements are contiguous and
+ * haven't been through any compression.
+ * 
+ * 
+*/
 class Contiguous final : public deserializer::Base
 {
   public:
+
+  /**
+   * Default constructor for the contiguous deserializer class
+   * 
+   * @param[in] inputDataBuffer The input buffer from whence to read the input data
+   * @param[in] inputDataBufferSize The size of the input buffer
+  */
   Contiguous(
     const void *__restrict inputDataBuffer = nullptr,
     const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max()) : deserializer::Base(inputDataBuffer, inputDataBufferSize)

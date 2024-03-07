@@ -15,7 +15,14 @@ namespace jaffarCommon
 namespace file
 {
 
-// Taken from https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c/116220#116220
+/**
+ * Function to read an entire input file stream into a standard string
+ * 
+ * Taken from https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c/116220#116220
+ * 
+ * @param[in] in The input file stream
+ * @return The produced string containing the entire input from the stream
+ */
 static __INLINE__ std::string slurp(std::ifstream &in)
 {
   std::ostringstream sstr;
@@ -23,6 +30,13 @@ static __INLINE__ std::string slurp(std::ifstream &in)
   return sstr.str();
 }
 
+/**
+ * Reads an entire file into a string
+ * 
+ * @param[out] dst The output string onto which to save the read file
+ * @param[in] fileName The name of the file to read
+ * @return Whether the load operation succeded (true) or failed (fail)
+ */
 static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string &fileName)
 {
   std::ifstream fi(fileName);
@@ -39,7 +53,13 @@ static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string &f
   return true;
 }
 
-// Save string to a file
+/**
+ * Write a string into a file
+ * 
+ * @param[in] src The source string to save into the file
+ * @param[in] fileName The name of the file to write to
+ * @return Whether the save operation succeded (true) or failed (fail)
+ */
 static __INLINE__ bool saveStringToFile(const std::string &src, const std::string &fileName)
 {
   FILE *fid = fopen(fileName.c_str(), "w");

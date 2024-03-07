@@ -16,10 +16,15 @@ namespace jaffarCommon
 namespace string
 {
 
-// Function to split a string into a sub-strings delimited by a character
-// Taken from stack overflow answer to https://stackoverflow.com/questions/236129/how-do-i-iterate-over-the-words-of-a-string
-// By Evan Teran
-
+/**
+ * [Internal] Function to split a string into a sub-strings collection delimited by a character
+ *
+ * @note Taken from stack overflow answer to https://stackoverflow.com/questions/236129/how-do-i-iterate-over-the-words-of-a-string By Evan Teran
+ *
+ * @param[in] s The input string
+ * @param[in] delim The separator that divides the substrings
+ * @param[out] result The storage where the substring collection wil be stored
+ */ 
 template <typename Out>
 __INLINE__ void split(const std::string &s, char delim, Out result)
 {
@@ -31,6 +36,13 @@ __INLINE__ void split(const std::string &s, char delim, Out result)
   }
 }
 
+/**
+ * Function to split a string into a vector of sub-strings delimited by a character
+ *
+ * @param[in] s The input string
+ * @param[in] delim The separator that divides the substrings
+ * @return A vector containing all the substrings
+ */ 
 __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
 {
   std::string newString = s;
@@ -40,6 +52,13 @@ __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
   return elems;
 }
 
+/**
+ * Converts a C-formatted string into a C++ string
+ *
+ * @param[in] format The format string
+ * @param[in] ... The arguments to the format string
+ * @return The C++ string produced
+ */ 
 __INLINE__ std::string formatString(const char *format, ...)
 {
   char *outstr = 0;

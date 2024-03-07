@@ -17,9 +17,25 @@ namespace jaffarCommon
 namespace exceptions
 {
 
+/**
+ * Macro for throwing runtime exceptions. It includes the file, line and a C-formatted string
+*/
 #define JAFFAR_THROW_RUNTIME(...) jaffarCommon::exceptions::throwException("Runtime", __FILE__, __LINE__, __VA_ARGS__)
+
+/**
+ * Macro for throwing logic exceptions. It includes the file, line and a C-formatted string
+*/
 #define JAFFAR_THROW_LOGIC(...) jaffarCommon::exceptions::throwException("Logic", __FILE__, __LINE__, __VA_ARGS__)
 
+/**
+ * Common function for throwing exceptions. 
+ * 
+ * @param[in] exceptionType The type of exception to launch (e.g., "Logic", "Runtime")
+ * @param[in] fileName The file in which the exception was originall thrown
+ * @param[in] lineNumber The line inside the file where the exception was originall thrown
+ * @param[in] format A constant formatted string
+ * @param[in] ... parameters for the formatted string
+*/
 __INLINE__ void throwException [[noreturn]] (const char *exceptionType, const char *fileName, const int lineNumber, const char *format, ...)
 {
   char *outstr = 0;
