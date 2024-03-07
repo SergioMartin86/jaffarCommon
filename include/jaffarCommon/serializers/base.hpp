@@ -46,7 +46,7 @@ class Base
    * @param[out] inputDataBuffer The contiguous output buffer from which data is serialized. Passing nullptr is allowed and can be used to determine the required output buffer size
    * @param[in] inputDataSize The number of bytes from the input data buffer to serialize
    */
-  virtual void push(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize) = 0;
+  virtual void push(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
 
   /**
    * Serializes the specified number of contiguous bytes onto the output data buffer, pushing the information from the input buffer
@@ -56,7 +56,7 @@ class Base
    * @param[out] inputDataBuffer The contiguous output buffer from which data is serialized. Passing nullptr is allowed and can be used to determine the required output buffer size
    * @param[in] inputDataSize The number of bytes from the input data buffer to serialize
    */
-  virtual void pushContiguous(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize) = 0;
+  virtual void pushContiguous(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
 
   /**
    *  The internally-stored output data buffer size
