@@ -11,7 +11,6 @@ https://sergiomartin86.github.io/jaffarCommon
 ## License
 
 Developed and Maintained by Sergio Martin (eien86)
-https://github.com/SergioMartin86https://github.com/SergioMartin86
 
 Distributed under the MIT License
 
