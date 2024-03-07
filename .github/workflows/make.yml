@@ -64,7 +64,7 @@ jobs:
           chmod -c -R +rX "docs/html/" | while read line; do
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
-    - uses: actions/upload-artifact@v4
+    - uses: upload-pages-artifact@v2
       if: success()
       with:
         name: github-pages
