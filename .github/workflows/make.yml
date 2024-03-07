@@ -7,6 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
+
+  # Build and run tests
   build:
 
     runs-on: ubuntu-latest
@@ -20,11 +22,7 @@ jobs:
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
     - name: Installing apt packages
-      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev clang-format doxygen graphviz
-    - name: Checking proper code styling
-      run:  .build-tools/check-style.sh check include
-    - name: Building documentation
-      run:  pushd docs; doxygen; popd;
+      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev clang-format
     - name: Run meson configuration
       run: meson setup build -Dbuildtype=debug -Db_coverage=true
     - name: Building project
@@ -40,11 +38,11 @@ jobs:
         slug: SergioMartin86/jaffarCommon
         fail_ci_if_error: true
         files: build/meson-logs/coverage.xml
-    - uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: github-pages
-        path: docs/html/*        
+    - name: Fix github pages permissions
+      run: |
+          chmod -c -R +rX "docs/html/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
     - name: Deploy GitHub Pages site
       uses: actions/deploy-pages@v4.0.4
       with:
@@ -54,3 +52,46 @@ jobs:
       with:
         name: meson-logs
         path: build/meson-logs/
+
+  # Build documentation and checking proper style
+  docs:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Installing apt packages
+      run: sudo apt install clang-format doxygen graphviz
+    - name: Checking proper code styling
+      run:  .build-tools/check-style.sh check include
+    - name: Building documentation
+      run:  pushd docs; doxygen; popd;
+    - uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: github-pages
+        path: docs/html/*      
+
+  # Deploying github pages
+  deploy-pages:
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
