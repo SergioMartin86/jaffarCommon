@@ -17,9 +17,9 @@ namespace file
 
 /**
  * Function to read an entire input file stream into a standard string
- * 
+ *
  * Taken from https://stackoverflow.com/questions/116038/how-do-i-read-an-entire-file-into-a-stdstring-in-c/116220#116220
- * 
+ *
  * @param[in] in The input file stream
  * @return The produced string containing the entire input from the stream
  */
@@ -32,7 +32,7 @@ static __INLINE__ std::string slurp(std::ifstream &in)
 
 /**
  * Reads an entire file into a string
- * 
+ *
  * @param[out] dst The output string onto which to save the read file
  * @param[in] fileName The name of the file to read
  * @return Whether the load operation succeded (true) or failed (fail)
@@ -55,7 +55,7 @@ static __INLINE__ bool loadStringFromFile(std::string &dst, const std::string &f
 
 /**
  * Write a string into a file
- * 
+ *
  * @param[in] src The source string to save into the file
  * @param[in] fileName The name of the file to write to
  * @return Whether the save operation succeded (true) or failed (fail)

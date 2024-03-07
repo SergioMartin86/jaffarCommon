@@ -19,24 +19,23 @@ namespace serializer
 /**
  * The differential serialization class enables the compression of a input elements that, when applied to a reference data buffer,
  * produces the a compressed output. Well used, it produces an output that is smaller than the original data. The original data
- * can be recovered later by comparing the output to the reference data. 
- * 
+ * can be recovered later by comparing the output to the reference data.
+ *
  * The compression can be applied to different elements at different times. It also enables the use of contiguous storage for elements
  * that are not meant to be compressed.
-*/
+ */
 class Differential final : public serializer::Base
 {
   public:
-
   /**
    * Default constructor for the differntial deserializer class
-   * 
+   *
    * @param[in] outputDataBuffer The output buffer onto which to write the serialized data
    * @param[in] outputDataBufferSize The size of the output buffer
    * @param[in] referenceDataBuffer The buffer from whence to read the reference data
    * @param[in] referenceDataBufferSize The size of the reference buffer
    * @param[in] useZlib Specifies whether to apply Zlib compression after the differential compression
-  */
+   */
   Differential(
     void *__restrict outputDataBuffer = nullptr,
     const size_t outputDataBufferSize = std::numeric_limits<uint32_t>::max(),
@@ -108,34 +107,32 @@ class Differential final : public serializer::Base
     _referenceDataBufferPos += inputDataSize;
   }
 
-
   /**
-   * Get the position of the reference buffer header. 
-   * 
+   * Get the position of the reference buffer header.
+   *
    * @return The position of the reference buffer header. This value represents the size of the reference data at the end of the deserialization process
-  */
+   */
   size_t getReferenceDataBufferPos() const { return _referenceDataBufferPos; }
 
   private:
-
   /**
    *  The internally-stored reference data buffer
-  */
+   */
   const uint8_t *__restrict const _referenceDataBuffer;
 
   /**
    *  The maximum size of the input data buffer
-  */
+   */
   const size_t _referenceDataBufferSize;
 
   /**
    *  The current position of the reference data buffer header
-  */
+   */
   size_t _referenceDataBufferPos = 0;
 
   /**
    *  Stores whether to use Zlib compression after the differential compression
-  */
+   */
   const bool _useZlib;
 };
 

@@ -19,20 +19,19 @@ namespace deserializer
  * The differential deserialization class enables the decompression of a differential input buffer that, when applied to a reference data buffer,
  * produces the original source data. The decompression can be applied to different elements at different times. It also enables the use of
  * contiguous storage for elements that are not meant to be compressed.
-*/
+ */
 class Differential final : public deserializer::Base
 {
   public:
-
   /**
    * Default constructor for the differntial deserializer class
-   * 
+   *
    * @param[in] inputDataBuffer The input buffer from whence to read the input data
    * @param[in] inputDataBufferSize The size of the input buffer
    * @param[in] referenceDataBuffer The buffer from whence to read the reference data
    * @param[in] referenceDataBufferSize The size of the reference buffer
    * @param[in] useZlib Specifies whether to apply Zlib decompression before the differential decompression
-  */
+   */
   Differential(
     const void *__restrict inputDataBuffer = nullptr,
     const size_t inputDataBufferSize = std::numeric_limits<uint32_t>::max(),
@@ -105,32 +104,31 @@ class Differential final : public deserializer::Base
   }
 
   /**
-   * Get the position of the reference buffer header. 
-   * 
+   * Get the position of the reference buffer header.
+   *
    * @return The position of the reference buffer header. This value represents the size of the reference data at the end of the deserialization process
-  */
+   */
   size_t getReferenceDataBufferPos() const { return _referenceDataBufferPos; }
 
   private:
-
   /**
    *  The internally-stored reference data buffer
-  */
+   */
   const uint8_t *__restrict const _referenceDataBuffer;
 
   /**
    *  The reference data buffer size, as provided by the used
-  */
+   */
   const size_t _referenceDataBufferSize;
 
   /**
    *  The current position of the reference data buffer header
-  */
+   */
   size_t _referenceDataBufferPos = 0;
 
   /**
    *  Stores whether to use Zlib compression after the differential compression
-  */
+   */
   const bool _useZlib;
 };
 

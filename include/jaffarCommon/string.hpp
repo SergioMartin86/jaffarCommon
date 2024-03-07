@@ -24,7 +24,7 @@ namespace string
  * @param[in] s The input string
  * @param[in] delim The separator that divides the substrings
  * @param[out] result The storage where the substring collection wil be stored
- */ 
+ */
 template <typename Out>
 __INLINE__ void split(const std::string &s, char delim, Out result)
 {
@@ -42,7 +42,7 @@ __INLINE__ void split(const std::string &s, char delim, Out result)
  * @param[in] s The input string
  * @param[in] delim The separator that divides the substrings
  * @return A vector containing all the substrings
- */ 
+ */
 __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
 {
   std::string newString = s;
@@ -58,7 +58,7 @@ __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
  * @param[in] format The format string
  * @param[in] ... The arguments to the format string
  * @return The C++ string produced
- */ 
+ */
 __INLINE__ std::string formatString(const char *format, ...)
 {
   char *outstr = 0;

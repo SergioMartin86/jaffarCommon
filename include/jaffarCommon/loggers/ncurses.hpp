@@ -20,15 +20,15 @@ namespace logger
 
 /**
  * A global setting to store whether NCurses or the normal terminal should be used
-*/
+ */
 static bool _useNCurses = false;
 
 /**
  * Prints the specified formatted string to the NCurses or normal terminal, as configured
- * 
+ *
  * @param[in] f The formatted string
  * @param[in] args The arguments to the formatted string
-*/
+ */
 template <typename... Args>
 __INLINE__ void log(const char *f, Args... args)
 {
@@ -38,11 +38,11 @@ __INLINE__ void log(const char *f, Args... args)
 }
 
 /**
-* Function to check the keyboard buffer for whether there have been any keypress
-*
-* @note Taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
-* @return True, if a key was hit; False, otherwise
-*/ 
+ * Function to check the keyboard buffer for whether there have been any keypress
+ *
+ * @note Taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
+ * @return True, if a key was hit; False, otherwise
+ */
 __INLINE__ int kbhit()
 {
   int ch, r;
@@ -69,13 +69,13 @@ __INLINE__ int kbhit()
 }
 
 /**
-* Stalls execution until a key is pressed.
-* It will only return upon the first key press and will report which key it was
-*
-* @note This function employs active polling so should be used sparringly
-*
-* @return Which key was pressed
-*/ 
+ * Stalls execution until a key is pressed.
+ * It will only return upon the first key press and will report which key it was
+ *
+ * @note This function employs active polling so should be used sparringly
+ *
+ * @return Which key was pressed
+ */
 __INLINE__ int waitForKeyPress()
 {
   if (_useNCurses == false) return getchar();
@@ -89,12 +89,12 @@ __INLINE__ int waitForKeyPress()
 }
 
 /**
-* Returns any pending key pressed.
-*
-* @note This function returns immediately
-*
-* @return Which key was pressed, the macro ERR if no key was pressed
-*/ 
+ * Returns any pending key pressed.
+ *
+ * @note This function returns immediately
+ *
+ * @return Which key was pressed, the macro ERR if no key was pressed
+ */
 __INLINE__ int getKeyPress()
 {
   if (_useNCurses == false) return 0;
@@ -112,8 +112,8 @@ __INLINE__ int getKeyPress()
 }
 
 /**
-* Initializes the NCurses terminal
-*/ 
+ * Initializes the NCurses terminal
+ */
 __INLINE__ void initializeTerminal()
 {
   // Instructing the log function to use printw
@@ -128,16 +128,16 @@ __INLINE__ void initializeTerminal()
 }
 
 /**
-* Clears the NCurses terminal
-*/ 
+ * Clears the NCurses terminal
+ */
 __INLINE__ void clearTerminal()
 {
   if (_useNCurses == true) clear();
 }
 
 /**
-* Finalizes the NCurses terminal
-*/ 
+ * Finalizes the NCurses terminal
+ */
 __INLINE__ void finalizeTerminal()
 {
   // Instructing the log function to use printf
@@ -147,8 +147,8 @@ __INLINE__ void finalizeTerminal()
 }
 
 /**
-* Refreshes the NCurses terminal. This is necessary after every logging operation to update the screen.
-*/ 
+ * Refreshes the NCurses terminal. This is necessary after every logging operation to update the screen.
+ */
 __INLINE__ void refreshTerminal()
 {
   if (_useNCurses == true) refresh();
