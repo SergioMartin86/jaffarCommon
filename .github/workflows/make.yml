@@ -65,12 +65,16 @@ jobs:
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
     - name: Compressing pages folder
-      run : tar -czvf github-pages.tar.gz docs/html/*
+      run: |
+        tar \
+          --dereference --hard-dereference \
+          -cvf "artifact.tar" \
+          docs/html/*
     - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       if: success()
       with:
-        path: github-pages.tar.gz      
+        path: artifact.tar
 
   # Deploying github pages
   deploy-pages:
