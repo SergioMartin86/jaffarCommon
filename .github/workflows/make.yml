@@ -64,6 +64,8 @@ jobs:
           chmod -c -R +rX "docs/html/" | while read line; do
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
+    - name: Setting files to be the initial page
+      run: cp docs/html/files.html docs/html/index.html
     - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       if: success()
