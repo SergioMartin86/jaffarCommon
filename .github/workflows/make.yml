@@ -20,9 +20,11 @@ jobs:
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
     - name: Installing apt packages
-      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev clang-format
+      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev clang-format doxygen graphviz
     - name: Checking proper code styling
       run:  .build-tools/check-style.sh check include
+    - name: Building documentation
+      run:  pushd docs; doxygen; popd;
     - name: Run meson configuration
       run: meson setup build -Dbuildtype=debug -Db_coverage=true
     - name: Building project
