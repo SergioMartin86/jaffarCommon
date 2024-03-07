@@ -38,15 +38,6 @@ jobs:
         slug: SergioMartin86/jaffarCommon
         fail_ci_if_error: true
         files: build/meson-logs/coverage.xml
-    - name: Fix github pages permissions
-      run: |
-          chmod -c -R +rX "docs/html/" | while read line; do
-            echo "::warning title=Invalid file permissions automatically fixed::$line"
-          done
-    - name: Deploy GitHub Pages site
-      uses: actions/deploy-pages@v4.0.4
-      with:
-        artifact_name: "github-pages"
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -68,6 +59,11 @@ jobs:
       run:  .build-tools/check-style.sh check include
     - name: Building documentation
       run:  pushd docs; doxygen; popd;
+    - name: Fix github pages permissions
+      run: |
+          chmod -c -R +rX "docs/html/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
     - uses: actions/upload-artifact@v4
       if: success()
       with:
