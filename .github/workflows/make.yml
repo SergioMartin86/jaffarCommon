@@ -22,7 +22,7 @@ jobs:
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
     - name: Installing apt packages
-      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev clang-format
+      run: sudo apt install libgtest-dev gcovr libnuma-dev libtbb-dev
     - name: Run meson configuration
       run: meson setup build -Dbuildtype=debug -Db_coverage=true
     - name: Building project
