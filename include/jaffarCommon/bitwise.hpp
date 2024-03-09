@@ -58,8 +58,11 @@ uint8_t bitNotMaskTable[8] =
 __INLINE__ void bitcopy(void *dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void *srcBufferPtr, const size_t srcBufferSize, const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
 {
   if (elementBitSize == 0) JAFFAR_THROW_LOGIC("Element bit size must be a positive number greater than zero");
-  if (dstBufferOffset + elementBitSize * count > dstBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow destination buffer (%lu + %lu * %lu > %lu)", dstBufferOffset, elementBitSize, count, dstBufferSize);
-  if (srcBufferOffset + elementBitSize * count > srcBufferSize) JAFFAR_THROW_LOGIC("The operation will overflow source buffer (%lu + %lu * %lu > %lu)", srcBufferOffset, elementBitSize, count, srcBufferSize);
+
+  const auto dstBufferSizeBits = dstBufferSize * 8;
+  const auto srcBufferSizeBits = srcBufferSize * 8;
+  if (dstBufferOffset + elementBitSize * count > dstBufferSizeBits) JAFFAR_THROW_LOGIC("The operation will overflow destination buffer (%lu + %lu * %lu > %lu)", dstBufferOffset, elementBitSize, count, dstBufferSizeBits);
+  if (srcBufferOffset + elementBitSize * count > srcBufferSizeBits) JAFFAR_THROW_LOGIC("The operation will overflow source buffer (%lu + %lu * %lu > %lu)", srcBufferOffset, elementBitSize, count, srcBufferSizeBits);
 
   uint8_t *dstBuffer = (uint8_t *)dstBufferPtr;
   const uint8_t *srcBuffer = (const uint8_t *)srcBufferPtr;
