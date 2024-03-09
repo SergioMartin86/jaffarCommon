@@ -5,11 +5,11 @@
  * @brief Contains common functions for exception throwing
  */
 
-#include "string.hpp"
 #include <cstdarg>
 #include <cstdio>
 #include <stdexcept>
 #include <unistd.h>
+#include "string.hpp"
 
 namespace jaffarCommon
 {

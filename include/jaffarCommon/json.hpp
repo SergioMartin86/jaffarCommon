@@ -4,10 +4,9 @@
  * @file json.hpp
  * @brief Contains common functions related to JSON manipulation
  */
-
-#include "exceptions.hpp"
 #include <cstdlib>
 #include <json/single_include/nlohmann/json.hpp>
+#include "exceptions.hpp"
 
 namespace jaffarCommon
 {

@@ -5,9 +5,9 @@
  * @brief Contains common functions related to bitwise operations
  */
 
-#include "exceptions.hpp"
 #include <cstdint>
 #include <stddef.h>
+#include "exceptions.hpp"
 
 namespace jaffarCommon
 {

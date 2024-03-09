@@ -5,9 +5,9 @@
  * @brief Contains the differential data deserializer
  */
 
+#include <xdelta3/xdelta3.h>
 #include "../exceptions.hpp"
 #include "base.hpp"
-#include <xdelta3/xdelta3.h>
 
 namespace jaffarCommon
 {

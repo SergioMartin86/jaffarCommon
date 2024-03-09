@@ -5,10 +5,10 @@
  * @brief Contains the differential data serializer
  */
 
-#include "base.hpp"
 #include <cstring>
 #include <limits>
 #include <xdelta3/xdelta3.h>
+#include "base.hpp"
 
 namespace jaffarCommon
 {
