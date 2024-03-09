@@ -14,8 +14,8 @@ namespace jaffarCommon
 namespace parallel
 {
 
-#define JAFFAR_PARALLEL _Pragma("omp parallel") 
-#define JAFFAR_PARALLEL_FOR _Pragma("omp parallel for") 
+#define JAFFAR_PARALLEL _Pragma("omp parallel")
+#define JAFFAR_PARALLEL_FOR _Pragma("omp parallel for")
 
 typedef uint32_t threadId_t;
 
