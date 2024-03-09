@@ -5,10 +5,10 @@
  * @brief Contains the contiguous data serializer
  */
 
-#include "../exceptions.hpp"
-#include "base.hpp"
 #include <cstring>
 #include <limits>
+#include "../exceptions.hpp"
+#include "base.hpp"
 
 namespace jaffarCommon
 {
