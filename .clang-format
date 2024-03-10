@@ -59,6 +59,7 @@ Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
+EmptyLineAfterAccessModifier: Always 
 FixNamespaceComments: true
 ForEachMacros:
   - foreach
