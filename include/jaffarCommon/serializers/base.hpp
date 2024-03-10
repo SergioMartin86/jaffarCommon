@@ -23,6 +23,7 @@ namespace serializer
 class Base
 {
   public:
+
   /**
    * Default constructor for the serializer classes
    *
@@ -73,6 +74,7 @@ class Base
   __INLINE__ uint8_t *getOutputDataBuffer() const { return _outputDataBuffer; }
 
   protected:
+
   /**
    *  The write-only internally stored output data buffer
    */

@@ -25,6 +25,7 @@ namespace deserializer
 class Contiguous final : public deserializer::Base
 {
   public:
+
   /**
    * Default constructor for the contiguous deserializer class
    *

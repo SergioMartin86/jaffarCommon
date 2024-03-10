@@ -50,6 +50,7 @@ template <class T>
 class Deque
 {
   public:
+
   Deque() = default;
   ~Deque() = default;
 
@@ -223,6 +224,7 @@ class Deque
   }
 
   private:
+
   /**
    * Internal mutual exclusion mechanism
    */

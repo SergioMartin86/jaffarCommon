@@ -23,6 +23,7 @@ namespace deserializer
 class Base
 {
   public:
+
   /**
    * Default constructor for the deserializer classes
    *
@@ -73,6 +74,7 @@ class Base
   __INLINE__ const uint8_t *getInputDataBuffer() const { return _inputDataBuffer; }
 
   protected:
+
   /**
    *  The read-only internally-stored input data buffer
    */

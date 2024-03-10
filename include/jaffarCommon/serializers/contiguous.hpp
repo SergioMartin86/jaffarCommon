@@ -23,6 +23,7 @@ namespace serializer
 class Contiguous final : public serializer::Base
 {
   public:
+
   /**
    * Default constructor for the contiguous serializer class
    *

@@ -27,6 +27,7 @@ namespace serializer
 class Differential final : public serializer::Base
 {
   public:
+
   /**
    * Default constructor for the differntial deserializer class
    *
@@ -103,6 +104,9 @@ class Differential final : public serializer::Base
     // Increasing output data position pointer
     _outputDataBufferPos += *diffCount;
 
+    // Increasing the number of differential bytes processed
+    _differentialBytesCount += *diffCount;
+
     // Finally, increasing reference data position pointer
     _referenceDataBufferPos += inputDataSize;
   }
@@ -114,7 +118,17 @@ class Differential final : public serializer::Base
    */
   size_t getReferenceDataBufferPos() const { return _referenceDataBufferPos; }
 
+  /**
+   * Gets the number of differential bytes included in the serialized output
+   *
+   * This is useful to make sure the differential part of the serialization is not exceeded
+   *
+   * @return The number of bytes used in differential compression
+   */
+  size_t getDifferentialBytesCount() const { return _differentialBytesCount; }
+
   private:
+
   /**
    *  The internally-stored reference data buffer
    */
@@ -129,6 +143,11 @@ class Differential final : public serializer::Base
    *  The current position of the reference data buffer header
    */
   size_t _referenceDataBufferPos = 0;
+
+  /**
+   *  Differential bytes count
+   */
+  size_t _differentialBytesCount = 0;
 
   /**
    *  Stores whether to use Zlib compression after the differential compression

@@ -142,9 +142,10 @@ TEST(differential, fullCycleNoZlib)
 
   size_t currentOutputSize = s.getReferenceDataBufferPos();
   ASSERT_EQ(currentOutputSize, 0);
-
+  ASSERT_EQ(s.getDifferentialBytesCount(), 0);
   ASSERT_THROW(s.push(input3Buffer, serializationOutputBufferSize + 1), std::runtime_error);
   ASSERT_NO_THROW(s.push(input1Buffer, input1BufferSize));
+  ASSERT_GT(s.getDifferentialBytesCount(), 0);
   
   ASSERT_EQ(s.getReferenceDataBufferPos(), currentReferenceBufferPosition + input1BufferSize);
   currentReferenceBufferPosition = s.getReferenceDataBufferPos();
@@ -195,7 +196,9 @@ TEST(differential, fullCycleNoZlib)
   deserializer::Differential d(deserializationInputBuffer, deserializationInputBufferSize, referenceBuffer, referenceBufferSize, useZlib);
 
   ASSERT_THROW(s.push(input3Buffer, deserializationOutput1BufferSize + 1), std::runtime_error);
+  ASSERT_EQ(d.getDifferentialBytesCount(), 0);
   ASSERT_NO_THROW(d.pop(deserializationOutput1Buffer, deserializationOutput1BufferSize));
+  ASSERT_GT(d.getDifferentialBytesCount(), 0);
   ASSERT_NO_THROW(d.popContiguous(deserializationOutput2Buffer, deserializationOutput2BufferSize));
   ASSERT_NO_THROW(d.pop(deserializationOutput3Buffer, deserializationOutput3BufferSize));
 
