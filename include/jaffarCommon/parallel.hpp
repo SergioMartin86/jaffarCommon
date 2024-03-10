@@ -25,23 +25,23 @@ typedef uint32_t threadId_t;
 
 /**
  * Gets the id of the currently running thread
- * 
+ *
  * @return The id of the currently running thread
-*/
+ */
 __INLINE__ threadId_t getThreadId() { return (threadId_t)omp_get_thread_num(); }
 
 /**
  * Gets the number of currently running threads
- * 
+ *
  * @return The number of currently running threads
-*/
+ */
 __INLINE__ size_t getThreadCount() { return (threadId_t)omp_get_num_threads(); }
 
 /**
  * Gets the number of maximum possible threads
- * 
+ *
  * @return The number of maximum possible threads
-*/
+ */
 __INLINE__ size_t getMaxThreadCount() { return (threadId_t)omp_get_max_threads(); }
 
 } // namespace parallel
