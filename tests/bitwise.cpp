@@ -200,12 +200,12 @@ TEST(bitwise, bitcopyBadInpus)
 
   // Error: Dst buffer exceeded by size
   resetGoodValues();
-  dstBufferSize = 7;
+  dstBufferSize = 3;
   EXPECT_THROW(bitcopy(&dstBuffer, dstBufferSize, dstBufferOffset, &srcBuffer, srcBufferSize, srcBufferOffset, count, elementBitSize), std::logic_error);
 
   // Error: Src buffer exceeded by size
   resetGoodValues();
-  srcBufferSize = 7;
+  srcBufferSize = 3;
   EXPECT_THROW(bitcopy(&dstBuffer, dstBufferSize, dstBufferOffset, &srcBuffer, srcBufferSize, srcBufferOffset, count, elementBitSize), std::logic_error);
 
   // Error: Dst buffer exceeded by offset
@@ -220,13 +220,13 @@ TEST(bitwise, bitcopyBadInpus)
 
   // Error: Dst buffer exceeded by element size
   resetGoodValues();
-  srcBufferSize = 1024;
+  srcBufferSize = 128;
   elementBitSize = 16;
   EXPECT_THROW(bitcopy(&dstBuffer, dstBufferSize, dstBufferOffset, &srcBuffer, srcBufferSize, srcBufferOffset, count, elementBitSize), std::logic_error);
 
   // Error: Src buffer exceeded by element size
   resetGoodValues();
-  dstBufferSize = 1024;
+  dstBufferSize = 128;
   elementBitSize = 16;
   EXPECT_THROW(bitcopy(&dstBuffer, dstBufferSize, dstBufferOffset, &srcBuffer, srcBufferSize, srcBufferOffset, count, elementBitSize), std::logic_error);
 }
