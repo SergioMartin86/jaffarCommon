@@ -24,8 +24,8 @@ __INLINE__ void log(const char *f, Args... args)
   printf("%s", string.c_str());
 }
 
-__INLINE__ int waitForKeyPress() { return getchar(); }
-__INLINE__ int getKeyPress() { return 0; };
+__INLINE__ int  waitForKeyPress() { return getchar(); }
+__INLINE__ int  getKeyPress() { return 0; };
 __INLINE__ void initializeTerminal() {}
 __INLINE__ void clearTerminal() {}
 __INLINE__ void finalizeTerminal() {}

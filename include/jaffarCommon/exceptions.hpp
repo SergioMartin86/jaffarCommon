@@ -38,7 +38,7 @@ namespace exceptions
  */
 __INLINE__ void throwException [[noreturn]] (const char *exceptionType, const char *fileName, const int lineNumber, const char *format, ...)
 {
-  char *outstr = 0;
+  char   *outstr = 0;
   va_list ap;
   va_start(ap, format);
   int ret = vasprintf(&outstr, format, ap);

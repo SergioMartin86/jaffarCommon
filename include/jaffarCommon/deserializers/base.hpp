@@ -30,12 +30,10 @@ class Base
    * @param[in] inputDataBuffer The input buffer from whence to read the input data
    * @param[in] inputDataBufferSize The size of the input buffer
    */
-  Base(
-    const void *__restrict inputDataBuffer,
-    const size_t inputDataBufferSize) : _inputDataBuffer((const uint8_t *)inputDataBuffer),
-                                        _inputDataBufferSize(inputDataBufferSize)
-  {
-  }
+  Base(const void *__restrict inputDataBuffer, const size_t inputDataBufferSize)
+    : _inputDataBuffer((const uint8_t *)inputDataBuffer)
+    , _inputDataBufferSize(inputDataBufferSize)
+  {}
 
   virtual ~Base() = default;
 

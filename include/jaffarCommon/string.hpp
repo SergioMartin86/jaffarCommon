@@ -29,11 +29,8 @@ template <typename Out>
 __INLINE__ void split(const std::string &s, char delim, Out result)
 {
   std::istringstream iss(s);
-  std::string item;
-  while (std::getline(iss, item, delim))
-  {
-    *result++ = item;
-  }
+  std::string        item;
+  while (std::getline(iss, item, delim)) { *result++ = item; }
 }
 
 /**
@@ -61,7 +58,7 @@ __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
  */
 __INLINE__ std::string formatString(const char *format, ...)
 {
-  char *outstr = 0;
+  char   *outstr = 0;
   va_list ap;
   va_start(ap, format);
   int ret = vasprintf(&outstr, format, ap);

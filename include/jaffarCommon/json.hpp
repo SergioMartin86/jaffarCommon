@@ -26,7 +26,8 @@ namespace json
  */
 __INLINE__ const void checkEntry(const nlohmann::json &json, const std::string &key)
 {
-  if (json.is_object() == false) JAFFAR_THROW_LOGIC("[Error] JSON passed is not a key/value object. Happened when trying to obtain string key '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
+  if (json.is_object() == false)
+    JAFFAR_THROW_LOGIC("[Error] JSON passed is not a key/value object. Happened when trying to obtain string key '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
   if (json.contains(key) == false) JAFFAR_THROW_LOGIC("[Error] JSON contains no field called '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
 }
 

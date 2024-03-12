@@ -30,12 +30,10 @@ class Base
    * @param[in] outputDataBuffer The input buffer from whence to read the input data
    * @param[in] outputDataBufferSize The size of the input buffer
    */
-  Base(
-    void *__restrict outputDataBuffer,
-    const size_t outputDataBufferSize) : _outputDataBuffer((uint8_t *)outputDataBuffer),
-                                         _outputDataBufferSize(outputDataBufferSize)
-  {
-  }
+  Base(void *__restrict outputDataBuffer, const size_t outputDataBufferSize)
+    : _outputDataBuffer((uint8_t *)outputDataBuffer)
+    , _outputDataBufferSize(outputDataBufferSize)
+  {}
 
   virtual ~Base() = default;
 

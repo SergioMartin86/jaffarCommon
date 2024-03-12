@@ -51,7 +51,7 @@ class Deque
 {
   public:
 
-  Deque() = default;
+  Deque()  = default;
   ~Deque() = default;
 
   /**
@@ -67,10 +67,7 @@ class Deque
    *
    * @param[in] element The input element to push
    */
-  __INLINE__ void push_back_no_lock(T element)
-  {
-    _internalDeque.push_back(element);
-  }
+  __INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); }
 
   /**
    * Pushes an element to the back of the deque with locking protection
@@ -93,10 +90,7 @@ class Deque
    *
    * @param[in] element The input element to push
    */
-  __INLINE__ void push_front_no_lock(T element)
-  {
-    _internalDeque.push_front(element);
-  }
+  __INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); }
 
   /**
    * Pushes an element to the front of the deque with locking protection
@@ -120,10 +114,7 @@ class Deque
    *
    * @return The element at the front of the Deque
    */
-  __INLINE__ T front() const
-  {
-    return _internalDeque.front();
-  }
+  __INLINE__ T front() const { return _internalDeque.front(); }
 
   /**
    * Gets the element at the back of the Deque
@@ -133,10 +124,7 @@ class Deque
    *
    * @return The element at the back of the Deque
    */
-  __INLINE__ T back() const
-  {
-    return _internalDeque.back();
-  }
+  __INLINE__ T back() const { return _internalDeque.back(); }
 
   /**
    * Pops (removes) the element at the front of the Deque
@@ -218,10 +206,7 @@ class Deque
    * @note This is not a thread safe operation
    * @return The current size of the Deque at the time of checking
    */
-  __INLINE__ size_t wasSize() const
-  {
-    return _internalDeque.size();
-  }
+  __INLINE__ size_t wasSize() const { return _internalDeque.size(); }
 
   private:
 
