@@ -69,6 +69,13 @@ __INLINE__ std::string formatString(const char *format, ...)
   return outString;
 }
 
+/**
+ * Converts a binary input into a readable hex string
+ *
+ * @param[in] data Binary data to print
+ * @param[in] size Number of bytes in the input data
+ * @return The C++ string produced 
+ */
 __INLINE__ std::string dumpBinary(const void *data, const size_t size)
 {
   auto        input = (uint8_t *)data;
