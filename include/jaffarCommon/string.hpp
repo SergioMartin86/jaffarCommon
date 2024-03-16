@@ -69,6 +69,20 @@ __INLINE__ std::string formatString(const char *format, ...)
   return outString;
 }
 
+__INLINE__ std::string dumpBinary(const void* data, const size_t size)
+{
+  auto input = (uint8_t*) data;
+  std::string output;
+  for (size_t i = 0; i < size; i++)
+  {
+    char substr[16];
+    sprintf(substr, "%02X", input[i]);
+    output += std::string(substr);
+  } 
+
+  return output;
+}
+
 } // namespace string
 
 } // namespace jaffarCommon
