@@ -19,7 +19,6 @@ commonSources = [
 # Common dependencies
 commonDependencies = [
   dependency('openmp', required: true),
-  dependency('numa', required: true),
   dependency('tbb', required: true),
   dependency('ncurses', required: true)
 ]
