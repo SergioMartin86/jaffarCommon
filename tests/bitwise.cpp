@@ -325,9 +325,12 @@ TEST(bitwise, getBitValueDecrement)
 
 TEST(bitwise, getEncodingBitsForElementCount)
 {
+  ASSERT_EQ(getEncodingBitsForElementCount(0), 0);
+  ASSERT_EQ(getEncodingBitsForElementCount(1), 1);
+
   size_t expectedBitCount = 0;
   size_t maxElements = 1;
-  for (size_t elementCount = 0; elementCount < 1024; elementCount++)
+  for (size_t elementCount = 2; elementCount < 1024; elementCount++)
   {
     if (elementCount > maxElements) { expectedBitCount++; maxElements <<= 1; }
     ASSERT_EQ(getEncodingBitsForElementCount(elementCount), expectedBitCount);

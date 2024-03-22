@@ -99,6 +99,10 @@ __INLINE__ void bitcopy(void        *dstBufferPtr,
  */
 __INLINE__ size_t getEncodingBitsForElementCount(const size_t elementCount)
 {
+  // Corner cases
+  if (elementCount == 0) return 0;
+  if (elementCount == 1) return 1;
+
   // Calculating bit storage for the possible inputs index
   size_t bitEncodingSize  = 0;
   size_t encodingCapacity = 1;
