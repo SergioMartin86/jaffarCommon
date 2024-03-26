@@ -29,7 +29,7 @@ __INLINE__ int  getKeyPress() { return 0; };
 __INLINE__ void initializeTerminal() {}
 __INLINE__ void clearTerminal() {}
 __INLINE__ void finalizeTerminal() {}
-__INLINE__ void refreshTerminal() {}
+__INLINE__ void refreshTerminal() { fflush(stdout); }
 
 } // namespace logger
 
