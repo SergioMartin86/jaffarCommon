@@ -46,7 +46,7 @@ class Contiguous final : public serializer::Base
                            inputDataSize);
 
     // Only perform memcpy if the output block is not null
-    if (_outputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputDataBuffer, inputDataSize);
+    if (_outputDataBuffer != nullptr && inputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputDataBuffer, inputDataSize);
 
     // Moving output data pointer position
     _outputDataBufferPos += inputDataSize;

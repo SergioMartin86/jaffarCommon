@@ -46,7 +46,7 @@ class Contiguous final : public deserializer::Base
         "Maximum input data position reached (%lu) by current position (%lu) + count (%lu) before contiguous deserialization", _inputDataBufferSize, _inputDataBufferPos, count);
 
     // Only perform memcpy if the input block is not null
-    if (outputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], count);
+    if (outputDataBuffer != nullptr && _inputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], count);
 
     // Moving input data pointer position
     _inputDataBufferPos += count;

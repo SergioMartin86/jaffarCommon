@@ -59,7 +59,7 @@ class Differential final : public deserializer::Base
                            _referenceDataBufferSize);
 
     // Only perform memcpy if the input block is not null
-    if (_inputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], outputDataSize);
+    if (_inputDataBuffer != nullptr && outputDataBuffer != nullptr) memcpy(outputDataBuffer, &_inputDataBuffer[_inputDataBufferPos], outputDataSize);
 
     // Moving input data pointer position
     _inputDataBufferPos += outputDataSize;
@@ -70,7 +70,7 @@ class Differential final : public deserializer::Base
 
   __INLINE__ void pop(void *const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
-    if (outputDataBuffer == nullptr) return;
+    if (outputDataBuffer == nullptr || _inputDataBuffer == nullptr) return;
 
     // Reading differential outputDataBufferSize
     usize_t diffCount = *(usize_t *)&_inputDataBuffer[_inputDataBufferPos];

@@ -53,7 +53,7 @@ class Differential final : public serializer::Base
   __INLINE__ void pushContiguous(const void *const __restrict inputData = nullptr, const size_t inputDataSize = 0) override
   {
     // Only perform memcpy if the output block is not null
-    if (_outputDataBuffer != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
+    if (_outputDataBuffer != nullptr && inputData != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
 
     // Making sure we do not exceed the maximum size estipulated
     if (_outputDataBufferPos + inputDataSize > _outputDataBufferSize)
@@ -72,7 +72,7 @@ class Differential final : public serializer::Base
   __INLINE__ void push(const void *const __restrict inputData, const size_t inputDataSize) override
   {
     // If output data buffer is null, then we simply ignore differential data.
-    if (_outputDataBuffer == nullptr) return;
+    if (_outputDataBuffer == nullptr || inputData == nullptr) return;
 
     // Check that we don't exceed reference data size
     if (_referenceDataBufferPos + inputDataSize > _referenceDataBufferSize)
