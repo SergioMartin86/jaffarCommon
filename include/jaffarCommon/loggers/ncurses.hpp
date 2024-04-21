@@ -157,3 +157,6 @@ __INLINE__ void refreshTerminal()
 } // namespace logger
 
 } // namespace jaffarCommon
+
+#undef	ERR
+#undef	OK
