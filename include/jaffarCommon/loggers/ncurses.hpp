@@ -158,5 +158,5 @@ __INLINE__ void refreshTerminal()
 
 } // namespace jaffarCommon
 
-#undef	ERR
-#undef	OK
+#undef ERR
+#undef OK
