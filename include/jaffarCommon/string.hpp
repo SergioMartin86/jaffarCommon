@@ -45,7 +45,7 @@ __INLINE__ void split(const std::string &s, char delim, Out result)
 __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
 {
   std::string newString = s;
-  std::replace(newString.begin(), newString.end(), '\n', ' ');
+  std::replace(newString.begin(), newString.end(), '\n', delim);
   std::vector<std::string> elems;
   split(newString, delim, std::back_inserter(elems));
   return elems;
