@@ -5,7 +5,7 @@
  * @brief Contains the contiguous data deserializer
  */
 
-#include <cstring>
+#include <string.h>
 #include <limits>
 #include "../exceptions.hpp"
 #include "base.hpp"
