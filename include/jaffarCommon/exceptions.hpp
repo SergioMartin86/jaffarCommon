@@ -5,10 +5,9 @@
  * @brief Contains common functions for exception throwing
  */
 
-#include <cstdarg>
-#include <cstdio>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdexcept>
-#include <unistd.h>
 #include "string.hpp"
 
 namespace jaffarCommon
@@ -41,8 +40,22 @@ __INLINE__ void throwException [[noreturn]] (const char *exceptionType, const ch
   char   *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vasprintf(&outstr, format, ap);
-  if (ret == 0) throw std::invalid_argument("Failed processing exception reason");
+  int ret = vsnprintf(nullptr, 0, format, ap);
+  va_end(ap);
+  if (ret < 0) throw std::invalid_argument("Failed processing exception reason");
+
+  outstr = (char *)malloc(ret + 1);
+  if (outstr == nullptr) throw std::invalid_argument("Failed processing exception reason");
+
+  va_start(ap, format);
+  ret = vsnprintf(outstr, ret + 1, format, ap);
+  va_end(ap);
+  if (ret < 0)
+  {
+    free(outstr);
+    throw std::invalid_argument("Failed processing exception reason");
+  }
+
   std::string outString = outstr;
   free(outstr);
 

@@ -5,8 +5,8 @@
  * @brief Contains common functions related to output and logging using NCurses
  */
 
-#include <cstdarg>
-#include <cstdio>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdexcept>
 #include <ncurses.h>
 #include <unistd.h>
