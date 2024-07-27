@@ -5,6 +5,7 @@
  * @brief Contains common functions related to manipulating strings
  */
 
+#include <cstdint>
 #include <cstdarg>
 #include <sstream>
 #include <string>
