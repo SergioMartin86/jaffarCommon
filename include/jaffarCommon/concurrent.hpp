@@ -5,6 +5,7 @@
  * @brief Containers designed for fast parallel, mutual exclusive access
  */
 
+#include <stddef.h>
 #include <deque>
 #include <mutex>
 #include <atomic_queue/include/atomic_queue/atomic_queue.h>

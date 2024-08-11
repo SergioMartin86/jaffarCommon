@@ -5,13 +5,12 @@
  * @brief Contains common functions related to manipulating strings
  */
 
-#include <cstdint>
-#include <cstdarg>
+#include <stdarg.h>
+#include <stdio.h>
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <cstdio>
 
 namespace jaffarCommon
 {
@@ -64,8 +63,21 @@ __INLINE__ std::string formatString(const char *format, ...)
   char   *outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vasprintf(&outstr, format, ap);
-  if (ret == 0) return "";
+  int ret = vsnprintf(nullptr, 0, format, ap);
+  va_end(ap);
+  if (ret < 0) return "";
+
+  outstr = (char *)malloc(ret + 1);
+  if (outstr == nullptr) return "";
+
+  va_start(ap, format);
+  ret = vsnprintf(outstr, ret + 1, format, ap);
+  va_end(ap);
+  if (ret < 0)
+  {
+    free(outstr);
+    return "";
+  }
 
   std::string outString = outstr;
   free(outstr);

@@ -5,7 +5,7 @@
  * @brief Contains the differential data serializer
  */
 
-#include <cstring>
+#include <string.h>
 #include <limits>
 #include <xdelta3/xdelta3.h>
 #include "base.hpp"

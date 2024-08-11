@@ -5,7 +5,8 @@
  * @brief Definitions and utilities for parallel execution
  */
 
-#include <cstddef>
+#include <stddef.h>
+#include <stdint.h>
 #include <omp.h>
 
 namespace jaffarCommon
