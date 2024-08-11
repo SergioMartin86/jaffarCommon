@@ -64,10 +64,10 @@ static __INLINE__ bool saveStringToFile(const std::string &src, const std::strin
 {
   FILE *fid = fopen(fileName.c_str(), "w");
   if (fid != NULL)
-  {
-    fwrite(src.c_str(), 1, src.size(), fid);
-    fclose(fid);
-    return true;
+    {
+      fwrite(src.c_str(), 1, src.size(), fid);
+      fclose(fid);
+      return true;
   }
   return false;
 }

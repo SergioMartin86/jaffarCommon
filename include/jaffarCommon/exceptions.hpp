@@ -51,9 +51,9 @@ __INLINE__ void throwException [[noreturn]] (const char *exceptionType, const ch
   ret = vsnprintf(outstr, ret + 1, format, ap);
   va_end(ap);
   if (ret < 0)
-  {
-    free(outstr);
-    throw std::invalid_argument("Failed processing exception reason");
+    {
+      free(outstr);
+      throw std::invalid_argument("Failed processing exception reason");
   }
 
   std::string outString = outstr;

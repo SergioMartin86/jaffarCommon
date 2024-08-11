@@ -56,10 +56,10 @@ __INLINE__ int kbhit()
   if (ch == ERR) // no input
     r = FALSE;
   else // input
-  {
-    r = TRUE;
-    ungetch(ch);
-  }
+    {
+      r = TRUE;
+      ungetch(ch);
+    }
 
   // restore block and echo
   echo();
@@ -81,10 +81,10 @@ __INLINE__ int waitForKeyPress()
   if (_useNCurses == false) return getchar();
 
   while (!kbhit())
-  {
-    usleep(100000ul);
-    refresh();
-  }
+    {
+      usleep(100000ul);
+      refresh();
+    }
   return getch();
 }
 

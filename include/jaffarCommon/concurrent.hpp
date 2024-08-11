@@ -165,9 +165,9 @@ class Deque
     _mutex.lock();
 
     if (_internalDeque.empty())
-    {
-      _mutex.unlock();
-      return false;
+      {
+        _mutex.unlock();
+        return false;
     }
 
     element = _internalDeque.back();
@@ -189,9 +189,9 @@ class Deque
     _mutex.lock();
 
     if (_internalDeque.empty())
-    {
-      _mutex.unlock();
-      return false;
+      {
+        _mutex.unlock();
+        return false;
     }
 
     element = _internalDeque.front();

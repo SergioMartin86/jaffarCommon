@@ -22,7 +22,6 @@ namespace json
  *
  * @param[in] json The json object to look into
  * @param[in] key The key to look for inside the json object
- * @return True, if the json object contains the key; False, otherwise
  */
 __INLINE__ const void checkEntry(const nlohmann::json &json, const std::string &key)
 {
