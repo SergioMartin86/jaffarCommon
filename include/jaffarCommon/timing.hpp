@@ -46,6 +46,19 @@ __INLINE__ size_t timeDeltaNanoseconds(const std::chrono::time_point<std::chrono
   return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 };
 
+/**
+ * Calculates the difference in microseconds between two given time points (tf - t0), using a high resolution clock
+ *
+ * @param[in] end The end time point (tf)
+ * @param[in] start The start time point (t0)
+ * @return A 64-bit unsigned integer with the microseconds difference between the time points
+ */
+__INLINE__ size_t timeDeltaMicroseconds(const std::chrono::time_point<std::chrono::high_resolution_clock> end,
+                                        const std::chrono::time_point<std::chrono::high_resolution_clock> start)
+{
+  return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+};
+
 } // namespace timing
 
 } // namespace jaffarCommon
