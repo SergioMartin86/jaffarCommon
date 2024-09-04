@@ -5,8 +5,8 @@
  * @brief Contains the base class for the data serializers
  */
 
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
 
 namespace jaffarCommon
 {

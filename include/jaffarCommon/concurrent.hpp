@@ -5,6 +5,7 @@
  * @brief Containers designed for fast parallel, mutual exclusive access
  */
 
+#include <stddef.h>
 #include <deque>
 #include <mutex>
 #include <atomic_queue/include/atomic_queue/atomic_queue.h>
@@ -164,9 +165,9 @@ class Deque
     _mutex.lock();
 
     if (_internalDeque.empty())
-    {
-      _mutex.unlock();
-      return false;
+      {
+        _mutex.unlock();
+        return false;
     }
 
     element = _internalDeque.back();
@@ -188,9 +189,9 @@ class Deque
     _mutex.lock();
 
     if (_internalDeque.empty())
-    {
-      _mutex.unlock();
-      return false;
+      {
+        _mutex.unlock();
+        return false;
     }
 
     element = _internalDeque.front();

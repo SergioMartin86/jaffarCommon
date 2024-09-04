@@ -5,8 +5,8 @@
  * @brief Contains common functions related to bitwise operations
  */
 
-#include <cstdint>
 #include <stddef.h>
+#include <stdint.h>
 #include "exceptions.hpp"
 
 namespace jaffarCommon
@@ -66,29 +66,29 @@ __INLINE__ void bitcopy(void        *dstBufferPtr,
   uint8_t        srcPosBit     = srcOffsetBits % 8;
 
   for (size_t i = 0; i < totalBitCount; i++)
-  {
-    // Clear bit in question
-    dstBuffer[dstPosByte] = dstBuffer[dstPosByte] & bitNotMaskTable[dstPosBit];
-
-    // If the corresponding bit is set in source, set it up in dst
-    if ((srcBuffer[srcPosByte] & bitMaskTable[srcPosBit]) > 0) dstBuffer[dstPosByte] = dstBuffer[dstPosByte] | bitMaskTable[dstPosBit];
-
-    // Advance bit positions
-    dstPosBit++;
-    srcPosBit++;
-
-    // If crossed a byte barrier, go over the next byte
-    if (dstPosBit == 8)
     {
-      dstPosBit = 0;
-      dstPosByte++;
+      // Clear bit in question
+      dstBuffer[dstPosByte] = dstBuffer[dstPosByte] & bitNotMaskTable[dstPosBit];
+
+      // If the corresponding bit is set in source, set it up in dst
+      if ((srcBuffer[srcPosByte] & bitMaskTable[srcPosBit]) > 0) dstBuffer[dstPosByte] = dstBuffer[dstPosByte] | bitMaskTable[dstPosBit];
+
+      // Advance bit positions
+      dstPosBit++;
+      srcPosBit++;
+
+      // If crossed a byte barrier, go over the next byte
+      if (dstPosBit == 8)
+        {
+          dstPosBit = 0;
+          dstPosByte++;
+      }
+      if (srcPosBit == 8)
+        {
+          srcPosBit = 0;
+          srcPosByte++;
+      }
     }
-    if (srcPosBit == 8)
-    {
-      srcPosBit = 0;
-      srcPosByte++;
-    }
-  }
 }
 
 /**
