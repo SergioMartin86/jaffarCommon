@@ -4,8 +4,11 @@ project('jaffarCommon','c','cpp',
   default_options : ['cpp_std=c++20', 'default_library=shared', 'buildtype=release']
 )
 
-# Common application flags
+# Common compile flags
 commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
+
+# Common link flags
+commonLinkArgs = [ '-latomic' ]
 
 # Common includes
 commonIncludes = include_directories(['third_party', 'include'])
@@ -25,6 +28,7 @@ commonDependencies = [
 
 jaffarCommonDependency = declare_dependency(
   compile_args        : commonCppArgs,
+  link_args           : commonLinkArgs,
   include_directories : commonIncludes,
   sources             : commonSources,
   dependencies        : commonDependencies

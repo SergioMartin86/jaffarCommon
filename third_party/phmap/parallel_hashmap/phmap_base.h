@@ -236,6 +236,8 @@ struct disjunction<> : std::false_type {};
 template <typename T>
 struct negation : std::integral_constant<bool, !T::value> {};
 
+#ifdef __GNUC__
+
 template <typename T>
 struct is_trivially_destructible
     : std::integral_constant<bool, __has_trivial_destructor(T) &&
@@ -258,6 +260,30 @@ struct is_trivially_copy_assignable
     : std::integral_constant<
           bool, __has_trivial_assign(typename std::remove_reference<T>::type) &&
       phmap::is_copy_assignable<T>::value> {};
+#else
+template <typename T>
+struct is_trivially_destructible
+    : std::integral_constant<bool, __is_trivially_destructible(T) &&
+      std::is_destructible<T>::value> {};
+
+template <typename T>
+struct is_trivially_default_constructible
+    : std::integral_constant<bool, __is_trivially_destructible(T) &&
+                                   std::is_default_constructible<T>::value &&
+      is_trivially_destructible<T>::value> {};
+
+template <typename T>
+struct is_trivially_copy_constructible
+    : std::integral_constant<bool, __is_trivially_copyable(T) &&
+                                   std::is_copy_constructible<T>::value &&
+      is_trivially_destructible<T>::value> {};
+
+template <typename T>
+struct is_trivially_copy_assignable
+    : std::integral_constant<
+          bool, __is_trivially_assignable(typename std::remove_reference<T>::type, typename std::remove_reference<T>::type) &&
+      phmap::is_copy_assignable<T>::value> {};
+#endif
 
 // -----------------------------------------------------------------------------
 // C++14 "_t" trait aliases
