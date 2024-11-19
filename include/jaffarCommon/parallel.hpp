@@ -21,6 +21,12 @@ namespace parallel
 /// Macro to initiate a parallel for basic block. Uses OpenMP for this
 #define JAFFAR_PARALLEL_FOR _Pragma("omp parallel for")
 
+/// Macro to initiate a basic block where only the master thread runs
+#define JAFFAR_MASTER _Pragma("omp master")
+
+/// Macro to synchronize all workers
+#define JAFFAR_BARRIER _Pragma("omp barrier")
+
 /// Type definition for thread identifier
 typedef uint32_t threadId_t;
 
