@@ -27,6 +27,10 @@ namespace parallel
 /// Macro to synchronize all workers
 #define JAFFAR_BARRIER _Pragma("omp barrier")
 
+/// Macro to mark a critical section
+#define JAFFAR_CRITICAL _Pragma("omp critical")
+
+
 /// Type definition for thread identifier
 typedef uint32_t threadId_t;
 
