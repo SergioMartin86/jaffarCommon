@@ -30,7 +30,6 @@ namespace parallel
 /// Macro to mark a critical section
 #define JAFFAR_CRITICAL _Pragma("omp critical")
 
-
 /// Type definition for thread identifier
 typedef uint32_t threadId_t;
 
