@@ -62,12 +62,12 @@ TEST(file, memFile)
 
   ASSERT_NO_THROW(f.setOpened());
   ASSERT_FALSE(MemoryFile::feof(&f));
-  ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
+  ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 1);
   ASSERT_TRUE(MemoryFile::feof(&f));
   ASSERT_LE(MemoryFile::fread(nullptr, size, 1, &f), 0);
   ASSERT_NO_THROW(MemoryFile::rewind(&f));
   ASSERT_EQ(MemoryFile::ftell(&f), 0);
-  ASSERT_EQ(MemoryFile::fread(myDstBuffer, size, 1, &f), size);
+  ASSERT_EQ(MemoryFile::fread(myDstBuffer, 1, size, &f), size);
   for (size_t i = 0; i < size; i++) ASSERT_EQ(myDstBuffer[i], mySrcBuffer[i]);
   ASSERT_TRUE(MemoryFile::feof(&f));
 
@@ -91,7 +91,7 @@ TEST(file, memFile)
     MemoryFile* filePointerCheck = nullptr;
     ASSERT_NO_THROW(f.setWriteCallback([&writtenBytesCheck, &filePointerCheck](const ssize_t writtenBytes, MemoryFile* const filePointer) { writtenBytesCheck = writtenBytes; filePointerCheck = filePointer; } ));
     ASSERT_NO_THROW(MemoryFile::rewind(&f));
-    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, 1, size, &f), size);
     ASSERT_EQ(writtenBytesCheck, size);
     ASSERT_EQ(filePointerCheck, &f);
 
@@ -99,7 +99,7 @@ TEST(file, memFile)
     writtenBytesCheck = 0;
     filePointerCheck = nullptr;
     ASSERT_NO_THROW(MemoryFile::rewind(&f));
-    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 1);
     ASSERT_EQ(writtenBytesCheck, 0);
     ASSERT_EQ(filePointerCheck, nullptr);
   }
@@ -110,7 +110,7 @@ TEST(file, memFile)
     MemoryFile* filePointerCheck = nullptr;
     ASSERT_NO_THROW(f.setReadCallback([&readBytesCheck, &filePointerCheck](const ssize_t readBytes, MemoryFile* const filePointer) { readBytesCheck = readBytes; filePointerCheck = filePointer; } ));
     ASSERT_NO_THROW(MemoryFile::rewind(&f));
-    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, size, 1, &f), 1);
     ASSERT_EQ(readBytesCheck, size);
     ASSERT_EQ(filePointerCheck, &f);
     
@@ -118,7 +118,7 @@ TEST(file, memFile)
     readBytesCheck = 0;
     filePointerCheck = nullptr;
     ASSERT_NO_THROW(MemoryFile::rewind(&f));
-    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, 1, size, &f), size);
     ASSERT_EQ(readBytesCheck, 0);
     ASSERT_EQ(filePointerCheck, nullptr);
   }

@@ -138,8 +138,8 @@ class MemoryFile
     // Calling corresponding callback, if defined
     if (file->_readCallbackDefined == true) file->_readCallback(requestedSize, file);
 
-    // Returning effective size of bytes read
-    return requestedSize;
+    // Returning element count read
+    return count;
   }
 
   /**
@@ -177,8 +177,8 @@ class MemoryFile
     // Calling corresponding callback, if defined
     if (file->_writeCallbackDefined == true) file->_writeCallback(requestedSize, file);
 
-    // Returning effective number of bytes read
-    return requestedSize;
+    // Returning element count read
+    return count;
   }
 
   /**
