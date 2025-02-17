@@ -81,6 +81,10 @@ class MemoryFile
 {
   public:
 
+  MemoryFile() = delete;
+  MemoryFile(const MemoryFile&) = delete;
+  void operator=(const MemoryFile&) = delete;
+
   /**
    * Constructor for the memory file class. 
    * 
@@ -110,7 +114,7 @@ class MemoryFile
    * 
    * @return The number of bytes read. Negative in case of error.
    */
-  static __INLINE__ size_t fread(void *const buffer, const size_t size, const size_t count, MemoryFile *const file)
+  static __INLINE__ ssize_t fread(void *const buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
     if (file->isOpened() == false) return -1;
@@ -130,6 +134,9 @@ class MemoryFile
     // Advancing head
     file->_head += requestedSize;
 
+    // Calling corresponding callback, if defined
+    if (file->_readCallbackDefined == true) file->_readCallback(requestedSize, file);
+
     // Returning effective size of bytes read
     return requestedSize;
   }
@@ -146,7 +153,7 @@ class MemoryFile
    * 
    * @return The number of bytes written. Negative in case of error.
    */
-  static __INLINE__ size_t fwrite(const void *buffer, const size_t size, const size_t count, MemoryFile *const file)
+  static __INLINE__ ssize_t fwrite(const void *buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
     if (file->isOpened() == false) return -1;
@@ -165,6 +172,9 @@ class MemoryFile
 
     // Advancing head until the next 
     file->_head += requestedSize;
+
+    // Calling corresponding callback, if defined
+    if (file->_writeCallbackDefined == true) file->_writeCallback(requestedSize, file);
 
     // Returning effective number of bytes read
     return requestedSize;
@@ -294,6 +304,11 @@ class MemoryFile
     */
   __INLINE__ bool isOpened() const { return _opened; }
 
+  __INLINE__ void setWriteCallback(const std::function<void(const ssize_t, MemoryFile*)> callback) { _writeCallback = callback; _writeCallbackDefined = true; }
+  __INLINE__ void setReadCallback(const std::function<void(const ssize_t, MemoryFile*)> callback)  { _readCallback  = callback; _readCallbackDefined  = true; }
+  __INLINE__ void unsetWriteCallback() { _writeCallbackDefined = false; }
+  __INLINE__ void unsetReadCallback() { _readCallbackDefined  = false; }
+
   private:
 
   /**
@@ -324,7 +339,27 @@ class MemoryFile
   /**
    * The file's internal head pointer
    */
-  size_t         _head;
+  size_t         _head = 0;
+
+  /**
+   * Whether the write callback has been defined
+   */
+   bool _writeCallbackDefined = false;
+
+  /**
+   * The file's internal callback for writes
+   */
+   std::function<void(const ssize_t, MemoryFile* const)> _writeCallback;
+
+   /**
+   * Whether the write callback has been defined
+   */
+   bool _readCallbackDefined = false;
+
+   /**
+   * The file's internal callback for read
+   */
+   std::function<void(const ssize_t, MemoryFile* const)> _readCallback;
 };
 
 /**
@@ -367,6 +402,9 @@ class MemoryFileDirectory
     // If appending, fail because mem buffers have static size
     if (openMode == mode_t::append) return NULL;
 
+    // If no mode chosen, fail
+    if (openMode == mode_t::none) return NULL;
+
     // Parsing extended
     bool extendedMode = false;
     if (mode.find("+") != std::string::npos) extendedMode = true;
@@ -386,20 +424,19 @@ class MemoryFileDirectory
 
     // Evaluating the case where the file does exist
     if (fileExists == true)
-      {
+    {
+        // Check if opened. If it is, then we cannot re-open it now
+        if (_fileMap.at(filename)->isOpened() == true) return NULL;
+
         // If reading, return NULL
         if (openMode == mode_t::read && fileExists == false) return NULL;
 
         // Otherwise, create a new one (a correct size needs to be provided)
-        if (size == 0) return NULL;
         _fileMap[filename] = std::make_unique<MemoryFile>(size);
     }
 
     // Getting file
     MemoryFile *file = _fileMap.at(filename).get();
-
-    // Check if opened. If it is, then we cannot re-open it now
-    if (file->isOpened() == true) return NULL;
 
     // Otherwise, we set it as opened
     file->setOpened();
@@ -440,8 +477,10 @@ class MemoryFileDirectory
    */
   int fclose(MemoryFile *const file)
   {
+    if (file == NULL) return -1;
+
     // Check if file already closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) return -2;
 
     // Set the file as closed
     file->unsetOpened();
