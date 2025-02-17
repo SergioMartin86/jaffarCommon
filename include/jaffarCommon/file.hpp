@@ -9,6 +9,8 @@
 #include <sstream>
 #include <string>
 #include <cstdio>
+#include <memory>
+#include <functional>
 
 namespace jaffarCommon
 {
