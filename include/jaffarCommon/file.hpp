@@ -123,11 +123,12 @@ class MemoryFile
     // Refuse operation if file is write only
     if (file->isWriteOnly() == true) return -2;
 
-    // Getting requested size
-    const size_t requestedSize = size * count;
-
     // Ensuring we don't exceed mem buffer size
-    if (file->_head + requestedSize > file->_size) return -3;
+    size_t newCount = count;
+    if (file->_head + (size * count) > file->_size) newCount = (file->_size - file->_head) / size;
+
+    // Getting requested size
+    const size_t requestedSize = size * newCount;
 
     // Performing memcpy
     if (requestedSize > 0) memcpy(buffer, file->_buffer, requestedSize);
@@ -139,7 +140,7 @@ class MemoryFile
     if (file->_readCallbackDefined == true) file->_readCallback(requestedSize, file);
 
     // Returning element count read
-    return count;
+    return newCount;
   }
 
   /**
@@ -162,11 +163,12 @@ class MemoryFile
     // Refuse operation if file is read only
     if (file->isReadOnly() == true) return -2;
 
-    // Getting requested size
-    const size_t requestedSize = size * count;
-
     // Ensuring we don't exceed mem buffer size
-    if (file->_head + requestedSize > file->_size) return -3;
+    size_t newCount = count;
+    if (file->_head + (size * count) > file->_size) newCount = (file->_size - file->_head) / size;
+
+    // Getting requested size
+    const size_t requestedSize = size * newCount;
 
     // Performing memcpy
     if (requestedSize > 0) memcpy(file->_buffer, buffer, requestedSize);
@@ -178,7 +180,7 @@ class MemoryFile
     if (file->_writeCallbackDefined == true) file->_writeCallback(requestedSize, file);
 
     // Returning element count read
-    return count;
+    return newCount;
   }
 
   /**
@@ -439,28 +441,31 @@ class MemoryFileDirectory
     // Checking if file already exists
     bool fileExists = _fileMap.contains(filename);
 
+    // Check if file needs to be created
+    bool createFile = false;
+
     // Evaluating the case where the file doesn't exist
     if (fileExists == false)
       {
         // If reading, return NULL
-        if (openMode == mode_t::read && fileExists == false) return NULL;
+        if (openMode == mode_t::read) return NULL;
 
         // Otherwise, create a new one
-        _fileMap[filename] = std::make_unique<MemoryFile>(size);
+        createFile = true;
     }
 
     // Evaluating the case where the file does exist
     if (fileExists == true)
-      {
+    {
         // Check if opened. If it is, then we cannot re-open it now
         if (_fileMap.at(filename)->isOpened() == true) return NULL;
 
-        // If reading, return NULL
-        if (openMode == mode_t::read && fileExists == false) return NULL;
-
-        // Otherwise, create a new one (a correct size needs to be provided)
-        _fileMap[filename] = std::make_unique<MemoryFile>(size);
+        // If writing, overwrite file
+        if (openMode == mode_t::write) createFile = true;
     }
+
+    // Creating new file, if required
+    if (createFile == true) _fileMap[filename] = std::make_unique<MemoryFile>(size);
 
     // Getting file
     MemoryFile *file = _fileMap.at(filename).get();
