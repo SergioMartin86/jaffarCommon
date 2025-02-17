@@ -94,17 +94,33 @@ TEST(file, memFile)
     ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
     ASSERT_EQ(writtenBytesCheck, size);
     ASSERT_EQ(filePointerCheck, &f);
+
+    ASSERT_NO_THROW(f.unsetWriteCallback());
+    writtenBytesCheck = 0;
+    filePointerCheck = nullptr;
+    ASSERT_NO_THROW(MemoryFile::rewind(&f));
+    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(writtenBytesCheck, 0);
+    ASSERT_EQ(filePointerCheck, nullptr);
   }
 
   // Read Callback testing
   {
     ssize_t readBytesCheck = 0;
     MemoryFile* filePointerCheck = nullptr;
-    ASSERT_NO_THROW(f.setWriteCallback([&readBytesCheck, &filePointerCheck](const ssize_t readBytes, MemoryFile* const filePointer) { readBytesCheck = readBytes; filePointerCheck = filePointer; } ));
+    ASSERT_NO_THROW(f.setReadCallback([&readBytesCheck, &filePointerCheck](const ssize_t readBytes, MemoryFile* const filePointer) { readBytesCheck = readBytes; filePointerCheck = filePointer; } ));
     ASSERT_NO_THROW(MemoryFile::rewind(&f));
-    ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, size, 1, &f), size);
     ASSERT_EQ(readBytesCheck, size);
     ASSERT_EQ(filePointerCheck, &f);
+    
+    ASSERT_NO_THROW(f.unsetReadCallback());
+    readBytesCheck = 0;
+    filePointerCheck = nullptr;
+    ASSERT_NO_THROW(MemoryFile::rewind(&f));
+    ASSERT_EQ(MemoryFile::fread(mySrcBuffer, size, 1, &f), size);
+    ASSERT_EQ(readBytesCheck, 0);
+    ASSERT_EQ(filePointerCheck, nullptr);
   }
 }
 

@@ -81,9 +81,9 @@ class MemoryFile
 {
   public:
 
-  MemoryFile() = delete;
-  MemoryFile(const MemoryFile&) = delete;
-  void operator=(const MemoryFile&) = delete;
+  MemoryFile()                       = delete;
+  MemoryFile(const MemoryFile &)     = delete;
+  void operator=(const MemoryFile &) = delete;
 
   /**
    * Constructor for the memory file class. 
@@ -100,7 +100,6 @@ class MemoryFile
    * Destructor for the memory file class. it frees the buffer created at allocation time
    */
   ~MemoryFile() { free(_buffer); }
-
 
   /**
    * Reads from the mem file into a buffer.
@@ -170,7 +169,7 @@ class MemoryFile
     // Performing memcpy
     if (requestedSize > 0) memcpy(file->_buffer, buffer, requestedSize);
 
-    // Advancing head until the next 
+    // Advancing head until the next
     file->_head += requestedSize;
 
     // Calling corresponding callback, if defined
@@ -253,7 +252,7 @@ class MemoryFile
    * @param[in] file The file to inquire for end of file
    * @return Non-zero, if the end has been reached. Zero, otherwise.
   */
-  static __INLINE__ int feof(MemoryFile * const file) { return file->_head == file->_size; }
+  static __INLINE__ int feof(MemoryFile *const file) { return file->_head == file->_size; }
 
   /**
    * Sets the read only flag in the file
@@ -285,14 +284,13 @@ class MemoryFile
    */
   __INLINE__ void unsetOpened() { _opened = false; }
 
-  
-   /**
+  /**
     * Gets the read-only flag from the file
     * @return The file's read-only flag
     */
   __INLINE__ bool isReadOnly() const { return _readonly; }
 
-   /**
+  /**
     * Gets the write-only flag from the file
     * @return The file's write-only flag
     */
@@ -304,17 +302,44 @@ class MemoryFile
     */
   __INLINE__ bool isOpened() const { return _opened; }
 
-  __INLINE__ void setWriteCallback(const std::function<void(const ssize_t, MemoryFile*)> callback) { _writeCallback = callback; _writeCallbackDefined = true; }
-  __INLINE__ void setReadCallback(const std::function<void(const ssize_t, MemoryFile*)> callback)  { _readCallback  = callback; _readCallbackDefined  = true; }
+  /**
+   * Sets a callback that will be called when a write is made
+   * 
+   * @param[in] callback Write-callback to set
+   */
+  __INLINE__ void setWriteCallback(const std::function<void(const ssize_t, MemoryFile *)> callback)
+  {
+    _writeCallback        = callback;
+    _writeCallbackDefined = true;
+  }
+
+  /**
+   * Sets a callback that will be called when a read is made
+   * 
+   * @param[in] callback Read-callback to set
+   */
+  __INLINE__ void setReadCallback(const std::function<void(const ssize_t, MemoryFile *)> callback)
+  {
+    _readCallback        = callback;
+    _readCallbackDefined = true;
+  }
+
+  /**
+   * Function to unset the write callback
+   */
   __INLINE__ void unsetWriteCallback() { _writeCallbackDefined = false; }
-  __INLINE__ void unsetReadCallback() { _readCallbackDefined  = false; }
+
+  /**
+   * Function to unset the read callback
+   */
+  __INLINE__ void unsetReadCallback() { _readCallbackDefined = false; }
 
   private:
 
   /**
    * The file's buffer size
    */
-  const size_t   _size;
+  const size_t _size;
 
   /**
    * The file's buffer
@@ -324,42 +349,42 @@ class MemoryFile
   /**
    * The file's read-only flag
    */
-  bool           _readonly  = false;
+  bool _readonly = false;
 
   /**
    * The file's write-only flag
    */
-  bool           _writeonly = false;
+  bool _writeonly = false;
 
   /**
    * The file's opened flag
    */
-  bool           _opened    = false;
+  bool _opened = false;
 
   /**
    * The file's internal head pointer
    */
-  size_t         _head = 0;
+  size_t _head = 0;
 
   /**
    * Whether the write callback has been defined
    */
-   bool _writeCallbackDefined = false;
+  bool _writeCallbackDefined = false;
 
   /**
    * The file's internal callback for writes
    */
-   std::function<void(const ssize_t, MemoryFile* const)> _writeCallback;
+  std::function<void(const ssize_t, MemoryFile *const)> _writeCallback;
 
-   /**
+  /**
    * Whether the write callback has been defined
    */
-   bool _readCallbackDefined = false;
+  bool _readCallbackDefined = false;
 
-   /**
+  /**
    * The file's internal callback for read
    */
-   std::function<void(const ssize_t, MemoryFile* const)> _readCallback;
+  std::function<void(const ssize_t, MemoryFile *const)> _readCallback;
 };
 
 /**
@@ -424,7 +449,7 @@ class MemoryFileDirectory
 
     // Evaluating the case where the file does exist
     if (fileExists == true)
-    {
+      {
         // Check if opened. If it is, then we cannot re-open it now
         if (_fileMap.at(filename)->isOpened() == true) return NULL;
 
