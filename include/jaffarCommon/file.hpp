@@ -83,20 +83,9 @@ class MemoryFile
 {
   public:
 
-  MemoryFile()                       = delete;
+  MemoryFile()                       = default;
   MemoryFile(const MemoryFile &)     = delete;
   void operator=(const MemoryFile &) = delete;
-
-  /**
-   * Constructor for the memory file class. 
-   * 
-   * @param[in] size The size of the internal buffer for the file. This buffer is static and cannot be increased.
-   */
-  MemoryFile(const size_t size)
-    : _size(size)
-    , _buffer(_size == 0 ? nullptr : (uint8_t *)calloc(1, _size))
-    , _head(0)
-  {}
 
   /**
    * Destructor for the memory file class. it frees the buffer created at allocation time
@@ -163,25 +152,35 @@ class MemoryFile
     // Refuse operation if file is read only
     if (file->isReadOnly() == true) return -2;
 
-    // Ensuring we don't exceed mem buffer size
-    size_t newCount = count;
-    if (file->_head + (size * count) > file->_size) newCount = (file->_size - file->_head) / size;
-
     // Getting requested size
-    const size_t requestedSize = size * newCount;
+    const size_t requestedSize = size * count;
+
+    // Checking if internal buffer needs to be resized
+    const size_t endHeadPos = file->_head + requestedSize;
+    if (endHeadPos > file->_bufferSize) file->resizeToFit(endHeadPos + 1);
 
     // Performing memcpy
     if (requestedSize > 0) memcpy(file->_buffer, buffer, requestedSize);
 
     // Advancing head until the next
     file->_head += requestedSize;
+    if (file->_head > file->_size) file->_size = file->_head;
 
     // Calling corresponding callback, if defined
     if (file->_writeCallbackDefined == true) file->_writeCallback(requestedSize, file);
 
-    // Returning element count read
-    return newCount;
+    // Returning element count written
+    return count;
   }
+
+  /**
+   * (mirror for ftell - has no different effect or interface)
+   * Returns the internal position of the file's head
+   * 
+   * @param[in] file The file to evaluate
+   * @return The internal position of the head. -1 if the file is not open
+   */
+  static __INLINE__ ssize_t ftello64(const MemoryFile *const file) { return ftell(file); }
 
   /**
    * Returns the internal position of the file's head
@@ -223,6 +222,18 @@ class MemoryFile
 
     return 0;
   }
+
+  /**
+   * (mirror for fseek - has no different effect or interface)
+   * Ensures the write operations have finished. No effect for mem buffers as all operations finish within their call.
+   * 
+   * @param[in] file The file whose head to move
+   * @param[in] offset The number of bytes to move the internal head
+   * @param[in] origin The point relative to which we apply the offset
+   * 
+   * @return Zero in case of success. -1 in case of error
+   */
+  static __INLINE__ int fseeko64(MemoryFile *const file, const ssize_t offset, const int origin) { return fseek(file, offset, origin); }
 
   /**
    * Ensures the write operations have finished. No effect for mem buffers as all operations finish within their call.
@@ -340,15 +351,34 @@ class MemoryFile
 
   private:
 
+  void resizeToFit(const size_t target)
+  {
+    // Getting current buffer size
+    size_t newBufferSize = _bufferSize;
+    if (newBufferSize == 0) newBufferSize = 1;
+
+    // Duplicating new buffer size until the target fits
+    while (newBufferSize < target) newBufferSize <<= 1;
+
+    // Reallocating buffer
+    _buffer = (uint8_t *)realloc(_buffer, newBufferSize);
+  }
+
   /**
-   * The file's buffer size
+   * The file's logical size
+   * Starts at zero if the file is new -- grows with write operations
    */
-  const size_t _size;
+  size_t _size = 0;
+
+  /**
+   * The file's internal buffer size (increases on demand)
+   */
+  size_t _bufferSize = 0;
 
   /**
    * The file's buffer
    */
-  uint8_t *const _buffer;
+  uint8_t *_buffer = nullptr;
 
   /**
    * The file's read-only flag
@@ -408,11 +438,10 @@ class MemoryFileDirectory
    * 
    * @param[in] filename The file of the name to open
    * @param[in] mode The opening mode (r,w,a,+)
-   * @param[in] size The buffer size for the file
    * 
    * @return The pointer to the new memory file, if successful. NULL, otherwise.
    */
-  __INLINE__ MemoryFile *fopen(const std::string filename, const std::string mode, const size_t size = 0)
+  __INLINE__ MemoryFile *fopen(const std::string filename, const std::string mode)
   {
     // Parsing mode
     mode_t openMode = mode_t::none;
@@ -438,6 +467,10 @@ class MemoryFileDirectory
     bool extendedMode = false;
     if (mode.find("+") != std::string::npos) extendedMode = true;
 
+    // Parsing extended
+    bool noCreateMode = false;
+    if (mode.find("x") != std::string::npos) noCreateMode = true;
+
     // Checking if file already exists
     bool fileExists = _fileMap.contains(filename);
 
@@ -447,6 +480,9 @@ class MemoryFileDirectory
     // Evaluating the case where the file doesn't exist
     if (fileExists == false)
       {
+        // Check if the no-create flag has been provided
+        if (noCreateMode == true) return NULL;
+
         // If reading, return NULL
         if (openMode == mode_t::read) return NULL;
 
@@ -456,7 +492,7 @@ class MemoryFileDirectory
 
     // Evaluating the case where the file does exist
     if (fileExists == true)
-    {
+      {
         // Check if opened. If it is, then we cannot re-open it now
         if (_fileMap.at(filename)->isOpened() == true) return NULL;
 
@@ -465,7 +501,7 @@ class MemoryFileDirectory
     }
 
     // Creating new file, if required
-    if (createFile == true) _fileMap[filename] = std::make_unique<MemoryFile>(size);
+    if (createFile == true) _fileMap[filename] = std::make_unique<MemoryFile>();
 
     // Getting file
     MemoryFile *file = _fileMap.at(filename).get();

@@ -40,7 +40,7 @@ TEST(file, memFile)
   uint8_t* myDstBuffer = (uint8_t*) malloc(size);
   for (size_t i = 0; i < size; i++) mySrcBuffer[i] = (uint8_t)i;
 
-  MemoryFile f(size);
+  MemoryFile f;
 
   ASSERT_FALSE(f.isOpened());
   ASSERT_NO_THROW(f.setOpened());
@@ -61,16 +61,24 @@ TEST(file, memFile)
   ASSERT_FALSE(f.isWriteOnly());
 
   ASSERT_NO_THROW(f.setOpened());
-  ASSERT_FALSE(MemoryFile::feof(&f));
+  ASSERT_TRUE(MemoryFile::feof(&f));
+  ASSERT_EQ(MemoryFile::ftell(&f), 0);
   ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 1);
+  ASSERT_EQ(MemoryFile::ftell(&f), size);
+  ASSERT_TRUE(MemoryFile::feof(&f));
+  ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 1);
+  ASSERT_EQ(MemoryFile::ftell(&f), size * 2);
   ASSERT_TRUE(MemoryFile::feof(&f));
   ASSERT_LE(MemoryFile::fread(nullptr, size, 1, &f), 0);
   ASSERT_NO_THROW(MemoryFile::rewind(&f));
+  ASSERT_FALSE(MemoryFile::feof(&f));
   ASSERT_EQ(MemoryFile::ftell(&f), 0);
   ASSERT_EQ(MemoryFile::fread(myDstBuffer, 1, size, &f), size);
+  ASSERT_EQ(MemoryFile::ftell(&f), 16);
   for (size_t i = 0; i < size; i++) ASSERT_EQ(myDstBuffer[i], mySrcBuffer[i]);
+  ASSERT_FALSE(MemoryFile::feof(&f));
+  ASSERT_EQ(MemoryFile::fread(myDstBuffer, 1, size, &f), size);
   ASSERT_TRUE(MemoryFile::feof(&f));
-
 
   ASSERT_EQ(MemoryFile::fseek(&f, 0, SEEK_SET), 0);
   ASSERT_EQ(MemoryFile::ftell(&f), 0);
@@ -79,11 +87,11 @@ TEST(file, memFile)
   ASSERT_EQ(MemoryFile::ftell(&f), 1);
   ASSERT_EQ(MemoryFile::fseek(&f, 0, SEEK_END), 0);
   ASSERT_TRUE(MemoryFile::feof(&f));
-  ASSERT_EQ(MemoryFile::ftell(&f), size);
+  ASSERT_EQ(MemoryFile::ftell(&f), 2*size);
   ASSERT_EQ(MemoryFile::fseek(&f, -1, SEEK_END), 0);
   ASSERT_FALSE(MemoryFile::feof(&f));
-  ASSERT_EQ(MemoryFile::ftell(&f), size - 1);
-  ASSERT_LT(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 0);
+  ASSERT_EQ(MemoryFile::ftell(&f), 2*size - 1);
+  ASSERT_EQ(MemoryFile::fwrite(mySrcBuffer, size, 1, &f), 1);
 
   // Write Callback testing
   {
@@ -127,30 +135,30 @@ TEST(file, memFile)
 TEST(file, memFileDirectory)
 {
   MemoryFileDirectory d;
-
-  size_t size = 16;
   std::string fileName = "file1";
 
-  ASSERT_EQ(d.fopen(fileName, "r", size), (MemoryFile*)NULL);
-  ASSERT_EQ(d.fopen(fileName, "r+", size), (MemoryFile*)NULL);
-  ASSERT_EQ(d.fopen(fileName, "a", size), (MemoryFile*)NULL);
-  ASSERT_EQ(d.fopen(fileName, "a+", size), (MemoryFile*)NULL);
-  ASSERT_EQ(d.fopen(fileName, "", size), (MemoryFile*)NULL);
-  ASSERT_EQ(d.fopen(fileName, "+", size), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "r"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "r+"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "a"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "a+"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, ""), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "+"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "wx"), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "wx+"), (MemoryFile*)NULL);
 
   MemoryFile* f = NULL;
   ASSERT_NE(d.fclose(f), 0);
-  ASSERT_NE(f = d.fopen(fileName, "w", size), (MemoryFile*)NULL);
+  ASSERT_NE(f = d.fopen(fileName, "w"), (MemoryFile*)NULL);
   ASSERT_TRUE(f->isOpened());
   ASSERT_TRUE(f->isWriteOnly());
   ASSERT_FALSE(f->isReadOnly());
-  ASSERT_EQ(d.fopen(fileName, "w", size), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "w"), (MemoryFile*)NULL);
   ASSERT_EQ(d.fclose(f), 0);
   ASSERT_NE(d.fclose(f), 0);
   ASSERT_FALSE(f->isOpened());
 
   f = NULL;
-  ASSERT_NE(f = d.fopen(fileName, "r", size), (MemoryFile*)NULL);
+  ASSERT_NE(f = d.fopen(fileName, "r"), (MemoryFile*)NULL);
   ASSERT_TRUE(f->isOpened());
   ASSERT_FALSE(f->isWriteOnly());
   ASSERT_TRUE(f->isReadOnly());
@@ -158,7 +166,7 @@ TEST(file, memFileDirectory)
   ASSERT_FALSE(f->isOpened());
 
   f = NULL;
-  ASSERT_NE(f = d.fopen(fileName, "r+", size), (MemoryFile*)NULL);
+  ASSERT_NE(f = d.fopen(fileName, "r+"), (MemoryFile*)NULL);
   ASSERT_TRUE(f->isOpened());
   ASSERT_FALSE(f->isWriteOnly());
   ASSERT_FALSE(f->isReadOnly());
@@ -166,7 +174,7 @@ TEST(file, memFileDirectory)
   ASSERT_FALSE(f->isOpened());
 
   f = NULL;
-  ASSERT_NE(f = d.fopen(fileName, "w+", size), (MemoryFile*)NULL);
+  ASSERT_NE(f = d.fopen(fileName, "w+"), (MemoryFile*)NULL);
   ASSERT_TRUE(f->isOpened());
   ASSERT_FALSE(f->isWriteOnly());
   ASSERT_FALSE(f->isReadOnly());
@@ -175,6 +183,6 @@ TEST(file, memFileDirectory)
 
   ASSERT_EQ(d.fdestroy(fileName), 0);
   ASSERT_NE(d.fdestroy(fileName), 0);
-  ASSERT_EQ(d.fopen(fileName, "r", size), (MemoryFile*)NULL);
-  ASSERT_NE(f = d.fopen(fileName, "w", size), (MemoryFile*)NULL);
+  ASSERT_EQ(d.fopen(fileName, "r"), (MemoryFile*)NULL);
+  ASSERT_NE(f = d.fopen(fileName, "w"), (MemoryFile*)NULL);
 }
