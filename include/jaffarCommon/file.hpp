@@ -107,10 +107,10 @@ class MemoryFile
   static __INLINE__ ssize_t fread(void *const buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
 
     // Refuse operation if file is write only
-    if (file->isWriteOnly() == true) return -2;
+    if (file->isWriteOnly() == true) { file->_errorCode = -2; return file->_errorCode; }
 
     // Ensuring we don't exceed mem buffer size
     size_t newCount = count;
@@ -129,6 +129,7 @@ class MemoryFile
     if (file->_readCallbackDefined == true) file->_readCallback(requestedSize, file);
 
     // Returning element count read
+    file->_errorCode = 0;
     return newCount;
   }
 
@@ -147,10 +148,10 @@ class MemoryFile
   static __INLINE__ ssize_t fwrite(const void *buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
 
     // Refuse operation if file is read only
-    if (file->isReadOnly() == true) return -2;
+    if (file->isReadOnly() == true) { file->_errorCode = -2; return file->_errorCode; }
 
     // Getting requested size
     const size_t requestedSize = size * count;
@@ -170,6 +171,7 @@ class MemoryFile
     if (file->_writeCallbackDefined == true) file->_writeCallback(requestedSize, file);
 
     // Returning element count written
+    file->_errorCode = 0;
     return count;
   }
 
@@ -180,7 +182,7 @@ class MemoryFile
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __INLINE__ ssize_t ftello64(const MemoryFile *const file) { return ftell(file); }
+  static __INLINE__ ssize_t ftello64(MemoryFile *const file) { return ftell(file); }
 
   /**
    * Returns the internal position of the file's head
@@ -188,11 +190,12 @@ class MemoryFile
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __INLINE__ ssize_t ftell(const MemoryFile *const file)
+  static __INLINE__ ssize_t ftell(MemoryFile *const file)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
 
+    file->_errorCode = 0;
     return file->_head;
   }
 
@@ -204,8 +207,9 @@ class MemoryFile
   static __INLINE__ void rewind(MemoryFile *const file)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return;
+    if (file->isOpened() == false) { file->_errorCode = -1; return; }
 
+    file->_errorCode = 0;
     file->_head = 0;
   }
 
@@ -218,8 +222,9 @@ class MemoryFile
   static __INLINE__ int fflush(MemoryFile *file)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
 
+    file->_errorCode = 0;
     return 0;
   }
 
@@ -247,17 +252,18 @@ class MemoryFile
   static __INLINE__ int fseek(MemoryFile *const file, const ssize_t offset, const int origin)
   {
     // Check if file is closed
-    if (file->isOpened() == false) return -1;
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
 
     ssize_t startPos = file->_head;
     if (origin == SEEK_SET) startPos = 0;
     if (origin == SEEK_END) startPos = file->_size;
 
     ssize_t desiredPos = startPos + offset;
-    if (desiredPos < 0) return -2;
-    if (desiredPos > (ssize_t)file->_size) return -3;
+    if (desiredPos < 0) { file->_errorCode = -2; return file->_errorCode; }
+    if (desiredPos > (ssize_t)file->_size) { file->_errorCode = -3; return file->_errorCode; }
 
     file->_head = desiredPos;
+    file->_errorCode = 0;
     return 0;
   }
 
@@ -267,7 +273,34 @@ class MemoryFile
    * @param[in] file The file to inquire for end of file
    * @return Non-zero, if the end has been reached. Zero, otherwise.
   */
-  static __INLINE__ int feof(MemoryFile *const file) { return file->_head == file->_size; }
+  static __INLINE__ int feof(MemoryFile *const file)
+  { 
+    // Check if file is closed
+    if (file->isOpened() == false) { file->_errorCode = -1; return file->_errorCode; }
+
+    file->_errorCode = 0;
+    return file->_head == file->_size;
+  }
+
+  /**
+   * Clears the error code(s)
+   * 
+   * @param[in] file The file to clear errors for
+  */
+  static __INLINE__ void clearerr(MemoryFile *const file)
+  {
+    // Check if file is closed
+    if (file->isOpened() == false) return;
+
+    file->_errorCode = 0;
+  }
+
+  /**
+   * Returns the value of the internal error value corresponding to the last operation
+   * 
+   * @return Zero, if last operation was successful. Non-zero, otherwise.
+  */
+  static __INLINE__ int ferror (MemoryFile *const file) { return file->_errorCode; }
 
   /**
    * Sets the read only flag in the file
@@ -399,6 +432,11 @@ class MemoryFile
    * The file's internal head pointer
    */
   size_t _head = 0;
+
+  /**
+   * Storage for an error code
+   */
+  int _errorCode = 0;
 
   /**
    * Whether the write callback has been defined
