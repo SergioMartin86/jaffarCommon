@@ -645,7 +645,7 @@ class MemoryFileDirectory
    * @param filename Name of the file to delete from the directory
    * @return Zero, if successful. Negative if error.
    */
-  int fdestroy(const std::string& filename)
+  int fdestroy(const std::string &filename)
   {
     // Checking if file already exists
     if (_fileMap.contains(filename) == false) return -1;
@@ -667,11 +667,8 @@ class MemoryFileDirectory
    * 
    * @param[in] filename The name of the file to check for
    * @return True, if the file exists. False, otherwise.
-   */ 
-  bool contains(const std::string& filename) const
-  {
-    return _fileMap.contains(filename);
-  }
+   */
+  bool contains(const std::string &filename) const { return _fileMap.contains(filename); }
 
   private:
 
