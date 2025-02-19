@@ -433,9 +433,24 @@ class MemoryFile
    * In case of shrinking, this operation keeps the internal buffer unchanged (no freed space).
    *  
    * @param[in] newSize The new desired size for the file
+   * @return Zero, if successful. Non-zero if an error ocurred.
    */
-  __INLINE__ void resize(const size_t newSize)
+  __INLINE__ int resize(const size_t newSize)
   {
+    // Check if file is closed
+    if (isOpened() == false)
+      {
+        _errorCode = -1;
+        return _errorCode;
+    }
+
+    // Refuse operation if file is read only
+    if (isReadOnly() == true)
+      {
+        _errorCode = -2;
+        return _errorCode;
+    }
+
     // First, assign new size
     const size_t oldSize = _size;
     _size                = newSize;
@@ -449,6 +464,9 @@ class MemoryFile
 
     // Then check head in case of shrinking file
     if (_head > _size) _head = _size;
+
+    _errorCode = 0;
+    return 0;
   }
 
   private:
