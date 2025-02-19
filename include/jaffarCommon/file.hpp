@@ -427,6 +427,30 @@ class MemoryFile
    */
   __INLINE__ void unsetReadCallback() { _readCallbackDefined = false; }
 
+  /**
+   * Function to resize file
+   * It fills with zeroes any additional bytes allocated
+   * In case of shrinking, this operation keeps the internal buffer unchanged (no freed space).
+   *  
+   * @param[in] newSize The new desired size for the file
+   */
+  __INLINE__ void resize(const size_t newSize)
+  {
+    // First, assign new size
+    const size_t oldSize = _size;
+    _size                = newSize;
+
+    // Then, resize the internal buffer, if needed
+    if (_bufferSize < _size)
+      {
+        resizeToFit(_size);
+        memset(&_buffer[oldSize], 0, _size - oldSize);
+    }
+
+    // Then check head in case of shrinking file
+    if (_head > _size) _head = _size;
+  }
+
   private:
 
   void resizeToFit(const size_t target)
@@ -440,7 +464,7 @@ class MemoryFile
 
     // Reallocating buffer
     _bufferSize = newBufferSize;
-    _buffer = (uint8_t *)realloc(_buffer, newBufferSize);
+    _buffer     = (uint8_t *)realloc(_buffer, newBufferSize);
   }
 
   /**
