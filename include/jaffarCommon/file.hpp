@@ -439,6 +439,7 @@ class MemoryFile
     while (newBufferSize < target) newBufferSize <<= 1;
 
     // Reallocating buffer
+    _bufferSize = newBufferSize;
     _buffer = (uint8_t *)realloc(_buffer, newBufferSize);
   }
 
