@@ -128,7 +128,7 @@ class MemoryFile
     const size_t requestedSize = size * newCount;
 
     // Performing memcpy
-    if (requestedSize > 0) memcpy(buffer, file->_buffer, requestedSize);
+    if (requestedSize > 0) memcpy(buffer, &file->_buffer[file->_head], requestedSize);
 
     // Advancing head
     file->_head += requestedSize;
@@ -177,7 +177,7 @@ class MemoryFile
     if (endHeadPos > file->_bufferSize) file->resizeToFit(endHeadPos + 1);
 
     // Performing memcpy
-    if (requestedSize > 0) memcpy(file->_buffer, buffer, requestedSize);
+    if (requestedSize > 0) memcpy(&file->_buffer[file->_head], buffer, requestedSize);
 
     // Advancing head until the next
     file->_head += requestedSize;
@@ -645,7 +645,7 @@ class MemoryFileDirectory
    * @param filename Name of the file to delete from the directory
    * @return Zero, if successful. Negative if error.
    */
-  int fdestroy(const std::string filename)
+  int fdestroy(const std::string& filename)
   {
     // Checking if file already exists
     if (_fileMap.contains(filename) == false) return -1;
@@ -660,6 +660,17 @@ class MemoryFileDirectory
     _fileMap.erase(filename);
 
     return 0;
+  }
+
+  /**
+   *  Checks if the directory contains the given file
+   * 
+   * @param[in] filename The name of the file to check for
+   * @return True, if the file exists. False, otherwise.
+   */ 
+  bool contains(const std::string& filename) const
+  {
+    return _fileMap.contains(filename);
   }
 
   private:
