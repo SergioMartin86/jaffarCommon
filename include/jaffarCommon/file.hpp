@@ -459,7 +459,7 @@ class MemoryFile
     if (_bufferSize < _size)
       {
         resizeToFit(_size);
-        memset(&_buffer[oldSize], 0, _size - oldSize);
+        // memset(&_buffer[oldSize], 0, _size - oldSize); For performance, do not zero-clear
     }
 
     // Then check head in case of shrinking file
