@@ -75,6 +75,8 @@ static __INLINE__ bool saveStringToFile(const std::string &src, const std::strin
   return false;
 }
 
+class MemoryFileDirectory;
+
 /**
  * Represents a file object that exists entirely in memory.
  * It exposes a C-like interface for light refactoring of programs that depend on accessing the filesystem directly
@@ -82,6 +84,8 @@ static __INLINE__ bool saveStringToFile(const std::string &src, const std::strin
 class MemoryFile
 {
   public:
+
+  friend class MemoryFileDirectory;
 
   MemoryFile()                       = default;
   MemoryFile(const MemoryFile &)     = delete;
@@ -452,8 +456,8 @@ class MemoryFile
     }
 
     // First, assign new size
-    const size_t oldSize = _size;
-    _size                = newSize;
+    // const size_t oldSize = _size;
+    _size = newSize;
 
     // Then, resize the internal buffer, if needed
     if (_bufferSize < _size)
@@ -470,6 +474,9 @@ class MemoryFile
   }
 
   private:
+
+  size_t   getSize() const { return _size; }
+  uint8_t *getBuffer() const { return _buffer; }
 
   void resizeToFit(const size_t target)
   {
@@ -712,6 +719,30 @@ class MemoryFileDirectory
    * @return True, if the file exists. False, otherwise.
    */
   bool contains(const std::string &filename) const { return _fileMap.contains(filename); }
+
+  /**
+   * Retrieves a file's size 
+   * 
+   * @param[in] filename The name of the file to check size for
+   * @return The file size, if file is found; -1, otherwise.
+  */
+  ssize_t getFileSize(const std::string &filename) const
+  {
+    if (contains(filename) == false) return -1;
+    return _fileMap.at(filename)->getSize();
+  }
+
+  /**
+   * Retrieves a file's internal buffer
+   * 
+   * @param[in] filename The name of the file to get the internal buffer from
+   * @return A pointer to the file's internal buffer, if file is found; nullptr, otherwise.
+  */
+  uint8_t *getFileBuffer(const std::string &filename) const
+  {
+    if (contains(filename) == false) return nullptr;
+    return _fileMap.at(filename)->getBuffer();
+  }
 
   private:
 
