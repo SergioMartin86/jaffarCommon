@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <memory>
 #include <functional>
+#include <cstring>
+#include <map>
 
 namespace jaffarCommon
 {
@@ -132,7 +134,7 @@ class MemoryFile
     const size_t requestedSize = size * newCount;
 
     // Performing memcpy
-    if (requestedSize > 0) memcpy(buffer, &file->_buffer[file->_head], requestedSize);
+    if (requestedSize > 0) std::memcpy(buffer, &file->_buffer[file->_head], requestedSize);
 
     // Advancing head
     file->_head += requestedSize;
