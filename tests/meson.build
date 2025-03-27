@@ -15,7 +15,8 @@ unitTestSet = [
   'json',
   'string',
   'timing',
-  'serialization'
+  'serialization',
+  'dethreader'
 ]
 
 # Only add logger tests if running in an interactive node
