@@ -17,6 +17,7 @@ commonIncludes = include_directories(['third_party', 'include'])
 commonSources = [ 
    'third_party/metrohash128/metrohash128.cpp',
    'third_party/xdelta3/xdelta3.c',
+   'third_party/libco/libco.c',
    ]
 
 # Common dependencies
