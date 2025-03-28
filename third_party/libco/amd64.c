@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <emulibc.h>
 
 // allocations are 16k larger than asked for, which is all used as guard space
 #define GUARD_SIZE 0x4000
@@ -76,7 +75,7 @@ static void crash(void)
 	__asm__("int3"); // called only if cothread_t entrypoint returns
 }
 
-ECL_EXPORT void co_clean(void)
+void co_clean(void)
 {
 	memset(&co_host_buffer, 0, sizeof(co_host_buffer));
 }
