@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <queue>
+#include "timing.hpp"
 
 /**
  *  This macro needs to be inserted in any .cpp file to define the singleton
@@ -59,7 +60,18 @@ class Runtime
    */
   class Thread
   {
-public:
+   public:
+
+    enum returnReason_t
+    {
+       none, 
+
+       finished,
+
+       yielding,
+
+       sleeping
+    };
 
     friend class Runtime;
 
@@ -87,20 +99,62 @@ public:
     ~Thread() { co_delete(_coroutine); }
 
     /** 
-    * Runs or resume an already created thread
+    * Runs or resume an already created thread.
+    * 
+    * That is, unless the thread is sleeping
     */
-    __INLINE__ void run() const { co_switch(_coroutine); }
+    __INLINE__ void run() const
+    {
+      // If the thread is sleep, checking if it has finished
+      if (_returnReason == returnReason_t::sleeping)
+      {
+        auto timeDelta = timing::timeDeltaMicroseconds(timing::now(), _sleepStartTime);
+
+        // If not, return now without continuing
+        if (timeDelta < _sleepDuration) return;
+      }
+
+      // Starting or continuing execution
+      co_switch(_coroutine);
+    }
 
     /**
      * Yields execution to the runtime
      */
     __INLINE__ void yield()
     {
-      __runtime->setThreadSuspended();
+      _returnReason = returnReason_t::yielding;
       __runtime->yieldToRuntime();
     }
 
+    /**
+     * Returns the reason why the thread has returned
+     * 
+     * @return The return reason
+     */
+    __INLINE__ returnReason_t getReturnReason() const { return _returnReason; }
+
+    /**
+     * Function to send the thread to sleep
+     * 
+     * @param[in] sleepDuration The number of microseconds to sleep for
+     */
+    __INLINE__ void sleep(const size_t sleepDuration)
+    {
+      _sleepDuration = sleepDuration;
+      _returnReason = returnReason_t::sleeping;
+      _sleepStartTime = timing::now();
+      __runtime->yieldToRuntime();
+    }
+  
 private:
+
+    /**
+     * Sets the thread's return reason
+     * 
+     * @param[in] returnReason The return reason
+     */
+    __INLINE__ void setReturnReason(const returnReason_t returnReason) { _returnReason = returnReason; }
 
     /**
      * Internal wrapper for the execution of the coroutine
@@ -109,7 +163,7 @@ private:
     {
       auto currentThread = __runtime->getCurrentThread();
       currentThread->_fc();
-      __runtime->setThreadFinished();
+      currentThread->setReturnReason(returnReason_t::finished);
       __runtime->yieldToRuntime();
     }
 
@@ -122,6 +176,21 @@ private:
      * The internal coroutine (state) of the thread
     */
     cothread_t _coroutine;
+
+    /**
+     * Establishes the reason why a thread comes back to the runtime
+     */
+    returnReason_t _returnReason = none;
+
+    /**
+     * Number of microseconds to sleep for
+     */
+    size_t _sleepDuration;
+
+    /**
+     * Time point of sleep start
+     */
+    timing::timePoint _sleepStartTime;
   };
 
   public:
@@ -162,19 +231,9 @@ private:
         thread->run();
 
         // If thread not finished, re-add to the back of the queue
-        if (_threadFinished == false) _threadQueue.push(std::move(thread));
+        if (thread->getReturnReason() != Thread::returnReason_t::finished) _threadQueue.push(std::move(thread));
       }
   }
-
-  /**
-   * Function to indicate the current thread is now suspended
-   */
-  __INLINE__ void setThreadSuspended() { _threadFinished = false; }
-
-  /**
-   * Function to indicate the current thread is now finished
-   */
-  __INLINE__ void setThreadFinished() { _threadFinished = true; }
 
   /**
    * Function to set the currently scheduled thread
@@ -200,12 +259,14 @@ private:
    */
   __INLINE__ static void yield() { __runtime->getCurrentThread()->yield(); }
 
-  private:
+   /**
+   * Publicly avialable function to send the thread to sleep
+   * 
+   * @param[in] milliseconds The number of microseconds to sleep for
+   */
+  __INLINE__ static void sleep(const size_t sleepDuration) { __runtime->getCurrentThread()->sleep(sleepDuration); }
 
-  /** 
-  * Indicates that the currently scheduled thread has finished
-  */
-  bool _threadFinished;
+  private:
 
   /**
    * A pointer to the current thread

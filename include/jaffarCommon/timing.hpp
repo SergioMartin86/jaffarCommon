@@ -16,11 +16,16 @@ namespace timing
 {
 
 /**
+ * Abstract definition of a time point
+ */
+typedef std::chrono::high_resolution_clock::time_point timePoint;
+
+/**
  * Gets the current time point as per a high resolution clock
  *
  * @return The current high resolution time point
  */
-__INLINE__ auto now() { return std::chrono::high_resolution_clock::now(); };
+__INLINE__ timePoint now() { return std::chrono::high_resolution_clock::now(); };
 
 /**
  * Calculates the difference in seconds between two given time points (tf - t0), using a high resolution clock
