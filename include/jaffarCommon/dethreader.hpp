@@ -9,7 +9,9 @@
 #include <functional>
 #include <memory>
 #include <queue>
+#include <set>
 #include "timing.hpp"
+#include "exceptions.hpp"
 
 /**
  *  This macro needs to be inserted in any .cpp file to define the singleton
@@ -19,7 +21,7 @@
   {                                                                                                                                                                                \
   namespace dethreader                                                                                                                                                             \
   {                                                                                                                                                                                \
-  Runtime *__runtime;                                                                                                                                                              \
+  Runtime *__runtime = nullptr;                                                                                                                                                              \
   }                                                                                                                                                                                \
   }
 
@@ -47,6 +49,11 @@ extern Runtime *__runtime;
 typedef std::function<void()> threadFc_t;
 
 /**
+ * Identification type for a thread
+ */
+typedef uint64_t threadId_t;
+
+/**
  * Represents a simulated kernel-level thread runtime scheduler
  * It uses user-level threads (coroutines) to carry their state and a Round Robin scheduling strategy to fairly distribute the CPU to them
  * The newly created threads execute non-preemptively so the user needs to insert yields in the code to volunteerly give up execution
@@ -68,9 +75,9 @@ class Runtime
 
        finished,
 
-       yielding,
+       sleeping,
 
-       sleeping
+       waiting
     };
 
     friend class Runtime;
@@ -86,8 +93,8 @@ class Runtime
      * 
      * It creates the thread coroutine on construction
      */
-    Thread(const threadFc_t fc)
-      : _fc(fc)
+    Thread(const threadFc_t fc, const threadId_t id)
+      : _id(id), _fc(fc)
     {
       constexpr size_t stackSize = __JAFFAR_COMMON_DETHREADER_STACK_SIZE;
       _coroutine                 = co_create(stackSize, Thread::coroutineWrapper);
@@ -114,6 +121,10 @@ class Runtime
         if (timeDelta < _sleepDuration) return;
       }
 
+      // If the thread is waiting for another to finish, check it now
+      if ( _returnReason == returnReason_t::waiting)
+        if (__runtime->getFinishedThreads().contains(_threadWaitedFor) == false) return;
+
       // Starting or continuing execution
       co_switch(_coroutine);
     }
@@ -123,7 +134,7 @@ class Runtime
      */
     __INLINE__ void yield()
     {
-      _returnReason = returnReason_t::yielding;
+      _returnReason = returnReason_t::none;
       __runtime->yieldToRuntime();
     }
 
@@ -146,6 +157,26 @@ class Runtime
       _sleepStartTime = timing::now();
       __runtime->yieldToRuntime();
     }
+
+    /**
+     * Function to wait for a thread completion
+     */
+    __INLINE__ void join(const threadId_t threadId)
+    {
+       _threadWaitedFor = threadId;
+       _returnReason = returnReason_t::waiting;
+       __runtime->yieldToRuntime();
+    }
+
+    /**
+     * Function to get the thread's id
+     */
+    __INLINE__ threadId_t getThreadId() const { return _id; }
+
+    /**
+     * The thread this thread is waiting for
+     */
+    threadId_t _threadWaitedFor;
   
 private:
 
@@ -166,6 +197,11 @@ private:
       currentThread->setReturnReason(returnReason_t::finished);
       __runtime->yieldToRuntime();
     }
+
+    /**
+     * Unique thread identifier
+     */
+    const threadId_t _id;
 
     /**
      * Copy of the thread function to execute
@@ -202,16 +238,38 @@ private:
    * 
    * @param[in] fc The function for the thread to execute
    */
-  __INLINE__ void createThread(const threadFc_t fc) { _threadQueue.push(std::make_unique<Thread>(fc)); }
+  __INLINE__ threadId_t createThread(const threadFc_t fc) 
+  {
+    const auto threadId = _uniqueThreadIdCounter;
+    _threadQueue.push(std::make_unique<Thread>(fc, threadId));
+    _uniqueThreadIdCounter++;
+    return threadId;
+  }
+
+  /**
+   * Initializes the runtime
+   */
+  __INLINE__ void initialize()
+  {
+    // Setting singleton
+    jaffarCommon::dethreader::__runtime = this;
+  }
+
+  /**
+   * Finalizes the runtime
+   */
+  __INLINE__ void finalize()
+  {
+    // unsetting singleton
+    jaffarCommon::dethreader::__runtime = nullptr;
+  }
+
 
   /**
    * Starts running the scheduler. It won't return until all previously created threads have fully finished executing
    */
   __INLINE__ void run()
   {
-    // Setting singleton
-    jaffarCommon::dethreader::__runtime = this;
-
     // Getting main coroutine
     _coroutine = co_active();
 
@@ -231,7 +289,10 @@ private:
         thread->run();
 
         // If thread not finished, re-add to the back of the queue
-        if (thread->getReturnReason() != Thread::returnReason_t::finished) _threadQueue.push(std::move(thread));
+        if (thread->getReturnReason() != Thread::returnReason_t::finished)
+         _threadQueue.push(std::move(thread));
+        else // Otherwise add it to the set of finished threads
+         _finishedThreads.insert(thread->getThreadId());
       }
   }
 
@@ -254,19 +315,24 @@ private:
    */
   __INLINE__ void yieldToRuntime() { co_switch(_coroutine); }
 
-  /**
-   * Publicly avialable function to yield back to the runtime
-   */
-  __INLINE__ static void yield() { __runtime->getCurrentThread()->yield(); }
-
    /**
-   * Publicly avialable function to send the thread to sleep
+   * Gets the list of finished threads
    * 
-   * @param[in] milliseconds The number of microseconds to sleep for
+   * @return The list of finished threads
    */
-  __INLINE__ static void sleep(const size_t sleepDuration) { __runtime->getCurrentThread()->sleep(sleepDuration); }
+  __INLINE__ const std::set<threadId_t>& getFinishedThreads() const { return _finishedThreads; }
 
   private:
+
+  /**
+   * Unique thread Id counter
+   */
+  threadId_t _uniqueThreadIdCounter = 0;
+
+  /**
+   * A set containing all finished threads
+   */
+  std::set<threadId_t> _finishedThreads;
 
   /**
    * A pointer to the current thread
@@ -283,6 +349,47 @@ private:
    */
   cothread_t _coroutine;
 };
+
+   /**
+   * Publicly available Creates a new thread and adds it to the thread queue
+   * 
+   * @param[in] fc The function for the thread to execute
+   */
+  __INLINE__ threadId_t createThread(const threadFc_t fc)
+   {
+    if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
+     return __runtime->createThread(fc);
+   }
+
+  /**
+   * Publicly avialable function to yield back to the runtime
+   */
+  __INLINE__ void yield()
+  {
+    if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
+    __runtime->getCurrentThread()->yield();
+  }
+
+   /**
+   * Publicly available function to send the thread to sleep
+   * 
+   * @param[in] milliseconds The number of microseconds to sleep for
+   */
+  __INLINE__ void sleep(const size_t sleepDuration)
+  {
+    if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
+     __runtime->getCurrentThread()->sleep(sleepDuration);
+  }
+  
+  /**
+   * Function to wait for a thread completion
+   */
+  __INLINE__ void join(const threadId_t threadId)
+  {
+    if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
+     __runtime->getCurrentThread()->join(threadId);
+  }
+    
 
 } // namespace dethreader
 
