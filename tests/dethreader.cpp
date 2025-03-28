@@ -15,20 +15,22 @@ TEST(dethreader, simpleTest)
 
   dethreader::createThread([]() 
   {
-     printf("[Thread 1] Started\n");
-     printf("[Thread 1] Suspending...\n");
+     const auto threadId = dethreader::getCurrentThread()->getThreadId();
+     printf("[Thread %lu] Started\n", threadId);
+     printf("[Thread %lu] Suspending...\n", threadId);
      dethreader::yield();
-     printf("[Thread 1] Continuing...\n");
-     printf("[Thread 1] Finished\n");
+     printf("[Thread %lu] Continuing...\n", threadId);
+     printf("[Thread %lu] Finished\n", threadId);
   });
 
   dethreader::createThread([]() 
   {
-     printf("[Thread 2] Started\n");
-     printf("[Thread 2] Suspending...\n");
+     const auto threadId = dethreader::getCurrentThread()->getThreadId();
+     printf("[Thread %lu] Started\n", threadId);
+     printf("[Thread %lu] Suspending...\n", threadId);
      dethreader::yield();
-     printf("[Thread 2] Continuing...\n");
-     printf("[Thread 2] Finished\n");
+     printf("[Thread %lu] Continuing...\n", threadId);
+     printf("[Thread %lu] Finished\n", threadId);
   });
 
   r->run();
@@ -43,17 +45,19 @@ TEST(dethreader, sleepTest)
 
   dethreader::createThread([]() 
   {
-     printf("[Thread 1] Started\n");
-     printf("[Thread 1] Sleeping...\n");
+     const auto threadId = dethreader::getCurrentThread()->getThreadId();
+     printf("[Thread %lu] Started\n", threadId);
+     printf("[Thread %lu] Sleeping...\n", threadId);
      dethreader::sleep(1 * 1000000); // 1 Second
-     printf("[Thread 1] Continuing...\n");
-     printf("[Thread 1] Finished\n");
+     printf("[Thread %lu] Continuing...\n", threadId);
+     printf("[Thread %lu] Finished\n", threadId);
   });
 
   dethreader::createThread([]() 
   {
-     printf("[Thread 2] Started\n");
-     printf("[Thread 2] Finished\n");
+     const auto threadId = dethreader::getCurrentThread()->getThreadId();
+     printf("[Thread %lu] Started\n", threadId);
+     printf("[Thread %lu] Finished\n", threadId);
   });
 
   r->run();
@@ -68,21 +72,23 @@ TEST(dethreader, join)
 
   dethreader::createThread([]() 
   {
-     printf("[Thread 1] Started\n");
-     printf("[Thread 1] Sleeping...\n");
+     const auto threadId = dethreader::getCurrentThread()->getThreadId();
+     printf("[Thread %lu] Started\n", threadId);
+     printf("[Thread %lu] Sleeping...\n", threadId);
 
-     auto threadId = dethreader::createThread([]() 
+     const auto newThreadId = dethreader::createThread([]() 
      {
-        printf("[Thread 2] Started\n");
+        const auto threadId = dethreader::getCurrentThread()->getThreadId();
+        printf("[Thread %lu] Started\n", threadId);
         dethreader::sleep(1 * 1000000); // 1 Second
-        printf("[Thread 2] Finished\n");
+        printf("[Thread %lu] Finished\n", threadId);
      });
 
-     printf("[Thread 1] Waiting for thread %lu...\n", threadId);
-     dethreader::join(threadId);
+     printf("[Thread %lu] Waiting for thread %lu...\n", threadId, newThreadId);
+     dethreader::join(newThreadId);
 
-     printf("[Thread 1] Continuing...\n");
-     printf("[Thread 1] Finished\n");
+     printf("[Thread %lu] Continuing...\n", threadId);
+     printf("[Thread %lu] Finished\n", threadId);
   });
 
   r->run();

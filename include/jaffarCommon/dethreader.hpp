@@ -60,7 +60,7 @@ typedef uint64_t threadId_t;
  */
 class Runtime
 {
-  private:
+  public:
 
   /**
    * Represents a simulated execution thread
@@ -69,14 +69,29 @@ class Runtime
   {
 public:
 
+    /**
+     * An enumeration of the reasons why a thread might return
+     */
     enum returnReason_t
     {
+      /**
+       * If the thread just yields execution without reason
+       */
       none,
 
+      /**
+       * If the thread has finished
+       */
       finished,
 
+      /**
+       * If the thread is set to sleep
+       */
       sleeping,
 
+      /**
+       * If the thread is waiting
+       */
       waiting
     };
 
@@ -90,6 +105,7 @@ public:
      * Constructor
      * 
      * @param[in] fc The (lambda) function to be executed
+     * @param[in] id The unique identifier for the thread
      * 
      * It creates the thread coroutine on construction
      */
@@ -161,6 +177,8 @@ public:
 
     /**
      * Function to wait for a thread completion
+     * 
+     * @param[in] threadId Identifier of the thread to wait for
      */
     __INLINE__ void join(const threadId_t threadId)
     {
@@ -171,6 +189,8 @@ public:
 
     /**
      * Function to get the thread's id
+     * 
+     * @return The unique id of the thread
      */
     __INLINE__ threadId_t getThreadId() const { return _id; }
 
@@ -229,8 +249,6 @@ private:
      */
     timing::timePoint _sleepStartTime;
   };
-
-  public:
 
   Runtime() = default;
 
@@ -350,6 +368,13 @@ private:
    */
   cothread_t _coroutine;
 };
+
+/**
+ * Gets the current thread being scheduled
+ * 
+ * @return The currently scheduled thread
+ */
+__INLINE__ Runtime::Thread *getCurrentThread() { return __runtime->getCurrentThread(); }
 
 /**
    * Publicly available Creates a new thread and adds it to the thread queue
