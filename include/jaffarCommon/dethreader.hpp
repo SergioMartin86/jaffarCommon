@@ -176,6 +176,13 @@ public:
     }
 
     /**
+     * States whether the thread is joinable
+     * 
+     * @return Always true
+     */
+    __INLINE__ bool joinable() { return true; }
+
+    /**
      * Function to wait for a thread completion
      * 
      * @param[in] threadId Identifier of the thread to wait for
