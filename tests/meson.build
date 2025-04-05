@@ -47,8 +47,9 @@ if get_option('includeFFmpeg') == true and get_option('includeZlib') == true
 
   exec = executable('tffmpeg',
   files(['ffmpeg.cpp']),
-  dependencies: [ jaffarCommonDependency, ffmpegDependency, zlibDependency ],
-  link_args: [ testCommonLinkArgs ],
+  dependencies: [ jaffarCommonDependency ],
+  link_args: [ testCommonLinkArgs,],
+  link_with: [ ffmpegLibrary, zlibLibrary ],
   cpp_args: [ testCommonCppArgs ]
   )
 

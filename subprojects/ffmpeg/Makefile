@@ -105,6 +105,7 @@ endef
 
 $(foreach D,$(FFLIBS),$(eval $(call DOSUBDIR,lib$(D))))
 
+include $(SRC_PATH)/doc/Makefile
 
 define DOPROG
 OBJS-$(1) += $(1).o $(EXEOBJS) $(OBJS-$(1)-yes)
@@ -191,6 +192,7 @@ config:
 
 check: all alltools examples testprogs fate
 
+include $(SRC_PATH)/tests/Makefile
 
 $(sort $(OBJDIRS)):
 	$(Q)mkdir -p $@

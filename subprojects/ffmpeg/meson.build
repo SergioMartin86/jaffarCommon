@@ -1,6 +1,6 @@
 project('ffmpeg','c',
   version: '1.0.0',
-  default_options : [ 'default_library=shared', 'buildtype=release'],
+  default_options : [ 'default_library=static', 'buildtype=release'],
 )
 
 # FFmpeg Core sources
@@ -334,6 +334,7 @@ ffmpegCompileArgs = [
   '-DHAVE_AV_CONFIG_H',
   '-D__STDC_CONSTANT_MACROS',
   '-DPIC',
+  '-fPIC'
 ]
 
 # FFmpeg Dependency
@@ -346,3 +347,7 @@ ffmpegCompileArgs = [
   dependencies        : [  
                         ]
  )
+
+# Library
+
+ffmpegLibrary = library('ffmpeg', dependencies: [ ffmpegDependency] )

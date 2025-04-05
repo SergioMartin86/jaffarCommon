@@ -8,8 +8,8 @@ set -e
 ARCH="x86_64"
 
 GENERAL="
-    --enable-shared \
-    --disable-static"
+    --disable-shared \
+    --enable-static"
 
 MODULES="\
     --disable-avdevice \

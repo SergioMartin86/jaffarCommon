@@ -8,12 +8,12 @@ project('jaffarCommon','c','cpp',
 # Adding subprojects
 if get_option('includeFFmpeg') == true
  ffmpegSubproject = subproject('ffmpeg')
- ffmpegDependency = ffmpegSubproject.get_variable('ffmpegDependency')
+ ffmpegLibrary = ffmpegSubproject.get_variable('ffmpegLibrary')
 endif
 
 if get_option('includeZlib') == true
  zlibSubproject = subproject('zlib')
- zlibDependency = zlibSubproject.get_variable('zlibDependency')
+ zlibLibrary = zlibSubproject.get_variable('zlibLibrary')
 endif
 
 # Common compile flags

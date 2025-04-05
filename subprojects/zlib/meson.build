@@ -1,6 +1,6 @@
 project('zlib','c',
   version: '1.0.0',
-  default_options : [ 'default_library=shared', 'buildtype=release'],
+  default_options : [ 'default_library=static', 'buildtype=release'],
 )
 
 # zlib Core sources
@@ -28,6 +28,7 @@ zlibIncludeDirs = [
 ]
 
 zlibCompileArgs = [
+  '-fPIC'
 ]
 
 # zlib Dependency
@@ -40,3 +41,7 @@ zlibCompileArgs = [
   dependencies        : [  
                         ]
  )
+
+# Library
+
+zlibLibrary = library('zlib', dependencies: [ zlibDependency] )
