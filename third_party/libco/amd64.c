@@ -1,159 +1,184 @@
-/*
-  libco.amd64 (2016-09-14)
-  author: byuu
-  license: public domain
-*/
-
+#define LIBCO_C
 #include "libco.h"
+#include "settings.h"
 
-#include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/mman.h>
 
-// allocations are 16k larger than asked for, which is all used as guard space
-#define GUARD_SIZE 0x4000
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {
-	// used by coswap.s, has to be at the beginning of the struct
-	struct {
-		uint64_t rsp;
-		uint64_t rbp; // we have to save rbp because unless fomit-frame-pointer is set, the compiler regards it as "special" and won't allow clobbers
-		uint64_t rip;
-	} jmp_buf;
-	// points to the lowest address in the stack
-	// NB: because of guard space, this is not valid stack
-	void* stack;
-	// length of the stack that we allocated in bytes
-	uint64_t stack_size;
-} cothread_impl;
+static thread_local long long co_active_buffer[64];
+static thread_local cothread_t co_active_handle = 0;
+static void (*co_swap)(cothread_t, cothread_t) = 0;
 
-// the cothread that represents the real host thread we started from
-static cothread_impl co_host_buffer;
-// what cothread are we in right now
-static cothread_impl* co_active_handle;
+#ifdef LIBCO_MPROTECT
+  alignas(4096)
+#else
+  section(text)
+#endif
+#ifdef _WIN32
+  /* ABI: Win64 */
+  const unsigned char co_swap_function[4096] = {
+    0x48, 0x89, 0x22,              /* mov [rdx],rsp           */
+    0x48, 0x8b, 0x21,              /* mov rsp,[rcx]           */
+    0x58,                          /* pop rax                 */
+    0x48, 0x83, 0xe9, 0x80,        /* sub rcx,-0x80           */
+    0x48, 0x83, 0xea, 0x80,        /* sub rdx,-0x80           */
+    0x48, 0x89, 0x6a, 0x88,        /* mov [rdx-0x78],rbp      */
+    0x48, 0x89, 0x72, 0x90,        /* mov [rdx-0x70],rsi      */
+    0x48, 0x89, 0x7a, 0x98,        /* mov [rdx-0x68],rdi      */
+    0x48, 0x89, 0x5a, 0xa0,        /* mov [rdx-0x60],rbx      */
+    0x4c, 0x89, 0x62, 0xa8,        /* mov [rdx-0x58],r12      */
+    0x4c, 0x89, 0x6a, 0xb0,        /* mov [rdx-0x50],r13      */
+    0x4c, 0x89, 0x72, 0xb8,        /* mov [rdx-0x48],r14      */
+    0x4c, 0x89, 0x7a, 0xc0,        /* mov [rdx-0x40],r15      */
+  #if !defined(LIBCO_NO_SSE)
+    0x0f, 0x29, 0x72, 0xd0,        /* movaps [rdx-0x30],xmm6  */
+    0x0f, 0x29, 0x7a, 0xe0,        /* movaps [rdx-0x20],xmm7  */
+    0x44, 0x0f, 0x29, 0x42, 0xf0,  /* movaps [rdx-0x10],xmm8  */
+    0x44, 0x0f, 0x29, 0x0a,        /* movaps [rdx],     xmm9  */
+    0x44, 0x0f, 0x29, 0x52, 0x10,  /* movaps [rdx+0x10],xmm10 */
+    0x44, 0x0f, 0x29, 0x5a, 0x20,  /* movaps [rdx+0x20],xmm11 */
+    0x44, 0x0f, 0x29, 0x62, 0x30,  /* movaps [rdx+0x30],xmm12 */
+    0x44, 0x0f, 0x29, 0x6a, 0x40,  /* movaps [rdx+0x40],xmm13 */
+    0x44, 0x0f, 0x29, 0x72, 0x50,  /* movaps [rdx+0x50],xmm14 */
+    0x44, 0x0f, 0x29, 0x7a, 0x60,  /* movaps [rdx+0x60],xmm15 */
+  #endif
+    0x48, 0x8b, 0x69, 0x88,        /* mov rbp,[rcx-0x78]      */
+    0x48, 0x8b, 0x71, 0x90,        /* mov rsi,[rcx-0x70]      */
+    0x48, 0x8b, 0x79, 0x98,        /* mov rdi,[rcx-0x68]      */
+    0x48, 0x8b, 0x59, 0xa0,        /* mov rbx,[rcx-0x60]      */
+    0x4c, 0x8b, 0x61, 0xa8,        /* mov r12,[rcx-0x58]      */
+    0x4c, 0x8b, 0x69, 0xb0,        /* mov r13,[rcx-0x50]      */
+    0x4c, 0x8b, 0x71, 0xb8,        /* mov r14,[rcx-0x48]      */
+    0x4c, 0x8b, 0x79, 0xc0,        /* mov r15,[rcx-0x40]      */
+  #if !defined(LIBCO_NO_SSE)
+    0x0f, 0x28, 0x71, 0xd0,        /* movaps xmm6, [rcx-0x30] */
+    0x0f, 0x28, 0x79, 0xe0,        /* movaps xmm7, [rcx-0x20] */
+    0x44, 0x0f, 0x28, 0x41, 0xf0,  /* movaps xmm8, [rcx-0x10] */
+    0x44, 0x0f, 0x28, 0x09,        /* movaps xmm9, [rcx]      */
+    0x44, 0x0f, 0x28, 0x51, 0x10,  /* movaps xmm10,[rcx+0x10] */
+    0x44, 0x0f, 0x28, 0x59, 0x20,  /* movaps xmm11,[rcx+0x20] */
+    0x44, 0x0f, 0x28, 0x61, 0x30,  /* movaps xmm12,[rcx+0x30] */
+    0x44, 0x0f, 0x28, 0x69, 0x40,  /* movaps xmm13,[rcx+0x40] */
+    0x44, 0x0f, 0x28, 0x71, 0x50,  /* movaps xmm14,[rcx+0x50] */
+    0x44, 0x0f, 0x28, 0x79, 0x60,  /* movaps xmm15,[rcx+0x60] */
+  #endif
+  #if !defined(LIBCO_NO_TIB)
+    0x65, 0x4c, 0x8b, 0x04, 0x25,  /* mov r8,gs:0x30          */
+    0x30, 0x00, 0x00, 0x00,
+    0x41, 0x0f, 0x10, 0x40, 0x08,  /* movups xmm0,[r8+0x8]    */
+    0x0f, 0x29, 0x42, 0x70,        /* movaps [rdx+0x70],xmm0  */
+    0x0f, 0x28, 0x41, 0x70,        /* movaps xmm0,[rcx+0x70]  */
+    0x41, 0x0f, 0x11, 0x40, 0x08,  /* movups [r8+0x8],xmm0    */
+  #endif
+    0xff, 0xe0,                    /* jmp rax                 */
+  };
 
-static void free_thread(cothread_impl* co)
-{
-	if (munmap(co->stack, co->stack_size) != 0)
-		abort();
-	free(co);
+  #include <windows.h>
+
+  static void co_init() {
+    #ifdef LIBCO_MPROTECT
+    DWORD old_privileges;
+    VirtualProtect((void*)co_swap_function, sizeof co_swap_function, PAGE_EXECUTE_READ, &old_privileges);
+    #endif
+  }
+#else
+  /* ABI: SystemV */
+  const unsigned char co_swap_function[4096] = {
+    0x48, 0x89, 0x26,        /* mov [rsi],rsp    */
+    0x48, 0x8b, 0x27,        /* mov rsp,[rdi]    */
+    0x58,                    /* pop rax          */
+    0x48, 0x89, 0x6e, 0x08,  /* mov [rsi+ 8],rbp */
+    0x48, 0x89, 0x5e, 0x10,  /* mov [rsi+16],rbx */
+    0x4c, 0x89, 0x66, 0x18,  /* mov [rsi+24],r12 */
+    0x4c, 0x89, 0x6e, 0x20,  /* mov [rsi+32],r13 */
+    0x4c, 0x89, 0x76, 0x28,  /* mov [rsi+40],r14 */
+    0x4c, 0x89, 0x7e, 0x30,  /* mov [rsi+48],r15 */
+    0x48, 0x8b, 0x6f, 0x08,  /* mov rbp,[rdi+ 8] */
+    0x48, 0x8b, 0x5f, 0x10,  /* mov rbx,[rdi+16] */
+    0x4c, 0x8b, 0x67, 0x18,  /* mov r12,[rdi+24] */
+    0x4c, 0x8b, 0x6f, 0x20,  /* mov r13,[rdi+32] */
+    0x4c, 0x8b, 0x77, 0x28,  /* mov r14,[rdi+40] */
+    0x4c, 0x8b, 0x7f, 0x30,  /* mov r15,[rdi+48] */
+    0xff, 0xe0,              /* jmp rax          */
+  };
+
+  #ifdef LIBCO_MPROTECT
+    #include <unistd.h>
+    #include <sys/mman.h>
+  #endif
+
+  static void co_init() {
+    #ifdef LIBCO_MPROTECT
+    unsigned long long addr = (unsigned long long)co_swap_function;
+    unsigned long long base = addr - (addr % sysconf(_SC_PAGESIZE));
+    unsigned long long size = (addr - base) + sizeof co_swap_function;
+    mprotect((void*)base, size, PROT_READ | PROT_EXEC);
+    #endif
+  }
+#endif
+
+static void co_entrypoint(cothread_t handle) {
+  long long* buffer = (long long*)handle;
+  #ifdef _WIN32
+  buffer -= 16;
+  #endif
+  void (*entrypoint)(void) = (void (*)(void))buffer[1];
+  entrypoint();
+  abort();  /* called only if cothread_t entrypoint returns */
 }
 
-static cothread_impl* alloc_thread(uint64_t size)
-{
-	cothread_impl* co = calloc(1, sizeof(*co));
-	if (!co)
-		return NULL;
-
-	// align up to 4k
-	size = (size + 4095) & ~4095ul;
-	size += GUARD_SIZE;
-
-	co->stack = mmap(NULL, size,
-		PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
-	
-	if (co->stack == (void*)(-1))
-	{
-		free(co);
-		return NULL;
-	}
-
-	if (mprotect(co->stack, GUARD_SIZE, PROT_NONE) != 0)
-	{
-		free_thread(co);
-		return NULL;
-	}
-
-	co->stack_size = size;
-	return co;
+cothread_t co_active() {
+  if(!co_active_handle) co_active_handle = &co_active_buffer;
+  return co_active_handle;
 }
 
-static void crash(void)
-{
-	__asm__("int3"); // called only if cothread_t entrypoint returns
+cothread_t co_derive(void* memory, unsigned int size, void (*entrypoint)(void)) {
+  cothread_t handle;
+  if(!co_swap) {
+    co_init();
+    co_swap = (void (*)(cothread_t, cothread_t))co_swap_function;
+  }
+  if(!co_active_handle) co_active_handle = &co_active_buffer;
+
+  if(handle = (cothread_t)memory) {
+    unsigned int offset = (size & ~15) - 32;
+    long long *p = (long long*)((char*)handle + offset);  /* seek to top of stack */
+    *--p = (long long)0;                                  /* crash if entrypoint returns */
+    *--p = (long long)co_entrypoint;
+    ((long long*)handle)[0] = (long long)p;               /* stack pointer */
+    ((long long*)handle)[1] = (long long)entrypoint;      /* start of function */
+#if defined(_WIN32) && !defined(LIBCO_NO_TIB)
+    ((long long*)handle)[30] = (long long)handle + size;  /* stack base */
+    ((long long*)handle)[31] = (long long)handle;         /* stack limit */
+#endif
+  }
+
+  return handle;
 }
 
-void co_clean(void)
-{
-	memset(&co_host_buffer, 0, sizeof(co_host_buffer));
+cothread_t co_create(unsigned int size, void (*entrypoint)(void)) {
+  void* memory = malloc(size);
+  if(!memory) return (cothread_t)0;
+  return co_derive(memory, size, entrypoint);
 }
 
-cothread_t co_active(void)
-{
-	if (!co_active_handle)
-		co_active_handle = &co_host_buffer;
-	return co_active_handle;
+void co_delete(cothread_t handle) {
+  free(handle);
 }
 
-cothread_t co_create(unsigned int sz, void (*entrypoint)(void))
-{
-	cothread_impl* co;
-	if (!co_active_handle)
-		co_active_handle = &co_host_buffer;
-
-	if ((co = alloc_thread(sz)))
-	{
-		uint64_t* p = (uint64_t*)((char*)co->stack + co->stack_size); // seek to top of stack
-		*--p = (uint64_t)crash; // crash if entrypoint returns
-		co->jmp_buf.rsp = (uint64_t)p; // stack pointer
-		co->jmp_buf.rip = (uint64_t)entrypoint; // start of function
-	}
-
-	return co;
+void co_switch(cothread_t handle) {
+  register cothread_t co_previous_handle = co_active_handle;
+  co_swap(co_active_handle = handle, co_previous_handle);
 }
 
-void co_delete(cothread_t handle)
-{
-	free_thread(handle);
+int co_serializable() {
+  return 1;
 }
 
-void co_switch(cothread_t handle)
-{
-	cothread_impl* co = handle;
-	cothread_impl* co_previous_handle = co_active_handle;
-	co_active_handle = co;
-
-	register uint64_t _rdi __asm__("rdi") = (uint64_t)co_previous_handle;
-	register uint64_t _rsi __asm__("rsi") = (uint64_t)co_active_handle;
-
-	/*
-		mov [rdi + 0], rsp
-		mov [rdi + 8], rbp
-		lea rax, [rip + 17]
-		mov [rdi + 16], rax
-		mov rsp, [rsi + 0]
-		mov rbp, [rsi + 8]
-		mov rax, [rsi + 16]
-		jmp rax
-	*/
-	__asm__(
-		"mov %%rsp, 0(%%rdi)\n"
-		"mov %%rbp, 8(%%rdi)\n"
-		"lea 17(%%rip), %%rax\n"
-		"mov %%rax, 16(%%rdi)\n"
-		"mov 0(%%rsi), %%rsp\n"
-		"mov 8(%%rsi), %%rbp\n"
-		"mov 16(%%rsi), %%rax\n"
-		"jmp *%%rax\n"
-		::"r"(_rdi), "r"(_rsi)
-		:"rax", "rbx", "rcx", "rdx", /*"rbp",*/ /*"rsi", "rdi",*/ "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-			"zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9",
-			"zmm10", "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
-			/*"zmm16", "zmm17", "zmm18", "zmm19",
-			"zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
-			"zmm30", "zmm31",*/
-			"memory"
-	);
+#ifdef __cplusplus
 }
-
-cothread_t co_derive(void* memory, unsigned sz, void (*entrypoint)(void))
-{
-	return NULL;
-}
-
-int co_serializable(void)
-{
-	return 0;
-}
+#endif
