@@ -333,5 +333,5 @@ void avfilter_register_all(void)
     REGISTER_FILTER_UNCONDITIONAL(vsink_buffer);
     REGISTER_FILTER_UNCONDITIONAL(af_afifo);
     REGISTER_FILTER_UNCONDITIONAL(vf_fifo);
-    ff_opencl_register_filter_kernel_code_all();
+    // ff_opencl_register_filter_kernel_code_all();
 }
