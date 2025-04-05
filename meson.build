@@ -1,8 +1,20 @@
 project('jaffarCommon','c','cpp',
   version: '1.0.0',
   license: 'GPL-3.0-only',
-  default_options : ['cpp_std=c++20', 'default_library=shared', 'buildtype=release']
+  default_options : ['cpp_std=c++20', 'default_library=shared', 'buildtype=release'],
+  subproject_dir: 'subprojects'
 )
+
+# Adding subprojects
+if get_option('includeFFmpeg') == true
+ ffmpegSubproject = subproject('ffmpeg')
+ ffmpegDependency = ffmpegSubproject.get_variable('ffmpegDependency')
+endif
+
+if get_option('includeZlib') == true
+ zlibSubproject = subproject('zlib')
+ zlibDependency = zlibSubproject.get_variable('zlibDependency')
+endif
 
 # Common compile flags
 commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
