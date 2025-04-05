@@ -5,3 +5,9 @@ option('testLoggers',
   yield: true
 )
 
+option('includeFFmpeg',
+  type : 'boolean',
+  value : false,
+  description : 'Indicates whether to build ffmpeg',
+  yield: true
+)
