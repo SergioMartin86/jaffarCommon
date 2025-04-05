@@ -5,6 +5,17 @@ project('jaffarCommon','c','cpp',
   subproject_dir: 'subprojects'
 )
 
+# Adding subprojects
+if get_option('includeFFmpeg') == true
+ ffmpegSubproject = subproject('ffmpeg')
+ ffmpegDependency = ffmpegSubproject.get_variable('ffmpegDependency')
+endif
+
+if get_option('includeZlib') == true
+ zlibSubproject = subproject('zlib')
+ zlibDependency = zlibSubproject.get_variable('zlibDependency')
+endif
+
 # Common compile flags
 commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
 
