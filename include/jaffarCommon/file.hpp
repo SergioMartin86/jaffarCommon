@@ -475,9 +475,22 @@ class MemoryFile
     return 0;
   }
 
+  /**
+  * Function to set size directly without resizing internal buffer -- use at your own risk.
+  * 
+  * @param[in] size The internal size to set
+  */
+  __INLINE__ void setSize(const size_t size) { _size = size; }
+
+  /**
+  * Function to get file size directly
+  * 
+  * return The internal size to set
+  */
+  __INLINE__ size_t getSize() const { return _size; }
+
   private:
 
-  size_t   getSize() const { return _size; }
   uint8_t *getBuffer() const { return _buffer; }
 
   void resizeToFit(const size_t target)
