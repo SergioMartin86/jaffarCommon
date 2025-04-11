@@ -16,6 +16,11 @@ if get_option('includeZlib') == true
  zlibLibrary = zlibSubproject.get_variable('zlibLibrary')
 endif
 
+if get_option('includeSDL_TTF') == true
+ SDL_TTFSubproject = subproject('SDL_TTF')
+ SDL_TTFLibrary = SDL_TTFSubproject.get_variable('SDL_TTFLibrary')
+endif
+
 # Common compile flags
 commonCppArgs = [ '-D__INLINE__=__attribute__((__used__)) inline' ]
 

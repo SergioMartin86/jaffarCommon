@@ -18,3 +18,10 @@ option('includeZlib',
   description : 'Indicates whether to build zlib',
   yield: true
 )
+
+option('includeSDL_TTF',
+  type : 'boolean',
+  value : false,
+  description : 'Indicates whether to build SDL_ttf',
+  yield: true
+)
