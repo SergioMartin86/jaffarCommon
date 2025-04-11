@@ -50,6 +50,7 @@ option('zlib',
   choices: [ 'auto', 'none',
              'internal', 'external', 'system',
              'disabled', 'enabled' ],
-  description: 'Support reading gzip-compressed font files')
+  description: 'Support reading gzip-compressed font files',
+  value : 'none')
 
 # EOF

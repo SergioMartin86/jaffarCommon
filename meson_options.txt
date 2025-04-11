@@ -19,7 +19,7 @@ option('includeZlib',
   yield: true
 )
 
-option('includeSDL_TTF',
+option('includeSDL2_TTF',
   type : 'boolean',
   value : false,
   description : 'Indicates whether to build SDL_ttf',

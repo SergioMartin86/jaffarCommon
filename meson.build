@@ -16,9 +16,9 @@ if get_option('includeZlib') == true
  zlibLibrary = zlibSubproject.get_variable('zlibLibrary')
 endif
 
-if get_option('includeSDL_TTF') == true
- SDL_TTFSubproject = subproject('SDL_TTF')
- SDL_TTFLibrary = SDL_TTFSubproject.get_variable('SDL_TTFLibrary')
+if get_option('includeSDL2_TTF') == true
+ SDL2_TTFSubproject = subproject('SDL2_TTF')
+ SDL2_TTFDependency = SDL2_TTFSubproject.get_variable('SDL2_TTFDependency')
 endif
 
 # Common compile flags
