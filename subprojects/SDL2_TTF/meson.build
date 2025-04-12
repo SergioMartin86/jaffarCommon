@@ -14,6 +14,7 @@ SDL2_TTFSrc =  [
 
 SDL2_TTFIncludeDirs = [
   '.',
+  'external/SDL2/include',
 ]
 
 SDL2_TTFCompileArgs = [
@@ -29,7 +30,6 @@ SDL2_TTFCompileArgs = [
   sources             : [ SDL2_TTFSrc ],
   dependencies        : [  
                             dependency('freetype2'),
-                            dependency('sdl2')
                         ]
  )
 
