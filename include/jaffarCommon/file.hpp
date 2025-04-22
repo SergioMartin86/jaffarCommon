@@ -461,9 +461,9 @@ class MemoryFile
 
     // Then, resize the internal buffer, if needed
     if (_bufferSize < _size)
-      {
+    {
         resizeToFit(_size);
-        // memset(&_buffer[oldSize], 0, _size - oldSize); For performance, do not zero-clear
+        if (_buffer == nullptr) return -1;
     }
 
     // Then check head in case of shrinking file
