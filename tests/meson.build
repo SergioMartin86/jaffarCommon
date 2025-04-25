@@ -15,7 +15,8 @@ unitTestSet = [
   'json',
   'string',
   'timing',
-  'serialization'
+  'serialization',
+  'dethreader'
 ]
 
 # Only add logger tests if running in an interactive node
@@ -40,3 +41,20 @@ foreach testFile : unitTestSet
        workdir : meson.current_source_dir(),
        suite : [ testSuite ])
 endforeach
+
+# Subproject testing
+if get_option('includeFFmpeg') == true and get_option('includeZlib') == true
+
+  exec = executable('tffmpeg',
+  files(['ffmpeg.cpp']),
+  dependencies: [ jaffarCommonDependency ],
+  link_args: [ testCommonLinkArgs,],
+  link_with: [ ffmpegLibrary, zlibLibrary ],
+  cpp_args: [ testCommonCppArgs ]
+  )
+
+  test(testName,
+       exec,
+       workdir : meson.current_source_dir(),
+       suite : [ testSuite ])
+endif

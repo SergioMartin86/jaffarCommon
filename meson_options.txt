@@ -5,3 +5,23 @@ option('testLoggers',
   yield: true
 )
 
+option('includeFFmpeg',
+  type : 'boolean',
+  value : false,
+  description : 'Indicates whether to build ffmpeg',
+  yield: true
+)
+
+option('includeZlib',
+  type : 'boolean',
+  value : false,
+  description : 'Indicates whether to build zlib',
+  yield: true
+)
+
+option('includeSDL2_TTF',
+  type : 'boolean',
+  value : false,
+  description : 'Indicates whether to build SDL_ttf',
+  yield: true
+)

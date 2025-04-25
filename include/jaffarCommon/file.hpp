@@ -110,7 +110,7 @@ class MemoryFile
    * 
    * @return The number of bytes read. Negative in case of error.
    */
-  static __INLINE__ ssize_t fread(void *const buffer, const size_t size, const size_t count, MemoryFile *const file)
+  static __INLINE__ int64_t fread(void *const buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -159,7 +159,7 @@ class MemoryFile
    * 
    * @return The number of bytes written. Negative in case of error.
    */
-  static __INLINE__ ssize_t fwrite(const void *buffer, const size_t size, const size_t count, MemoryFile *const file)
+  static __INLINE__ int64_t fwrite(const void *buffer, const size_t size, const size_t count, MemoryFile *const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -204,7 +204,7 @@ class MemoryFile
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __INLINE__ ssize_t ftello64(MemoryFile *const file) { return ftell(file); }
+  static __INLINE__ int64_t ftello64(MemoryFile *const file) { return ftell(file); }
 
   /**
    * Returns the internal position of the file's head
@@ -212,7 +212,7 @@ class MemoryFile
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __INLINE__ ssize_t ftell(MemoryFile *const file)
+  static __INLINE__ int64_t ftell(MemoryFile *const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -272,7 +272,7 @@ class MemoryFile
    * 
    * @return Zero in case of success. -1 in case of error
    */
-  static __INLINE__ int fseeko64(MemoryFile *const file, const ssize_t offset, const int origin) { return fseek(file, offset, origin); }
+  static __INLINE__ int fseeko64(MemoryFile *const file, const int64_t offset, const int origin) { return fseek(file, offset, origin); }
 
   /**
    * Ensures the write operations have finished. No effect for mem buffers as all operations finish within their call.
@@ -283,7 +283,7 @@ class MemoryFile
    * 
    * @return Zero in case of success. -1 in case of error
    */
-  static __INLINE__ int fseek(MemoryFile *const file, const ssize_t offset, const int origin)
+  static __INLINE__ int fseek(MemoryFile *const file, const int64_t offset, const int origin)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -292,17 +292,17 @@ class MemoryFile
         return file->_errorCode;
     }
 
-    ssize_t startPos = file->_head;
+    int64_t startPos = file->_head;
     if (origin == SEEK_SET) startPos = 0;
     if (origin == SEEK_END) startPos = file->_size;
 
-    ssize_t desiredPos = startPos + offset;
+    int64_t desiredPos = startPos + offset;
     if (desiredPos < 0)
       {
         file->_errorCode = -2;
         return file->_errorCode;
     }
-    if (desiredPos > (ssize_t)file->_size)
+    if (desiredPos > (int64_t)file->_size)
       {
         file->_errorCode = -3;
         return file->_errorCode;
@@ -406,7 +406,7 @@ class MemoryFile
    * 
    * @param[in] callback Write-callback to set
    */
-  __INLINE__ void setWriteCallback(const std::function<void(const ssize_t, MemoryFile *)> callback)
+  __INLINE__ void setWriteCallback(const std::function<void(const int64_t, MemoryFile *)> callback)
   {
     _writeCallback        = callback;
     _writeCallbackDefined = true;
@@ -417,7 +417,7 @@ class MemoryFile
    * 
    * @param[in] callback Read-callback to set
    */
-  __INLINE__ void setReadCallback(const std::function<void(const ssize_t, MemoryFile *)> callback)
+  __INLINE__ void setReadCallback(const std::function<void(const int64_t, MemoryFile *)> callback)
   {
     _readCallback        = callback;
     _readCallbackDefined = true;
@@ -463,9 +463,9 @@ class MemoryFile
 
     // Then, resize the internal buffer, if needed
     if (_bufferSize < _size)
-      {
+    {
         resizeToFit(_size);
-        // memset(&_buffer[oldSize], 0, _size - oldSize); For performance, do not zero-clear
+        if (_buffer == nullptr) return -1;
     }
 
     // Then check head in case of shrinking file
@@ -475,9 +475,22 @@ class MemoryFile
     return 0;
   }
 
+  /**
+  * Function to set size directly without resizing internal buffer -- use at your own risk.
+  * 
+  * @param[in] size The internal size to set
+  */
+  __INLINE__ void setSize(const size_t size) { _size = size; }
+
+  /**
+  * Function to get file size directly
+  * 
+  * return The internal size to set
+  */
+  __INLINE__ size_t getSize() const { return _size; }
+
   private:
 
-  size_t   getSize() const { return _size; }
   uint8_t *getBuffer() const { return _buffer; }
 
   void resizeToFit(const size_t target)
@@ -543,7 +556,7 @@ class MemoryFile
   /**
    * The file's internal callback for writes
    */
-  std::function<void(const ssize_t, MemoryFile *const)> _writeCallback;
+  std::function<void(const int64_t, MemoryFile *const)> _writeCallback;
 
   /**
    * Whether the write callback has been defined
@@ -553,7 +566,7 @@ class MemoryFile
   /**
    * The file's internal callback for read
    */
-  std::function<void(const ssize_t, MemoryFile *const)> _readCallback;
+  std::function<void(const int64_t, MemoryFile *const)> _readCallback;
 };
 
 /**
@@ -728,7 +741,7 @@ class MemoryFileDirectory
    * @param[in] filename The name of the file to check size for
    * @return The file size, if file is found; -1, otherwise.
   */
-  ssize_t getFileSize(const std::string &filename) const
+  int64_t getFileSize(const std::string &filename) const
   {
     if (contains(filename) == false) return -1;
     return _fileMap.at(filename)->getSize();
