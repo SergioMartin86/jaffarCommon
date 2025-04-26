@@ -5,8 +5,8 @@
  * @brief Contains common functions related to time measurement
  */
 
-#include <stddef.h>
 #include <chrono>
+#include <stddef.h>
 #include <type_traits>
 
 namespace jaffarCommon

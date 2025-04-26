@@ -22,18 +22,14 @@ namespace serializer
  */
 class Base
 {
-  public:
-
+public:
   /**
    * Default constructor for the serializer classes
    *
    * @param[in] outputDataBuffer The input buffer from whence to read the input data
    * @param[in] outputDataBufferSize The size of the input buffer
    */
-  Base(void *__restrict outputDataBuffer, const size_t outputDataBufferSize)
-    : _outputDataBuffer((uint8_t *)outputDataBuffer)
-    , _outputDataBufferSize(outputDataBufferSize)
-  {}
+  Base(void* __restrict outputDataBuffer, const size_t outputDataBufferSize) : _outputDataBuffer((uint8_t*)outputDataBuffer), _outputDataBufferSize(outputDataBufferSize) {}
 
   virtual ~Base() = default;
 
@@ -45,7 +41,7 @@ class Base
    * @param[out] inputDataBuffer The contiguous output buffer from which data is serialized. Passing nullptr is allowed and can be used to determine the required output buffer size
    * @param[in] inputDataSize The number of bytes from the input data buffer to serialize
    */
-  virtual void push(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
+  virtual void push(const void* const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
 
   /**
    * Serializes the specified number of contiguous bytes onto the output data buffer, pushing the information from the input buffer
@@ -55,7 +51,7 @@ class Base
    * @param[out] inputDataBuffer The contiguous output buffer from which data is serialized. Passing nullptr is allowed and can be used to determine the required output buffer size
    * @param[in] inputDataSize The number of bytes from the input data buffer to serialize
    */
-  virtual void pushContiguous(const void *const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
+  virtual void pushContiguous(const void* const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) = 0;
 
   /**
    *  The internally-stored output data buffer size
@@ -69,14 +65,13 @@ class Base
    *
    * @return A reference to the output data buffer
    */
-  __INLINE__ uint8_t *getOutputDataBuffer() const { return _outputDataBuffer; }
+  __INLINE__ uint8_t* getOutputDataBuffer() const { return _outputDataBuffer; }
 
-  protected:
-
+protected:
   /**
    *  The write-only internally stored output data buffer
    */
-  uint8_t *__restrict const _outputDataBuffer;
+  uint8_t* __restrict const _outputDataBuffer;
 
   /**
    * The size of the output data buffer

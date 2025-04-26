@@ -5,10 +5,10 @@
  * @brief Contains common functions for exception throwing
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdexcept>
 #include "string.hpp"
+#include <stdarg.h>
+#include <stdexcept>
+#include <stdio.h>
 
 namespace jaffarCommon
 {
@@ -35,25 +35,25 @@ namespace exceptions
  * @param[in] format A constant formatted string
  * @param[in] ... parameters for the formatted string
  */
-__INLINE__ void throwException [[noreturn]] (const char *exceptionType, const char *fileName, const int lineNumber, const char *format, ...)
+__INLINE__ void throwException [[noreturn]] (const char* exceptionType, const char* fileName, const int lineNumber, const char* format, ...)
 {
-  char   *outstr = 0;
+  char*   outstr = 0;
   va_list ap;
   va_start(ap, format);
   int ret = vsnprintf(nullptr, 0, format, ap);
   va_end(ap);
   if (ret < 0) throw std::invalid_argument("Failed processing exception reason");
 
-  outstr = (char *)malloc(ret + 1);
+  outstr = (char*)malloc(ret + 1);
   if (outstr == nullptr) throw std::invalid_argument("Failed processing exception reason");
 
   va_start(ap, format);
   ret = vsnprintf(outstr, ret + 1, format, ap);
   va_end(ap);
   if (ret < 0)
-    {
-      free(outstr);
-      throw std::invalid_argument("Failed processing exception reason");
+  {
+    free(outstr);
+    throw std::invalid_argument("Failed processing exception reason");
   }
 
   std::string outString = outstr;

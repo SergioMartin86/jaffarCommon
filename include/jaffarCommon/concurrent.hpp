@@ -5,12 +5,12 @@
  * @brief Containers designed for fast parallel, mutual exclusive access
  */
 
-#include <stddef.h>
+#include <atomic_queue/include/atomic_queue/atomic_queue.h>
 #include <deque>
 #include <mutex>
-#include <atomic_queue/include/atomic_queue/atomic_queue.h>
 #include <oneapi/tbb/concurrent_map.h>
 #include <phmap/parallel_hashmap/phmap.h>
+#include <stddef.h>
 
 namespace jaffarCommon
 {
@@ -50,8 +50,7 @@ using concurrentMultimap_t = oneapi::tbb::concurrent_multimap<K, V, C>;
 template <class T>
 class Deque
 {
-  public:
-
+public:
   Deque()  = default;
   ~Deque() = default;
 
@@ -59,7 +58,7 @@ class Deque
    * Gets access to the internal Deque storage
    * @return A reference to the internal Deque storage
    */
-  __INLINE__ auto &getInternalStorage() { return _internalDeque; }
+  __INLINE__ auto& getInternalStorage() { return _internalDeque; }
 
   /**
    * Pushes an element to the back of the deque without any locking protection
@@ -160,14 +159,14 @@ class Deque
    * @param[out] element A reference to the storage to save the element into
    * @return True, if the operation was successful; false, if the Deque was empty
    */
-  __INLINE__ bool pop_back_get(T &element)
+  __INLINE__ bool pop_back_get(T& element)
   {
     _mutex.lock();
 
     if (_internalDeque.empty())
-      {
-        _mutex.unlock();
-        return false;
+    {
+      _mutex.unlock();
+      return false;
     }
 
     element = _internalDeque.back();
@@ -184,14 +183,14 @@ class Deque
    * @param[out] element A reference to the storage to save the element into
    * @return True, if the operation was successful; false, if the Deque was empty
    */
-  __INLINE__ bool pop_front_get(T &element)
+  __INLINE__ bool pop_front_get(T& element)
   {
     _mutex.lock();
 
     if (_internalDeque.empty())
-      {
-        _mutex.unlock();
-        return false;
+    {
+      _mutex.unlock();
+      return false;
     }
 
     element = _internalDeque.front();
@@ -209,8 +208,7 @@ class Deque
    */
   __INLINE__ size_t wasSize() const { return _internalDeque.size(); }
 
-  private:
-
+private:
   /**
    * Internal mutual exclusion mechanism
    */

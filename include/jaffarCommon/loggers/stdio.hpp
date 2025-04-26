@@ -5,10 +5,10 @@
  * @brief Contains common functions related to output and logging using stdio
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdexcept>
 #include "../string.hpp"
+#include <stdarg.h>
+#include <stdexcept>
+#include <stdio.h>
 
 namespace jaffarCommon
 {
@@ -17,7 +17,7 @@ namespace logger
 {
 
 template <typename... Args>
-__INLINE__ void log(const char *f, Args... args)
+__INLINE__ void log(const char* f, Args... args)
 {
   auto string = jaffarCommon::string::formatString(f, args...);
   printf("%s", string.c_str());

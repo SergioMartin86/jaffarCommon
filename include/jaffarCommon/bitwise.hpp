@@ -5,9 +5,9 @@
  * @brief Contains common functions related to bitwise operations
  */
 
+#include "exceptions.hpp"
 #include <stddef.h>
 #include <stdint.h>
-#include "exceptions.hpp"
 
 namespace jaffarCommon
 {
@@ -37,14 +37,8 @@ uint8_t bitNotMaskTable[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b
  * @param[in] count The number of elements to copy
  * @param[in] elementBitSize The size of each element (expressed in bits)
  */
-__INLINE__ void bitcopy(void        *dstBufferPtr,
-                        const size_t dstBufferSize,
-                        const size_t dstBufferOffset,
-                        const void  *srcBufferPtr,
-                        const size_t srcBufferSize,
-                        const size_t srcBufferOffset,
-                        const size_t count,
-                        const size_t elementBitSize)
+__INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void* srcBufferPtr, const size_t srcBufferSize,
+                        const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
 {
   if (elementBitSize == 0) JAFFAR_THROW_LOGIC("Element bit size must be a positive number greater than zero");
 
@@ -55,8 +49,8 @@ __INLINE__ void bitcopy(void        *dstBufferPtr,
   if (srcBufferOffset + elementBitSize * count > srcBufferSizeBits)
     JAFFAR_THROW_LOGIC("The operation will overflow source buffer (%lu + %lu * %lu > %lu)", srcBufferOffset, elementBitSize, count, srcBufferSizeBits);
 
-  uint8_t       *dstBuffer     = (uint8_t *)dstBufferPtr;
-  const uint8_t *srcBuffer     = (const uint8_t *)srcBufferPtr;
+  uint8_t*       dstBuffer     = (uint8_t*)dstBufferPtr;
+  const uint8_t* srcBuffer     = (const uint8_t*)srcBufferPtr;
   const size_t   totalBitCount = count * elementBitSize;
   const size_t   dstOffsetBits = dstBufferOffset * elementBitSize;
   const size_t   srcOffsetBits = srcBufferOffset * elementBitSize;
@@ -66,29 +60,29 @@ __INLINE__ void bitcopy(void        *dstBufferPtr,
   uint8_t        srcPosBit     = srcOffsetBits % 8;
 
   for (size_t i = 0; i < totalBitCount; i++)
+  {
+    // Clear bit in question
+    dstBuffer[dstPosByte] = dstBuffer[dstPosByte] & bitNotMaskTable[dstPosBit];
+
+    // If the corresponding bit is set in source, set it up in dst
+    if ((srcBuffer[srcPosByte] & bitMaskTable[srcPosBit]) > 0) dstBuffer[dstPosByte] = dstBuffer[dstPosByte] | bitMaskTable[dstPosBit];
+
+    // Advance bit positions
+    dstPosBit++;
+    srcPosBit++;
+
+    // If crossed a byte barrier, go over the next byte
+    if (dstPosBit == 8)
     {
-      // Clear bit in question
-      dstBuffer[dstPosByte] = dstBuffer[dstPosByte] & bitNotMaskTable[dstPosBit];
-
-      // If the corresponding bit is set in source, set it up in dst
-      if ((srcBuffer[srcPosByte] & bitMaskTable[srcPosBit]) > 0) dstBuffer[dstPosByte] = dstBuffer[dstPosByte] | bitMaskTable[dstPosBit];
-
-      // Advance bit positions
-      dstPosBit++;
-      srcPosBit++;
-
-      // If crossed a byte barrier, go over the next byte
-      if (dstPosBit == 8)
-        {
-          dstPosBit = 0;
-          dstPosByte++;
-      }
-      if (srcPosBit == 8)
-        {
-          srcPosBit = 0;
-          srcPosByte++;
-      }
+      dstPosBit = 0;
+      dstPosByte++;
     }
+    if (srcPosBit == 8)
+    {
+      srcPosBit = 0;
+      srcPosByte++;
+    }
+  }
 }
 
 /**
@@ -131,11 +125,11 @@ __INLINE__ size_t getByteStorageForBitCount(const size_t bitCount)
  * @param[in] idx Index (position) of the bit to set inside the buffer
  * @param[in] value Value to set (true or false)
  */
-__INLINE__ void setBitValue(void *dst, const size_t idx, const bool value)
+__INLINE__ void setBitValue(void* dst, const size_t idx, const bool value)
 {
   size_t  dstPosByte = idx / 8;
   uint8_t dstPosBit  = idx % 8;
-  auto    dstPtr     = (uint8_t *)dst;
+  auto    dstPtr     = (uint8_t*)dst;
 
   if (value == false) dstPtr[dstPosByte] = dstPtr[dstPosByte] & bitNotMaskTable[dstPosBit];
   if (value == true) dstPtr[dstPosByte] = dstPtr[dstPosByte] | bitMaskTable[dstPosBit];
@@ -148,11 +142,11 @@ __INLINE__ void setBitValue(void *dst, const size_t idx, const bool value)
  * @param[in] idx Index (position) of the bit to get inside value
  * @return Whether the specified bit was true or false
  */
-__INLINE__ bool getBitValue(const void *src, const size_t idx)
+__INLINE__ bool getBitValue(const void* src, const size_t idx)
 {
   size_t  srcPosByte = idx / 8;
   uint8_t srcPosBit  = idx % 8;
-  auto    srcPtr     = (const uint8_t *)src;
+  auto    srcPtr     = (const uint8_t*)src;
 
   return (srcPtr[srcPosByte] & bitMaskTable[srcPosBit]) > 0;
 }

@@ -6,7 +6,7 @@
  */
 
 #ifdef NCURSES
-  #include "loggers/ncurses.hpp"
+#include "loggers/ncurses.hpp"
 #else
-  #include "loggers/stdio.hpp"
+#include "loggers/stdio.hpp"
 #endif

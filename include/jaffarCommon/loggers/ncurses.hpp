@@ -5,12 +5,12 @@
  * @brief Contains common functions related to output and logging using NCurses
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdexcept>
-#include <ncurses.h>
-#include <unistd.h>
 #include "../string.hpp"
+#include <ncurses.h>
+#include <stdarg.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <unistd.h>
 
 namespace jaffarCommon
 {
@@ -30,7 +30,7 @@ static bool _useNCurses = false;
  * @param[in] args The arguments to the formatted string
  */
 template <typename... Args>
-__INLINE__ void log(const char *f, Args... args)
+__INLINE__ void log(const char* f, Args... args)
 {
   auto string = jaffarCommon::string::formatString(f, args...);
   if (_useNCurses == true) printw("%s", string.c_str());
@@ -56,10 +56,10 @@ __INLINE__ int kbhit()
   if (ch == ERR) // no input
     r = FALSE;
   else // input
-    {
-      r = TRUE;
-      ungetch(ch);
-    }
+  {
+    r = TRUE;
+    ungetch(ch);
+  }
 
   // restore block and echo
   echo();
@@ -81,10 +81,10 @@ __INLINE__ int waitForKeyPress()
   if (_useNCurses == false) return getchar();
 
   while (!kbhit())
-    {
-      usleep(100000ul);
-      refresh();
-    }
+  {
+    usleep(100000ul);
+    refresh();
+  }
   return getch();
 }
 

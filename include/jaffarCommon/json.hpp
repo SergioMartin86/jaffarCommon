@@ -4,9 +4,9 @@
  * @file json.hpp
  * @brief Contains common functions related to JSON manipulation
  */
-#include <stdlib.h>
-#include <json/single_include/nlohmann/json.hpp>
 #include "exceptions.hpp"
+#include <json/single_include/nlohmann/json.hpp>
+#include <stdlib.h>
 
 namespace jaffarCommon
 {
@@ -23,7 +23,7 @@ namespace json
  * @param[in] json The json object to look into
  * @param[in] key The key to look for inside the json object
  */
-__INLINE__ const void checkEntry(const nlohmann::json &json, const std::string &key)
+__INLINE__ const void checkEntry(const nlohmann::json& json, const std::string& key)
 {
   if (json.is_object() == false)
     JAFFAR_THROW_LOGIC("[Error] JSON passed is not a key/value object. Happened when trying to obtain string key '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -41,7 +41,7 @@ __INLINE__ const void checkEntry(const nlohmann::json &json, const std::string &
  * @param[in] key The key to look for inside the json object
  * @return A string contained in the key
  */
-__INLINE__ const std::string getString(const nlohmann::json &json, const std::string &key)
+__INLINE__ const std::string getString(const nlohmann::json& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_string() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a string. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -59,7 +59,7 @@ __INLINE__ const std::string getString(const nlohmann::json &json, const std::st
  * @param[in] key The key to look for inside the json object
  * @return A json object contained in the key
  */
-__INLINE__ const nlohmann::json &getObject(const nlohmann::json &json, const std::string &key)
+__INLINE__ const nlohmann::json& getObject(const nlohmann::json& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_object() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a key/value object. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -78,7 +78,7 @@ __INLINE__ const nlohmann::json &getObject(const nlohmann::json &json, const std
  * @return A vector of the type specified containing all the elements of the array of key entry
  */
 template <typename T>
-__INLINE__ const std::vector<T> getArray(const nlohmann::json &json, const std::string &key)
+__INLINE__ const std::vector<T> getArray(const nlohmann::json& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_array() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not an array. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -97,7 +97,7 @@ __INLINE__ const std::vector<T> getArray(const nlohmann::json &json, const std::
  * @return The number stored in the key entry
  */
 template <typename T>
-__INLINE__ const T getNumber(const nlohmann::json &json, const std::string &key)
+__INLINE__ const T getNumber(const nlohmann::json& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_number() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a number. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -115,7 +115,7 @@ __INLINE__ const T getNumber(const nlohmann::json &json, const std::string &key)
  * @param[in] key The key to look for inside the json object
  * @return The boolean stored in the key entry
  */
-__INLINE__ const bool getBoolean(const nlohmann::json &json, const std::string &key)
+__INLINE__ const bool getBoolean(const nlohmann::json& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_boolean() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a boolean. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());

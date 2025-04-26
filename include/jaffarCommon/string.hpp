@@ -5,11 +5,11 @@
  * @brief Contains common functions related to manipulating strings
  */
 
+#include <algorithm>
+#include <sstream>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <algorithm>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -29,7 +29,7 @@ namespace string
  * @param[out] result The storage where the substring collection wil be stored
  */
 template <typename Out>
-__INLINE__ void split(const std::string &s, char delim, Out result)
+__INLINE__ void split(const std::string& s, char delim, Out result)
 {
   std::istringstream iss(s);
   std::string        item;
@@ -43,7 +43,7 @@ __INLINE__ void split(const std::string &s, char delim, Out result)
  * @param[in] delim The separator that divides the substrings
  * @return A vector containing all the substrings
  */
-__INLINE__ std::vector<std::string> split(const std::string &s, char delim)
+__INLINE__ std::vector<std::string> split(const std::string& s, char delim)
 {
   std::string newString = s;
   std::replace(newString.begin(), newString.end(), '\n', delim);
@@ -59,25 +59,25 @@ __INLINE__ std::vector<std::string> split(const std::string &s, char delim)
  * @param[in] ... The arguments to the format string
  * @return The C++ string produced
  */
-__INLINE__ std::string formatString(const char *format, ...)
+__INLINE__ std::string formatString(const char* format, ...)
 {
-  char   *outstr = 0;
+  char*   outstr = 0;
   va_list ap;
   va_start(ap, format);
   int ret = vsnprintf(nullptr, 0, format, ap);
   va_end(ap);
   if (ret < 0) return "";
 
-  outstr = (char *)malloc(ret + 1);
+  outstr = (char*)malloc(ret + 1);
   if (outstr == nullptr) return "";
 
   va_start(ap, format);
   ret = vsnprintf(outstr, ret + 1, format, ap);
   va_end(ap);
   if (ret < 0)
-    {
-      free(outstr);
-      return "";
+  {
+    free(outstr);
+    return "";
   }
 
   std::string outString = outstr;
@@ -90,18 +90,18 @@ __INLINE__ std::string formatString(const char *format, ...)
  *
  * @param[in] data Binary data to print
  * @param[in] size Number of bytes in the input data
- * @return The C++ string produced 
+ * @return The C++ string produced
  */
-__INLINE__ std::string dumpBinary(const void *data, const size_t size)
+__INLINE__ std::string dumpBinary(const void* data, const size_t size)
 {
-  auto        input = (uint8_t *)data;
+  auto        input = (uint8_t*)data;
   std::string output;
   for (size_t i = 0; i < size; i++)
-    {
-      char substr[16];
-      sprintf(substr, "%02X", input[i]);
-      output += std::string(substr);
-    }
+  {
+    char substr[16];
+    sprintf(substr, "%02X", input[i]);
+    output += std::string(substr);
+  }
 
   return output;
 }
