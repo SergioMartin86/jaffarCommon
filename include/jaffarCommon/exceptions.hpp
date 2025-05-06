@@ -35,7 +35,7 @@ namespace exceptions
  * @param[in] format A constant formatted string
  * @param[in] ... parameters for the formatted string
  */
-__JAFFARCOMMON__INLINE__ void throwException [[noreturn]] (const char* exceptionType, const char* fileName, const int lineNumber, const char* format, ...)
+__JAFFAR_COMMON__INLINE__ void throwException [[noreturn]] (const char* exceptionType, const char* fileName, const int lineNumber, const char* format, ...)
 {
   char*   outstr = 0;
   va_list ap;

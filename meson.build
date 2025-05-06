@@ -22,7 +22,7 @@ if get_option('includeSDL2_TTF') == true
 endif
 
 # Common compile flags
-commonCppArgs = [ '-D__JAFFARCOMMON__INLINE__=__attribute__((__used__)) inline' ]
+commonCppArgs = [ '-D__JAFFAR_COMMON__INLINE__=__attribute__((__used__)) inline' ]
 
 # Common link flags
 commonLinkArgs = [ '-latomic' ]

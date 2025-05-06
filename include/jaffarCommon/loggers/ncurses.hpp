@@ -30,7 +30,7 @@ static bool _useNCurses = false;
  * @param[in] args The arguments to the formatted string
  */
 template <typename... Args>
-__JAFFARCOMMON__INLINE__ void log(const char* f, Args... args)
+__JAFFAR_COMMON__INLINE__ void log(const char* f, Args... args)
 {
   auto string = jaffarCommon::string::formatString(f, args...);
   if (_useNCurses == true) printw("%s", string.c_str());
@@ -43,7 +43,7 @@ __JAFFARCOMMON__INLINE__ void log(const char* f, Args... args)
  * @note Taken from https://github.com/ajpaulson/learning-ncurses/blob/master/kbhit.c
  * @return True, if a key was hit; False, otherwise
  */
-__JAFFARCOMMON__INLINE__ int kbhit()
+__JAFFAR_COMMON__INLINE__ int kbhit()
 {
   int ch, r;
 
@@ -76,7 +76,7 @@ __JAFFARCOMMON__INLINE__ int kbhit()
  *
  * @return Which key was pressed
  */
-__JAFFARCOMMON__INLINE__ int waitForKeyPress()
+__JAFFAR_COMMON__INLINE__ int waitForKeyPress()
 {
   if (_useNCurses == false) return getchar();
 
@@ -95,7 +95,7 @@ __JAFFARCOMMON__INLINE__ int waitForKeyPress()
  *
  * @return Which key was pressed, the macro ERR if no key was pressed
  */
-__JAFFARCOMMON__INLINE__ int getKeyPress()
+__JAFFAR_COMMON__INLINE__ int getKeyPress()
 {
   if (_useNCurses == false) return 0;
 
@@ -114,7 +114,7 @@ __JAFFARCOMMON__INLINE__ int getKeyPress()
 /**
  * Initializes the NCurses terminal
  */
-__JAFFARCOMMON__INLINE__ void initializeTerminal()
+__JAFFAR_COMMON__INLINE__ void initializeTerminal()
 {
   // Instructing the log function to use printw
   _useNCurses = true;
@@ -130,7 +130,7 @@ __JAFFARCOMMON__INLINE__ void initializeTerminal()
 /**
  * Clears the NCurses terminal
  */
-__JAFFARCOMMON__INLINE__ void clearTerminal()
+__JAFFAR_COMMON__INLINE__ void clearTerminal()
 {
   if (_useNCurses == true) clear();
 }
@@ -138,7 +138,7 @@ __JAFFARCOMMON__INLINE__ void clearTerminal()
 /**
  * Finalizes the NCurses terminal
  */
-__JAFFARCOMMON__INLINE__ void finalizeTerminal()
+__JAFFAR_COMMON__INLINE__ void finalizeTerminal()
 {
   // Instructing the log function to use printf
   _useNCurses = false;
@@ -149,7 +149,7 @@ __JAFFARCOMMON__INLINE__ void finalizeTerminal()
 /**
  * Refreshes the NCurses terminal. This is necessary after every logging operation to update the screen.
  */
-__JAFFARCOMMON__INLINE__ void refreshTerminal()
+__JAFFAR_COMMON__INLINE__ void refreshTerminal()
 {
   if (_useNCurses == true) refresh();
 }

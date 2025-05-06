@@ -58,14 +58,14 @@ public:
    *
    * @return The position of the input buffer header. This value represents the size of the input data at the end of the deserialization process
    */
-  __JAFFARCOMMON__INLINE__ size_t getInputSize() const { return _inputDataBufferPos; }
+  __JAFFAR_COMMON__INLINE__ size_t getInputSize() const { return _inputDataBufferPos; }
 
   /**
    * Gets a reference to the input data buffer
    *
    * @return The pointer to the input data buffer
    */
-  __JAFFARCOMMON__INLINE__ const uint8_t* getInputDataBuffer() const { return _inputDataBuffer; }
+  __JAFFAR_COMMON__INLINE__ const uint8_t* getInputDataBuffer() const { return _inputDataBuffer; }
 
 protected:
   /**

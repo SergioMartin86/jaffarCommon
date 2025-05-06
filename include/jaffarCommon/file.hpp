@@ -28,7 +28,7 @@ namespace file
  * @param[in] in The input file file
  * @return The produced string containing the entire input from the file
  */
-static __JAFFARCOMMON__INLINE__ std::string slurp(std::ifstream& in)
+static __JAFFAR_COMMON__INLINE__ std::string slurp(std::ifstream& in)
 {
   std::ostringstream sstr;
   sstr << in.rdbuf();
@@ -42,7 +42,7 @@ static __JAFFARCOMMON__INLINE__ std::string slurp(std::ifstream& in)
  * @param[in] fileName The name of the file to read
  * @return Whether the load operation succeded (true) or failed (fail)
  */
-static __JAFFARCOMMON__INLINE__ bool loadStringFromFile(std::string& dst, const std::string& fileName)
+static __JAFFAR_COMMON__INLINE__ bool loadStringFromFile(std::string& dst, const std::string& fileName)
 {
   std::ifstream fi(fileName);
 
@@ -65,7 +65,7 @@ static __JAFFARCOMMON__INLINE__ bool loadStringFromFile(std::string& dst, const 
  * @param[in] fileName The name of the file to write to
  * @return Whether the save operation succeded (true) or failed (fail)
  */
-static __JAFFARCOMMON__INLINE__ bool saveStringToFile(const std::string& src, const std::string& fileName)
+static __JAFFAR_COMMON__INLINE__ bool saveStringToFile(const std::string& src, const std::string& fileName)
 {
   FILE* fid = fopen(fileName.c_str(), "w");
   if (fid != NULL)
@@ -109,7 +109,7 @@ public:
    *
    * @return The number of bytes read. Negative in case of error.
    */
-  static __JAFFARCOMMON__INLINE__ int64_t fread(void* const buffer, const size_t size, const size_t count, MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ int64_t fread(void* const buffer, const size_t size, const size_t count, MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -158,7 +158,7 @@ public:
    *
    * @return The number of bytes written. Negative in case of error.
    */
-  static __JAFFARCOMMON__INLINE__ int64_t fwrite(const void* buffer, const size_t size, const size_t count, MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ int64_t fwrite(const void* buffer, const size_t size, const size_t count, MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -203,7 +203,7 @@ public:
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __JAFFARCOMMON__INLINE__ int64_t ftello64(MemoryFile* const file) { return ftell(file); }
+  static __JAFFAR_COMMON__INLINE__ int64_t ftello64(MemoryFile* const file) { return ftell(file); }
 
   /**
    * Returns the internal position of the file's head
@@ -211,7 +211,7 @@ public:
    * @param[in] file The file to evaluate
    * @return The internal position of the head. -1 if the file is not open
    */
-  static __JAFFARCOMMON__INLINE__ int64_t ftell(MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ int64_t ftell(MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -229,7 +229,7 @@ public:
    *
    * @param[in] file The file to rewind
    */
-  static __JAFFARCOMMON__INLINE__ void rewind(MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ void rewind(MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -248,7 +248,7 @@ public:
    * @param[in] file The file to flush
    * @return Zero in case of success. -1 in case of error
    */
-  static __JAFFARCOMMON__INLINE__ int fflush(MemoryFile* file)
+  static __JAFFAR_COMMON__INLINE__ int fflush(MemoryFile* file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -271,7 +271,7 @@ public:
    *
    * @return Zero in case of success. -1 in case of error
    */
-  static __JAFFARCOMMON__INLINE__ int fseeko64(MemoryFile* const file, const int64_t offset, const int origin) { return fseek(file, offset, origin); }
+  static __JAFFAR_COMMON__INLINE__ int fseeko64(MemoryFile* const file, const int64_t offset, const int origin) { return fseek(file, offset, origin); }
 
   /**
    * Ensures the write operations have finished. No effect for mem buffers as all operations finish within their call.
@@ -282,7 +282,7 @@ public:
    *
    * @return Zero in case of success. -1 in case of error
    */
-  static __JAFFARCOMMON__INLINE__ int fseek(MemoryFile* const file, const int64_t offset, const int origin)
+  static __JAFFAR_COMMON__INLINE__ int fseek(MemoryFile* const file, const int64_t offset, const int origin)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -318,7 +318,7 @@ public:
    * @param[in] file The file to inquire for end of file
    * @return Non-zero, if the end has been reached. Zero, otherwise.
    */
-  static __JAFFARCOMMON__INLINE__ int feof(MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ int feof(MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false)
@@ -336,7 +336,7 @@ public:
    *
    * @param[in] file The file to clear errors for
    */
-  static __JAFFARCOMMON__INLINE__ void clearerr(MemoryFile* const file)
+  static __JAFFAR_COMMON__INLINE__ void clearerr(MemoryFile* const file)
   {
     // Check if file is closed
     if (file->isOpened() == false) return;
@@ -350,62 +350,62 @@ public:
    * @param[in] file The file to check errors for
    * @return Zero, if last operation was successful. Non-zero, otherwise.
    */
-  static __JAFFARCOMMON__INLINE__ int ferror(MemoryFile* const file) { return file->_errorCode; }
+  static __JAFFAR_COMMON__INLINE__ int ferror(MemoryFile* const file) { return file->_errorCode; }
 
   /**
    * Sets the read only flag in the file
    */
-  __JAFFARCOMMON__INLINE__ void setReadOnly() { _readonly = true; }
+  __JAFFAR_COMMON__INLINE__ void setReadOnly() { _readonly = true; }
 
   /**
    * Clears the read only flag from the file
    */
-  __JAFFARCOMMON__INLINE__ void unsetReadOnly() { _readonly = false; }
+  __JAFFAR_COMMON__INLINE__ void unsetReadOnly() { _readonly = false; }
 
   /**
    * Sets the write only flag in the file
    */
-  __JAFFARCOMMON__INLINE__ void setWriteOnly() { _writeonly = true; }
+  __JAFFAR_COMMON__INLINE__ void setWriteOnly() { _writeonly = true; }
 
   /**
    * Clears the read only flag from the file
    */
-  __JAFFARCOMMON__INLINE__ void unsetWriteOnly() { _writeonly = false; }
+  __JAFFAR_COMMON__INLINE__ void unsetWriteOnly() { _writeonly = false; }
 
   /**
    * Sets the opened flag in the file
    */
-  __JAFFARCOMMON__INLINE__ void setOpened() { _opened = true; }
+  __JAFFAR_COMMON__INLINE__ void setOpened() { _opened = true; }
 
   /**
    * Clears the opened flag from the file
    */
-  __JAFFARCOMMON__INLINE__ void unsetOpened() { _opened = false; }
+  __JAFFAR_COMMON__INLINE__ void unsetOpened() { _opened = false; }
 
   /**
    * Gets the read-only flag from the file
    * @return The file's read-only flag
    */
-  __JAFFARCOMMON__INLINE__ bool isReadOnly() const { return _readonly; }
+  __JAFFAR_COMMON__INLINE__ bool isReadOnly() const { return _readonly; }
 
   /**
    * Gets the write-only flag from the file
    * @return The file's write-only flag
    */
-  __JAFFARCOMMON__INLINE__ bool isWriteOnly() const { return _writeonly; }
+  __JAFFAR_COMMON__INLINE__ bool isWriteOnly() const { return _writeonly; }
 
   /**
    * Gets the opened flag from the file
    * @return The file's opened flag
    */
-  __JAFFARCOMMON__INLINE__ bool isOpened() const { return _opened; }
+  __JAFFAR_COMMON__INLINE__ bool isOpened() const { return _opened; }
 
   /**
    * Sets a callback that will be called when a write is made
    *
    * @param[in] callback Write-callback to set
    */
-  __JAFFARCOMMON__INLINE__ void setWriteCallback(const std::function<void(const int64_t, MemoryFile*)> callback)
+  __JAFFAR_COMMON__INLINE__ void setWriteCallback(const std::function<void(const int64_t, MemoryFile*)> callback)
   {
     _writeCallback        = callback;
     _writeCallbackDefined = true;
@@ -416,7 +416,7 @@ public:
    *
    * @param[in] callback Read-callback to set
    */
-  __JAFFARCOMMON__INLINE__ void setReadCallback(const std::function<void(const int64_t, MemoryFile*)> callback)
+  __JAFFAR_COMMON__INLINE__ void setReadCallback(const std::function<void(const int64_t, MemoryFile*)> callback)
   {
     _readCallback        = callback;
     _readCallbackDefined = true;
@@ -425,12 +425,12 @@ public:
   /**
    * Function to unset the write callback
    */
-  __JAFFARCOMMON__INLINE__ void unsetWriteCallback() { _writeCallbackDefined = false; }
+  __JAFFAR_COMMON__INLINE__ void unsetWriteCallback() { _writeCallbackDefined = false; }
 
   /**
    * Function to unset the read callback
    */
-  __JAFFARCOMMON__INLINE__ void unsetReadCallback() { _readCallbackDefined = false; }
+  __JAFFAR_COMMON__INLINE__ void unsetReadCallback() { _readCallbackDefined = false; }
 
   /**
    * Function to resize file
@@ -440,7 +440,7 @@ public:
    * @param[in] newSize The new desired size for the file
    * @return Zero, if successful. Non-zero if an error ocurred.
    */
-  __JAFFARCOMMON__INLINE__ int resize(const size_t newSize)
+  __JAFFAR_COMMON__INLINE__ int resize(const size_t newSize)
   {
     // Check if file is closed
     if (isOpened() == false)
@@ -479,14 +479,14 @@ public:
    *
    * @param[in] size The internal size to set
    */
-  __JAFFARCOMMON__INLINE__ void setSize(const size_t size) { _size = size; }
+  __JAFFAR_COMMON__INLINE__ void setSize(const size_t size) { _size = size; }
 
   /**
    * Function to get file size directly
    *
    * @return The internal size to set
    */
-  __JAFFARCOMMON__INLINE__ size_t getSize() const { return _size; }
+  __JAFFAR_COMMON__INLINE__ size_t getSize() const { return _size; }
 
 private:
   uint8_t* getBuffer() const { return _buffer; }
@@ -586,7 +586,7 @@ public:
    *
    * @return The pointer to the new memory file, if successful. NULL, otherwise.
    */
-  __JAFFARCOMMON__INLINE__ MemoryFile* fopen(const std::string filename, const std::string mode)
+  __JAFFAR_COMMON__INLINE__ MemoryFile* fopen(const std::string filename, const std::string mode)
   {
     // Parsing mode
     mode_t openMode = mode_t::none;

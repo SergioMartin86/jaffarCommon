@@ -43,7 +43,7 @@ public:
 
   ~Differential() = default;
 
-  __JAFFARCOMMON__INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __JAFFAR_COMMON__INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos + outputDataSize > _inputDataBufferSize)
@@ -63,7 +63,7 @@ public:
     _referenceDataBufferPos += outputDataSize;
   }
 
-  __JAFFARCOMMON__INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
+  __JAFFAR_COMMON__INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t outputDataSize) override
   {
     if (outputDataBuffer == nullptr || _inputDataBuffer == nullptr) return;
 

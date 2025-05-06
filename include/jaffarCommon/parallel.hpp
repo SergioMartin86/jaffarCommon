@@ -38,28 +38,28 @@ typedef uint32_t threadId_t;
  *
  * @return The id of the currently running thread
  */
-__JAFFARCOMMON__INLINE__ threadId_t getThreadId() { return (threadId_t)omp_get_thread_num(); }
+__JAFFAR_COMMON__INLINE__ threadId_t getThreadId() { return (threadId_t)omp_get_thread_num(); }
 
 /**
  * Gets the number of currently running threads
  *
  * @return The number of currently running threads
  */
-__JAFFARCOMMON__INLINE__ size_t getThreadCount() { return (threadId_t)omp_get_num_threads(); }
+__JAFFAR_COMMON__INLINE__ size_t getThreadCount() { return (threadId_t)omp_get_num_threads(); }
 
 /**
  * Sets the number of parallel threads
  *
  * @param[in] threadCount The number of currently running threads
  */
-__JAFFARCOMMON__INLINE__ void setThreadCount(const size_t threadCount) { omp_set_num_threads((threadId_t)threadCount); }
+__JAFFAR_COMMON__INLINE__ void setThreadCount(const size_t threadCount) { omp_set_num_threads((threadId_t)threadCount); }
 
 /**
  * Gets the number of maximum possible threads
  *
  * @return The number of maximum possible threads
  */
-__JAFFARCOMMON__INLINE__ size_t getMaxThreadCount() { return (threadId_t)omp_get_max_threads(); }
+__JAFFAR_COMMON__INLINE__ size_t getMaxThreadCount() { return (threadId_t)omp_get_max_threads(); }
 
 } // namespace parallel
 
