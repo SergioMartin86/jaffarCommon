@@ -484,7 +484,7 @@ public:
   /**
    * Function to get file size directly
    *
-   * return The internal size to set
+   * @return The internal size to set
    */
   __JAFFARCOMMON__INLINE__ size_t getSize() const { return _size; }
 
