@@ -36,7 +36,7 @@ public:
 
   ~Contiguous() = default;
 
-  __JAFFAR_COMMON__INLINE__ void pushContiguous(const void* const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) override
+  __JAFFAR_COMMON_INLINE__ void pushContiguous(const void* const __restrict inputDataBuffer = nullptr, const size_t inputDataSize = 0) override
   {
     // Making sure we do not exceed the maximum size estipulated
     if (_outputDataBufferPos + inputDataSize > _outputDataBufferSize)
@@ -50,7 +50,7 @@ public:
     _outputDataBufferPos += inputDataSize;
   }
 
-  __JAFFAR_COMMON__INLINE__ void push(const void* const __restrict inputDataBuffer, const size_t inputDataSize) override { pushContiguous(inputDataBuffer, inputDataSize); }
+  __JAFFAR_COMMON_INLINE__ void push(const void* const __restrict inputDataBuffer, const size_t inputDataSize) override { pushContiguous(inputDataBuffer, inputDataSize); }
 };
 
 } // namespace serializer

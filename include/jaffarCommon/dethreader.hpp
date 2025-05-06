@@ -123,7 +123,7 @@ public:
      *
      * That is, unless the thread is sleeping
      */
-    __JAFFAR_COMMON__INLINE__ void run() const
+    __JAFFAR_COMMON_INLINE__ void run() const
     {
       // If the thread is sleep, checking if it has finished
       if (_returnReason == returnReason_t::sleeping)
@@ -145,7 +145,7 @@ public:
     /**
      * Yields execution to the runtime
      */
-    __JAFFAR_COMMON__INLINE__ void yield()
+    __JAFFAR_COMMON_INLINE__ void yield()
     {
       _returnReason = returnReason_t::none;
       __runtime->yieldToRuntime();
@@ -156,14 +156,14 @@ public:
      *
      * @return The return reason
      */
-    __JAFFAR_COMMON__INLINE__ returnReason_t getReturnReason() const { return _returnReason; }
+    __JAFFAR_COMMON_INLINE__ returnReason_t getReturnReason() const { return _returnReason; }
 
     /**
      * Function to send the thread to sleep
      *
      * @param[in] sleepDuration The number of microseconds to sleep for
      */
-    __JAFFAR_COMMON__INLINE__ void sleep(const size_t sleepDuration)
+    __JAFFAR_COMMON_INLINE__ void sleep(const size_t sleepDuration)
     {
       _sleepDuration  = sleepDuration;
       _returnReason   = returnReason_t::sleeping;
@@ -176,14 +176,14 @@ public:
      *
      * @return Always true
      */
-    __JAFFAR_COMMON__INLINE__ bool joinable() { return true; }
+    __JAFFAR_COMMON_INLINE__ bool joinable() { return true; }
 
     /**
      * Function to wait for a thread completion
      *
      * @param[in] threadId Identifier of the thread to wait for
      */
-    __JAFFAR_COMMON__INLINE__ void join(const threadId_t threadId)
+    __JAFFAR_COMMON_INLINE__ void join(const threadId_t threadId)
     {
       _threadWaitedFor = threadId;
       _returnReason    = returnReason_t::waiting;
@@ -195,7 +195,7 @@ public:
      *
      * @return The unique id of the thread
      */
-    __JAFFAR_COMMON__INLINE__ threadId_t getThreadId() const { return _id; }
+    __JAFFAR_COMMON_INLINE__ threadId_t getThreadId() const { return _id; }
 
     /**
      * The thread this thread is waiting for
@@ -208,12 +208,12 @@ public:
      *
      * @param[in] returnReason The return reason
      */
-    __JAFFAR_COMMON__INLINE__ void setReturnReason(const returnReason_t returnReason) { _returnReason = returnReason; }
+    __JAFFAR_COMMON_INLINE__ void setReturnReason(const returnReason_t returnReason) { _returnReason = returnReason; }
 
     /**
      * Internal wrapper for the execution of the coroutine
      */
-    __JAFFAR_COMMON__INLINE__ static void coroutineWrapper()
+    __JAFFAR_COMMON_INLINE__ static void coroutineWrapper()
     {
       auto currentThread = __runtime->getCurrentThread();
       currentThread->_fc();
@@ -260,7 +260,7 @@ public:
    * @param[in] fc The function for the thread to execute
    * @return The identifier of the thread to wait for
    */
-  __JAFFAR_COMMON__INLINE__ threadId_t createThread(const threadFc_t fc)
+  __JAFFAR_COMMON_INLINE__ threadId_t createThread(const threadFc_t fc)
   {
     const auto threadId = _uniqueThreadIdCounter;
     _threadQueue.push(std::make_unique<Thread>(fc, threadId));
@@ -271,7 +271,7 @@ public:
   /**
    * Initializes the runtime
    */
-  __JAFFAR_COMMON__INLINE__ void initialize()
+  __JAFFAR_COMMON_INLINE__ void initialize()
   {
     // Setting singleton
     jaffarCommon::dethreader::__runtime = this;
@@ -280,7 +280,7 @@ public:
   /**
    * Finalizes the runtime
    */
-  __JAFFAR_COMMON__INLINE__ void finalize()
+  __JAFFAR_COMMON_INLINE__ void finalize()
   {
     // unsetting singleton
     jaffarCommon::dethreader::__runtime = nullptr;
@@ -289,7 +289,7 @@ public:
   /**
    * Starts running the scheduler. It won't return until all previously created threads have fully finished executing
    */
-  __JAFFAR_COMMON__INLINE__ void run()
+  __JAFFAR_COMMON_INLINE__ void run()
   {
     // Getting main coroutine
     _coroutine = co_active();
@@ -322,26 +322,26 @@ public:
    *
    * @param[in] thread The thread to set as current one
    */
-  __JAFFAR_COMMON__INLINE__ void setCurrentThread(Thread* const thread) { _currentThread = thread; }
+  __JAFFAR_COMMON_INLINE__ void setCurrentThread(Thread* const thread) { _currentThread = thread; }
 
   /**
    * Gets the current thread being scheduled
    *
    * @return The currently scheduled thread
    */
-  __JAFFAR_COMMON__INLINE__ Thread* getCurrentThread() const { return _currentThread; }
+  __JAFFAR_COMMON_INLINE__ Thread* getCurrentThread() const { return _currentThread; }
 
   /**
    * A function for the thread to yield back to the runtime system
    */
-  __JAFFAR_COMMON__INLINE__ void yieldToRuntime() { co_switch(_coroutine); }
+  __JAFFAR_COMMON_INLINE__ void yieldToRuntime() { co_switch(_coroutine); }
 
   /**
    * Gets the list of finished threads
    *
    * @return The list of finished threads
    */
-  __JAFFAR_COMMON__INLINE__ const std::set<threadId_t>& getFinishedThreads() const { return _finishedThreads; }
+  __JAFFAR_COMMON_INLINE__ const std::set<threadId_t>& getFinishedThreads() const { return _finishedThreads; }
 
 private:
   /**
@@ -375,7 +375,7 @@ private:
  *
  * @return The currently scheduled thread
  */
-__JAFFAR_COMMON__INLINE__ Runtime::Thread* getCurrentThread() { return __runtime->getCurrentThread(); }
+__JAFFAR_COMMON_INLINE__ Runtime::Thread* getCurrentThread() { return __runtime->getCurrentThread(); }
 
 /**
  * Publicly available Creates a new thread and adds it to the thread queue
@@ -383,7 +383,7 @@ __JAFFAR_COMMON__INLINE__ Runtime::Thread* getCurrentThread() { return __runtime
  * @param[in] fc The function for the thread to execute
  * @return The thread identifier of the new  thread
  */
-__JAFFAR_COMMON__INLINE__ threadId_t createThread(const threadFc_t fc)
+__JAFFAR_COMMON_INLINE__ threadId_t createThread(const threadFc_t fc)
 {
   if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
   return __runtime->createThread(fc);
@@ -392,7 +392,7 @@ __JAFFAR_COMMON__INLINE__ threadId_t createThread(const threadFc_t fc)
 /**
  * Publicly avialable function to yield back to the runtime
  */
-__JAFFAR_COMMON__INLINE__ void yield()
+__JAFFAR_COMMON_INLINE__ void yield()
 {
   if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
   __runtime->getCurrentThread()->yield();
@@ -403,7 +403,7 @@ __JAFFAR_COMMON__INLINE__ void yield()
  *
  * @param[in] sleepDuration The number of microseconds to sleep for
  */
-__JAFFAR_COMMON__INLINE__ void sleep(const size_t sleepDuration)
+__JAFFAR_COMMON_INLINE__ void sleep(const size_t sleepDuration)
 {
   if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
   __runtime->getCurrentThread()->sleep(sleepDuration);
@@ -414,7 +414,7 @@ __JAFFAR_COMMON__INLINE__ void sleep(const size_t sleepDuration)
  *
  * @param[in] threadId Identifier of the thread to wait for
  */
-__JAFFAR_COMMON__INLINE__ void join(const threadId_t threadId)
+__JAFFAR_COMMON_INLINE__ void join(const threadId_t threadId)
 {
   if (__runtime == nullptr) JAFFAR_THROW_LOGIC("Trying to use dethreader runtime before it is initialized");
   __runtime->getCurrentThread()->join(threadId);

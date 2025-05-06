@@ -38,7 +38,7 @@ public:
 
   ~Contiguous() = default;
 
-  __JAFFAR_COMMON__INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t count) override
+  __JAFFAR_COMMON_INLINE__ void popContiguous(void* const __restrict outputDataBuffer, const size_t count) override
   {
     // Making sure we do not exceed the maximum size estipulated
     if (_inputDataBufferPos + count > _inputDataBufferSize)
@@ -52,7 +52,7 @@ public:
     _inputDataBufferPos += count;
   }
 
-  __JAFFAR_COMMON__INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t count) override { popContiguous(outputDataBuffer, count); }
+  __JAFFAR_COMMON_INLINE__ void pop(void* const __restrict outputDataBuffer, const size_t count) override { popContiguous(outputDataBuffer, count); }
 };
 
 } // namespace deserializer

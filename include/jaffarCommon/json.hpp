@@ -28,7 +28,7 @@ typedef nlohmann::json object;
  * @param[in] json The json object to look into
  * @param[in] key The key to look for inside the json object
  */
-__JAFFAR_COMMON__INLINE__ const void checkEntry(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const void checkEntry(const object& json, const std::string& key)
 {
   if (json.is_object() == false)
     JAFFAR_THROW_LOGIC("[Error] JSON passed is not a key/value object. Happened when trying to obtain string key '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -46,7 +46,7 @@ __JAFFAR_COMMON__INLINE__ const void checkEntry(const object& json, const std::s
  * @param[in] key The key to look for inside the json object
  * @return A string contained in the key
  */
-__JAFFAR_COMMON__INLINE__ const std::string getString(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const std::string getString(const object& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_string() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a string. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -64,7 +64,7 @@ __JAFFAR_COMMON__INLINE__ const std::string getString(const object& json, const 
  * @param[in] key The key to look for inside the json object
  * @return A json object contained in the key
  */
-__JAFFAR_COMMON__INLINE__ const object& getObject(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const object& getObject(const object& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_object() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a key/value object. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -83,7 +83,7 @@ __JAFFAR_COMMON__INLINE__ const object& getObject(const object& json, const std:
  * @return A vector of the type specified containing all the elements of the array of key entry
  */
 template <typename T>
-__JAFFAR_COMMON__INLINE__ const std::vector<T> getArray(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const std::vector<T> getArray(const object& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_array() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not an array. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -102,7 +102,7 @@ __JAFFAR_COMMON__INLINE__ const std::vector<T> getArray(const object& json, cons
  * @return The number stored in the key entry
  */
 template <typename T>
-__JAFFAR_COMMON__INLINE__ const T getNumber(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const T getNumber(const object& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_number() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a number. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
@@ -120,7 +120,7 @@ __JAFFAR_COMMON__INLINE__ const T getNumber(const object& json, const std::strin
  * @param[in] key The key to look for inside the json object
  * @return The boolean stored in the key entry
  */
-__JAFFAR_COMMON__INLINE__ const bool getBoolean(const object& json, const std::string& key)
+__JAFFAR_COMMON_INLINE__ const bool getBoolean(const object& json, const std::string& key)
 {
   checkEntry(json, key);
   if (json[key].is_boolean() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a boolean. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());

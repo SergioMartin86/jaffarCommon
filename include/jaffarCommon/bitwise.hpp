@@ -37,7 +37,7 @@ uint8_t bitNotMaskTable[8] = {0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b
  * @param[in] count The number of elements to copy
  * @param[in] elementBitSize The size of each element (expressed in bits)
  */
-__JAFFAR_COMMON__INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void* srcBufferPtr, const size_t srcBufferSize,
+__JAFFAR_COMMON_INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void* srcBufferPtr, const size_t srcBufferSize,
                                        const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
 {
   if (elementBitSize == 0) JAFFAR_THROW_LOGIC("Element bit size must be a positive number greater than zero");
@@ -91,7 +91,7 @@ __JAFFAR_COMMON__INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBuffe
  * @param[in] elementCount The number of elements to encode
  * @return The number of bits required. Examples: (Element Count, Bits Required) => (0,0), (1,0), (2,1), (3,2), (4,2), (5,3), (6,3), (7,3), (8,3), (9,4)
  */
-__JAFFAR_COMMON__INLINE__ size_t getEncodingBitsForElementCount(const size_t elementCount)
+__JAFFAR_COMMON_INLINE__ size_t getEncodingBitsForElementCount(const size_t elementCount)
 {
   // Corner cases
   if (elementCount == 0) return 0;
@@ -110,7 +110,7 @@ __JAFFAR_COMMON__INLINE__ size_t getEncodingBitsForElementCount(const size_t ele
  * @param[in] bitCount The number of bits to store
  * @return The bytes required to store them
  */
-__JAFFAR_COMMON__INLINE__ size_t getByteStorageForBitCount(const size_t bitCount)
+__JAFFAR_COMMON_INLINE__ size_t getByteStorageForBitCount(const size_t bitCount)
 {
   // Calculating bit storage for the possible inputs index
   size_t byteStorageSize = bitCount / 8;
@@ -125,7 +125,7 @@ __JAFFAR_COMMON__INLINE__ size_t getByteStorageForBitCount(const size_t bitCount
  * @param[in] idx Index (position) of the bit to set inside the buffer
  * @param[in] value Value to set (true or false)
  */
-__JAFFAR_COMMON__INLINE__ void setBitValue(void* dst, const size_t idx, const bool value)
+__JAFFAR_COMMON_INLINE__ void setBitValue(void* dst, const size_t idx, const bool value)
 {
   size_t  dstPosByte = idx / 8;
   uint8_t dstPosBit  = idx % 8;
@@ -142,7 +142,7 @@ __JAFFAR_COMMON__INLINE__ void setBitValue(void* dst, const size_t idx, const bo
  * @param[in] idx Index (position) of the bit to get inside value
  * @return Whether the specified bit was true or false
  */
-__JAFFAR_COMMON__INLINE__ bool getBitValue(const void* src, const size_t idx)
+__JAFFAR_COMMON_INLINE__ bool getBitValue(const void* src, const size_t idx)
 {
   size_t  srcPosByte = idx / 8;
   uint8_t srcPosBit  = idx % 8;
@@ -158,7 +158,7 @@ __JAFFAR_COMMON__INLINE__ bool getBitValue(const void* src, const size_t idx)
  * @param[in] idx Index (position) of the bit to get inside the value (only accepted values: 0-7)
  * @return Whether the specified bit was true or false
  */
-__JAFFAR_COMMON__INLINE__ bool getBitFlag(const uint8_t value, const uint8_t idx)
+__JAFFAR_COMMON_INLINE__ bool getBitFlag(const uint8_t value, const uint8_t idx)
 {
   if (idx > 7) JAFFAR_THROW_LOGIC("Provided bit index higher than 7 for a an 8-bit value");
 

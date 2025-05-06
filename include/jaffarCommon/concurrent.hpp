@@ -58,7 +58,7 @@ public:
    * Gets access to the internal Deque storage
    * @return A reference to the internal Deque storage
    */
-  __JAFFAR_COMMON__INLINE__ auto& getInternalStorage() { return _internalDeque; }
+  __JAFFAR_COMMON_INLINE__ auto& getInternalStorage() { return _internalDeque; }
 
   /**
    * Pushes an element to the back of the deque without any locking protection
@@ -67,7 +67,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON__INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); }
+  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); }
 
   /**
    * Pushes an element to the back of the deque with locking protection
@@ -76,7 +76,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON__INLINE__ void push_back(T element)
+  __JAFFAR_COMMON_INLINE__ void push_back(T element)
   {
     _mutex.lock();
     _internalDeque.push_back(element);
@@ -90,7 +90,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON__INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); }
+  __JAFFAR_COMMON_INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); }
 
   /**
    * Pushes an element to the front of the deque with locking protection
@@ -99,7 +99,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON__INLINE__ void push_front(T element)
+  __JAFFAR_COMMON_INLINE__ void push_front(T element)
   {
     _mutex.lock();
     _internalDeque.push_front(element);
@@ -114,7 +114,7 @@ public:
    *
    * @return The element at the front of the Deque
    */
-  __JAFFAR_COMMON__INLINE__ T front() const { return _internalDeque.front(); }
+  __JAFFAR_COMMON_INLINE__ T front() const { return _internalDeque.front(); }
 
   /**
    * Gets the element at the back of the Deque
@@ -124,7 +124,7 @@ public:
    *
    * @return The element at the back of the Deque
    */
-  __JAFFAR_COMMON__INLINE__ T back() const { return _internalDeque.back(); }
+  __JAFFAR_COMMON_INLINE__ T back() const { return _internalDeque.back(); }
 
   /**
    * Pops (removes) the element at the front of the Deque
@@ -132,7 +132,7 @@ public:
    * @note This is a thread safe operation
    * @note This operation does not check for an empty container and might produce unexpected behaviour if ran with an empty container
    */
-  __JAFFAR_COMMON__INLINE__ void pop_front()
+  __JAFFAR_COMMON_INLINE__ void pop_front()
   {
     _mutex.lock();
     _internalDeque.pop_front();
@@ -145,7 +145,7 @@ public:
    * @note This is a thread safe operation
    * @note This operation does not check for an empty container and might produce unexpected behaviour if ran with an empty container
    */
-  __JAFFAR_COMMON__INLINE__ void pop_back()
+  __JAFFAR_COMMON_INLINE__ void pop_back()
   {
     _mutex.lock();
     _internalDeque.pop_back();
@@ -159,7 +159,7 @@ public:
    * @param[out] element A reference to the storage to save the element into
    * @return True, if the operation was successful; false, if the Deque was empty
    */
-  __JAFFAR_COMMON__INLINE__ bool pop_back_get(T& element)
+  __JAFFAR_COMMON_INLINE__ bool pop_back_get(T& element)
   {
     _mutex.lock();
 
@@ -183,7 +183,7 @@ public:
    * @param[out] element A reference to the storage to save the element into
    * @return True, if the operation was successful; false, if the Deque was empty
    */
-  __JAFFAR_COMMON__INLINE__ bool pop_front_get(T& element)
+  __JAFFAR_COMMON_INLINE__ bool pop_front_get(T& element)
   {
     _mutex.lock();
 
@@ -206,7 +206,7 @@ public:
    * @note This is not a thread safe operation
    * @return The current size of the Deque at the time of checking
    */
-  __JAFFAR_COMMON__INLINE__ size_t wasSize() const { return _internalDeque.size(); }
+  __JAFFAR_COMMON_INLINE__ size_t wasSize() const { return _internalDeque.size(); }
 
 private:
   /**
