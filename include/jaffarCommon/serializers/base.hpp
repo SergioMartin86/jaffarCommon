@@ -58,14 +58,14 @@ public:
    *
    * @return The size of the output data so far (at the end, this represents the output buffer size)
    */
-  __INLINE__ size_t getOutputSize() const { return _outputDataBufferPos; }
+  __JAFFARCOMMON__INLINE__ size_t getOutputSize() const { return _outputDataBufferPos; }
 
   /**
    *  The internally-stored output data buffer size
    *
    * @return A reference to the output data buffer
    */
-  __INLINE__ uint8_t* getOutputDataBuffer() const { return _outputDataBuffer; }
+  __JAFFARCOMMON__INLINE__ uint8_t* getOutputDataBuffer() const { return _outputDataBuffer; }
 
 protected:
   /**

@@ -29,7 +29,7 @@ namespace string
  * @param[out] result The storage where the substring collection wil be stored
  */
 template <typename Out>
-__INLINE__ void split(const std::string& s, char delim, Out result)
+__JAFFARCOMMON__INLINE__ void split(const std::string& s, char delim, Out result)
 {
   std::istringstream iss(s);
   std::string        item;
@@ -43,7 +43,7 @@ __INLINE__ void split(const std::string& s, char delim, Out result)
  * @param[in] delim The separator that divides the substrings
  * @return A vector containing all the substrings
  */
-__INLINE__ std::vector<std::string> split(const std::string& s, char delim)
+__JAFFARCOMMON__INLINE__ std::vector<std::string> split(const std::string& s, char delim)
 {
   std::string newString = s;
   std::replace(newString.begin(), newString.end(), '\n', delim);
@@ -59,7 +59,7 @@ __INLINE__ std::vector<std::string> split(const std::string& s, char delim)
  * @param[in] ... The arguments to the format string
  * @return The C++ string produced
  */
-__INLINE__ std::string formatString(const char* format, ...)
+__JAFFARCOMMON__INLINE__ std::string formatString(const char* format, ...)
 {
   char*   outstr = 0;
   va_list ap;
@@ -92,7 +92,7 @@ __INLINE__ std::string formatString(const char* format, ...)
  * @param[in] size Number of bytes in the input data
  * @return The C++ string produced
  */
-__INLINE__ std::string dumpBinary(const void* data, const size_t size)
+__JAFFARCOMMON__INLINE__ std::string dumpBinary(const void* data, const size_t size)
 {
   auto        input = (uint8_t*)data;
   std::string output;

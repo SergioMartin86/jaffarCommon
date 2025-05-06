@@ -27,7 +27,7 @@ typedef _uint128_t hash_t;
  * @param[in] string The input string
  * @return The SHA1 string of the input string
  */
-__INLINE__ std::string getSHA1String(const std::string& string) { return sha1::SHA1::GetHash((const uint8_t*)string.data(), string.size()); }
+__JAFFARCOMMON__INLINE__ std::string getSHA1String(const std::string& string) { return sha1::SHA1::GetHash((const uint8_t*)string.data(), string.size()); }
 
 /**
  * Calculates the 128 bit Metrohash of a given buffer
@@ -36,7 +36,7 @@ __INLINE__ std::string getSHA1String(const std::string& string) { return sha1::S
  * @param[in] size The size of the buffer to hash
  * @return The calculated 128-bit metro hash
  */
-__INLINE__ hash_t calculateMetroHash(const void* data, size_t size)
+__JAFFARCOMMON__INLINE__ hash_t calculateMetroHash(const void* data, size_t size)
 {
   MetroHash128 hash;
   hash.Update(data, size);
@@ -51,7 +51,7 @@ __INLINE__ hash_t calculateMetroHash(const void* data, size_t size)
  * @param[in] hash The hash value to stringify
  * @return The string containing the stringified hash, formatted as upper case hexadecimal
  */
-__INLINE__ std::string hashToString(const hash_t hash)
+__JAFFARCOMMON__INLINE__ std::string hashToString(const hash_t hash)
 {
   // Creating hash string
   char hashStringBuffer[256];
@@ -65,7 +65,7 @@ __INLINE__ std::string hashToString(const hash_t hash)
  * @param[in] string The string to calculate the hash for
  * @return The hash value of the provided string
  */
-__INLINE__ hash_t hashString(const std::string& string) { return calculateMetroHash(string.data(), string.size()); }
+__JAFFARCOMMON__INLINE__ hash_t hashString(const std::string& string) { return calculateMetroHash(string.data(), string.size()); }
 
 } // namespace hash
 

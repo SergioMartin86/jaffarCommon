@@ -47,7 +47,7 @@ public:
 
   ~Differential() = default;
 
-  __INLINE__ void pushContiguous(const void* const __restrict inputData = nullptr, const size_t inputDataSize = 0) override
+  __JAFFARCOMMON__INLINE__ void pushContiguous(const void* const __restrict inputData = nullptr, const size_t inputDataSize = 0) override
   {
     // Only perform memcpy if the output block is not null
     if (_outputDataBuffer != nullptr && inputData != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
@@ -66,7 +66,7 @@ public:
     _referenceDataBufferPos += inputDataSize;
   }
 
-  __INLINE__ void push(const void* const __restrict inputData, const size_t inputDataSize) override
+  __JAFFARCOMMON__INLINE__ void push(const void* const __restrict inputData, const size_t inputDataSize) override
   {
     // If output data buffer is null, then we simply ignore differential data.
     if (_outputDataBuffer == nullptr || inputData == nullptr) return;
