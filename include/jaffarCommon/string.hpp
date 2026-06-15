@@ -99,7 +99,7 @@ __JAFFAR_COMMON_INLINE__ std::string dumpBinary(const void* data, const size_t s
   for (size_t i = 0; i < size; i++)
   {
     char substr[16];
-    sprintf(substr, "%02X", input[i]);
+    snprintf(substr, sizeof(substr), "%02X", input[i]);
     output += std::string(substr);
   }
 

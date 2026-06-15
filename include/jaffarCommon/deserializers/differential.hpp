@@ -67,16 +67,17 @@ public:
   {
     if (outputDataBuffer == nullptr || _inputDataBuffer == nullptr) return;
 
-    // Reading differential outputDataBufferSize
-    usize_t diffCount = *(usize_t*)&_inputDataBuffer[_inputDataBufferPos];
-
     // Size of differential buffer size
     const size_t differentialBufferSize = sizeof(usize_t);
 
-    // If we reached maximum output, stop here
+    // If we reached maximum output, stop here -- this must be checked BEFORE reading diffCount below,
+    // otherwise we read out of bounds when positioned at the end of the input buffer
     if (_inputDataBufferPos + differentialBufferSize >= _inputDataBufferSize)
       JAFFAR_THROW_RUNTIME("[Error] Maximum input data position reached before differential buffer size decode (%lu + %lu > %lu)", _inputDataBufferPos, differentialBufferSize,
                            _inputDataBufferSize);
+
+    // Reading differential outputDataBufferSize
+    usize_t diffCount = *(usize_t*)&_inputDataBuffer[_inputDataBufferPos];
 
     // Advancing position pointer to store the difference outputDataBufferSizeer
     _inputDataBufferPos += differentialBufferSize;

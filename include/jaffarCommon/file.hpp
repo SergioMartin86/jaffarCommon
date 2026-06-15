@@ -125,9 +125,9 @@ public:
       return file->_errorCode;
     }
 
-    // Ensuring we don't exceed mem buffer size
+    // Ensuring we don't exceed mem buffer size (guarding against a zero element size to avoid division by zero)
     size_t newCount = count;
-    if (file->_head + (size * count) > file->_size) newCount = (file->_size - file->_head) / size;
+    if (size > 0 && file->_head + (size * count) > file->_size) newCount = (file->_size - file->_head) / size;
 
     // Getting requested size
     const size_t requestedSize = size * newCount;
@@ -500,9 +500,13 @@ private:
     // Duplicating new buffer size until the target fits
     while (newBufferSize < target) newBufferSize <<= 1;
 
-    // Reallocating buffer
+    // Reallocating buffer. Only commit the new pointer/size if realloc succeeds, so a failed
+    // reallocation leaves the original buffer (and its size) intact instead of leaking it and
+    // claiming a capacity the buffer does not actually have.
+    uint8_t* newBuffer = (uint8_t*)realloc(_buffer, newBufferSize);
+    if (newBuffer == nullptr) return;
+    _buffer     = newBuffer;
     _bufferSize = newBufferSize;
-    _buffer     = (uint8_t*)realloc(_buffer, newBufferSize);
   }
 
   /**

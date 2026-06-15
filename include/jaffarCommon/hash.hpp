@@ -55,7 +55,7 @@ __JAFFAR_COMMON_INLINE__ std::string hashToString(const hash_t hash)
 {
   // Creating hash string
   char hashStringBuffer[256];
-  sprintf(hashStringBuffer, "0x%016lX%016lX", hash.first, hash.second);
+  snprintf(hashStringBuffer, sizeof(hashStringBuffer), "0x%016lX%016lX", (unsigned long)hash.first, (unsigned long)hash.second);
   return std::string(hashStringBuffer);
 }
 

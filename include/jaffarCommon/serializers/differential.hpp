@@ -49,15 +49,16 @@ public:
 
   __JAFFAR_COMMON_INLINE__ void pushContiguous(const void* const __restrict inputData = nullptr, const size_t inputDataSize = 0) override
   {
-    // Only perform memcpy if the output block is not null
-    if (_outputDataBuffer != nullptr && inputData != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
-
-    // Making sure we do not exceed the maximum size estipulated
+    // Making sure we do not exceed the maximum size estipulated -- this must happen BEFORE the memcpy
+    // to actually prevent the overflow, not merely detect it after the buffer has been corrupted
     if (_outputDataBufferPos + inputDataSize > _outputDataBufferSize)
       JAFFAR_THROW_RUNTIME("Maximum output data position reached before contiguous serialization (%lu + %lu > %lu)", _outputDataBufferPos, inputDataSize, _outputDataBufferSize);
     if (_referenceDataBufferPos + inputDataSize > _referenceDataBufferSize)
       JAFFAR_THROW_RUNTIME("[Error] Maximum reference data position exceeded on contiguous deserialization (%lu + %lu > %lu)", _referenceDataBufferPos, inputDataSize,
                            _referenceDataBufferSize);
+
+    // Only perform memcpy if the output block is not null
+    if (_outputDataBuffer != nullptr && inputData != nullptr) memcpy(&_outputDataBuffer[_outputDataBufferPos], inputData, inputDataSize);
 
     // Moving output data pointer position
     _outputDataBufferPos += inputDataSize;
