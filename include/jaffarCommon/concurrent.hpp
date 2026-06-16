@@ -5,6 +5,7 @@
  * @brief Containers designed for fast parallel, mutual exclusive access
  */
 
+#include <atomic>
 #include <atomic_queue/include/atomic_queue/atomic_queue.h>
 #include <deque>
 #include <mutex>
@@ -67,7 +68,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); }
+  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); _size.fetch_add(1, std::memory_order_relaxed); }
 
   /**
    * Pushes an element to the back of the deque with locking protection
@@ -80,6 +81,7 @@ public:
   {
     _mutex.lock();
     _internalDeque.push_back(element);
+    _size.fetch_add(1, std::memory_order_relaxed);
     _mutex.unlock();
   }
 
@@ -90,7 +92,7 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON_INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); }
+  __JAFFAR_COMMON_INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); _size.fetch_add(1, std::memory_order_relaxed); }
 
   /**
    * Pushes an element to the front of the deque with locking protection
@@ -103,6 +105,7 @@ public:
   {
     _mutex.lock();
     _internalDeque.push_front(element);
+    _size.fetch_add(1, std::memory_order_relaxed);
     _mutex.unlock();
   }
 
@@ -136,6 +139,7 @@ public:
   {
     _mutex.lock();
     _internalDeque.pop_front();
+    _size.fetch_sub(1, std::memory_order_relaxed);
     _mutex.unlock();
   }
 
@@ -149,6 +153,7 @@ public:
   {
     _mutex.lock();
     _internalDeque.pop_back();
+    _size.fetch_sub(1, std::memory_order_relaxed);
     _mutex.unlock();
   }
 
@@ -171,6 +176,7 @@ public:
 
     element = _internalDeque.back();
     _internalDeque.pop_back();
+    _size.fetch_sub(1, std::memory_order_relaxed);
 
     _mutex.unlock();
     return true;
@@ -195,6 +201,7 @@ public:
 
     element = _internalDeque.front();
     _internalDeque.pop_front();
+    _size.fetch_sub(1, std::memory_order_relaxed);
 
     _mutex.unlock();
     return true;
@@ -203,16 +210,24 @@ public:
   /**
    * Retrieves the size of the container at the time of checking
    *
-   * @note This is not a thread safe operation
+   * @note Reads an atomic counter rather than std::deque::size(), so it is safe to call
+   *       concurrently with pushes/pops (the size may be momentarily stale, but it will not
+   *       crash by walking deque internals that another thread is mutating).
    * @return The current size of the Deque at the time of checking
    */
-  __JAFFAR_COMMON_INLINE__ size_t wasSize() const { return _internalDeque.size(); }
+  __JAFFAR_COMMON_INLINE__ size_t wasSize() const { return _size.load(std::memory_order_relaxed); }
 
 private:
   /**
    * Internal mutual exclusion mechanism
    */
   std::mutex _mutex;
+
+  /**
+   * Element count, maintained atomically alongside every push/pop so that wasSize() can be read
+   * concurrently without touching the (non-thread-safe) std::deque internals.
+   */
+  std::atomic<size_t> _size{0};
 
   /**
    * Internal storage for the Deque
