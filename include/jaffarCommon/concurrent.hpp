@@ -7,6 +7,9 @@
 
 #include <atomic>
 #include <atomic_queue/include/atomic_queue/atomic_queue.h>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <deque>
 #include <mutex>
 #include <oneapi/tbb/concurrent_map.h>
@@ -18,6 +21,152 @@ namespace jaffarCommon
 
 namespace concurrent
 {
+
+/**
+ * A fixed-capacity buffer specialized for a fill-once / drain-from-both-ends lifecycle, with a
+ * lock-free concurrent drain phase.
+ *
+ * It is built for the pattern where one phase fills the buffer single-threaded (no contention),
+ * a barrier follows, and then many threads concurrently consume the elements -- most pulling
+ * batches from the front, a few pulling single elements from the back -- until it is empty. There
+ * is never a push concurrent with a pop. (This is exactly how a best-first search step works: the
+ * ordered set of states for the step is laid down once, then worker threads drain it.)
+ *
+ * Versus a mutex-guarded std::deque this wins three ways: the fill is a plain sequential store with
+ * no per-element allocation; the storage is contiguous, so the concurrent drain is cache- and
+ * prefetcher-friendly; and front/back claiming is lock-free (a single CAS) instead of taking a
+ * mutex. Both ends are claimed by advancing counters packed into one 64-bit atomic, so a front and
+ * a back claim can never alias the same slot. Indices only grow within a step and are reset
+ * (clear()) only while the buffer is quiescent, so there is no ABA hazard.
+ *
+ * @note Capacity is fixed at reserve() time; the fill phase must not exceed it. Capacity is limited
+ *       to UINT32_MAX elements (the claim counters are 32-bit halves).
+ */
+template <class T>
+class DrainBuffer
+{
+public:
+  DrainBuffer() = default;
+  ~DrainBuffer()
+  {
+    if (_buffer != nullptr) free(_buffer);
+  }
+
+  /**
+   * Allocates the backing storage. Must be called once before use.
+   * @param[in] capacity Maximum number of elements the buffer will ever hold in a single fill phase
+   */
+  __JAFFAR_COMMON_INLINE__ void reserve(const size_t capacity)
+  {
+    _capacity = capacity;
+    _buffer   = (T*)malloc(capacity * sizeof(T));
+  }
+
+  /**
+   * Resets the buffer to empty for a new fill phase. Must be called while quiescent (no concurrent
+   * drain in flight), e.g. right before the single-threaded fill of the next step.
+   */
+  __JAFFAR_COMMON_INLINE__ void clear()
+  {
+    _count = 0;
+    _claim.store(0, std::memory_order_relaxed);
+  }
+
+  /**
+   * Appends an element during the (single-threaded) fill phase.
+   *
+   * @note Not thread safe -- intended to be called by a single filler thread between clear() and
+   *       the start of the concurrent drain.
+   */
+  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element) { _buffer[_count++] = element; }
+
+  /**
+   * Claims up to maxCount elements from the front in a single lock-free step, copying them into the
+   * provided buffer in front-to-back order.
+   *
+   * @param[out] elements Destination buffer; room for at least maxCount elements
+   * @param[in] maxCount Maximum number of elements to claim
+   * @return The number of elements actually claimed (0 if empty)
+   */
+  __JAFFAR_COMMON_INLINE__ size_t pop_front_get_batch(T* elements, const size_t maxCount)
+  {
+    uint64_t observed = _claim.load(std::memory_order_acquire);
+    uint64_t desired;
+    uint32_t front;
+    size_t   take;
+    do {
+      front              = (uint32_t)(observed & 0xFFFFFFFFULL);
+      const uint32_t back = (uint32_t)(observed >> 32);
+      if ((size_t)front + (size_t)back >= _count) return 0; // empty
+      const size_t available = _count - (size_t)front - (size_t)back;
+      take                    = maxCount < available ? maxCount : available;
+      desired                 = (observed & 0xFFFFFFFF00000000ULL) | (uint64_t)(front + (uint32_t)take);
+    } while (_claim.compare_exchange_weak(observed, desired, std::memory_order_acq_rel, std::memory_order_acquire) == false);
+
+    memcpy(elements, &_buffer[front], take * sizeof(T));
+    return take;
+  }
+
+  /**
+   * Claims a single element from the front. Lock-free.
+   * @param[out] element Storage for the claimed element
+   * @return True if an element was claimed; false if empty
+   */
+  __JAFFAR_COMMON_INLINE__ bool pop_front_get(T& element) { return pop_front_get_batch(&element, 1) == 1; }
+
+  /**
+   * Claims a single element from the back. Lock-free.
+   * @param[out] element Storage for the claimed element
+   * @return True if an element was claimed; false if empty
+   */
+  __JAFFAR_COMMON_INLINE__ bool pop_back_get(T& element)
+  {
+    uint64_t observed = _claim.load(std::memory_order_acquire);
+    uint64_t desired;
+    uint32_t back;
+    do {
+      const uint32_t front = (uint32_t)(observed & 0xFFFFFFFFULL);
+      back                 = (uint32_t)(observed >> 32);
+      if ((size_t)front + (size_t)back >= _count) return false; // empty
+      desired = (observed & 0x00000000FFFFFFFFULL) | ((uint64_t)(back + 1) << 32);
+    } while (_claim.compare_exchange_weak(observed, desired, std::memory_order_acq_rel, std::memory_order_acquire) == false);
+
+    element = _buffer[_count - 1 - (size_t)back];
+    return true;
+  }
+
+  /**
+   * Number of elements not yet claimed, at the time of checking. Safe to call concurrently.
+   */
+  __JAFFAR_COMMON_INLINE__ size_t wasSize() const
+  {
+    const uint64_t observed = _claim.load(std::memory_order_relaxed);
+    const size_t   claimed  = (size_t)(observed & 0xFFFFFFFFULL) + (size_t)(observed >> 32);
+    return claimed >= _count ? 0 : _count - claimed;
+  }
+
+private:
+  /**
+   * Contiguous backing storage, allocated once by reserve()
+   */
+  T* _buffer = nullptr;
+
+  /**
+   * Allocated capacity (elements)
+   */
+  size_t _capacity = 0;
+
+  /**
+   * Number of elements filled in the current phase (written single-threaded during fill)
+   */
+  size_t _count = 0;
+
+  /**
+   * Packed claim counters: low 32 bits = elements claimed from the front, high 32 bits = elements
+   * claimed from the back. A single atomic so front/back claims can't race onto the same slot.
+   */
+  std::atomic<uint64_t> _claim{0};
+};
 
 /**
  * Definition for an atomic queue. It enables lock-free concurrent push and pop operations.
@@ -205,6 +354,37 @@ public:
 
     _mutex.unlock();
     return true;
+  }
+
+  /**
+   * Pops (removes) up to maxCount elements from the front of the Deque under a single lock
+   * acquisition, copying them into the provided buffer in front-to-back order.
+   *
+   * @note This is a thread safe operation.
+   *
+   * Batching amortizes the mutex cost across many elements. Under heavy multi-consumer contention
+   * (dozens of threads each pulling one element at a time, as the Jaffar engine does when the
+   * per-element work is cheap) the lock/unlock pair -- not the pop itself -- dominates wall time.
+   * Grabbing a run of elements per lock cuts lock-acquisition traffic by up to maxCount.
+   *
+   * @param[out] elements Destination buffer; must have room for at least maxCount elements
+   * @param[in] maxCount Maximum number of elements to pop
+   * @return The number of elements actually popped (0 if the Deque was empty)
+   */
+  __JAFFAR_COMMON_INLINE__ size_t pop_front_get_batch(T* elements, const size_t maxCount)
+  {
+    _mutex.lock();
+
+    size_t count = 0;
+    while (count < maxCount && _internalDeque.empty() == false)
+    {
+      elements[count++] = _internalDeque.front();
+      _internalDeque.pop_front();
+    }
+    if (count > 0) _size.fetch_sub(count, std::memory_order_relaxed);
+
+    _mutex.unlock();
+    return count;
   }
 
   /**
