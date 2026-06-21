@@ -8,6 +8,10 @@ Library of common functionalities used throughout most of my repositories
 
 https://sergiomartin86.github.io/jaffarCommon
 
+## Development note
+
+Parts of this library were developed with the assistance of AI tools (Anthropic's Claude / Claude Code).
+
 ## License
 
 Developed and Maintained by Sergio Martin (eien86)
