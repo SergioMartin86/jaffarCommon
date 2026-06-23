@@ -128,9 +128,13 @@ __JAFFAR_COMMON_INLINE__ const bool getBoolean(const object& json, const std::st
 }
 
 /**
- * Consuming variants of the getters: read the value as the corresponding get*() function, then
- * erase the key from the (mutable) json object. After a parser has read every key it recognizes
- * with these, any keys left in the object are unrecognized -- pass the object to checkEmpty().
+ * Consuming variant of getString(): reads the string value, then erases the key from the
+ * (mutable) json object. After a parser has read every key it recognizes with the pop*()
+ * functions, any keys left in the object are unrecognized -- pass the object to checkEmpty().
+ *
+ * @param[in,out] json The json object to read from and erase the key from
+ * @param[in] key The key to read and erase
+ * @return The string stored in the key entry
  */
 __JAFFAR_COMMON_INLINE__ const std::string popString(object& json, const std::string& key)
 {
@@ -139,7 +143,13 @@ __JAFFAR_COMMON_INLINE__ const std::string popString(object& json, const std::st
   return value;
 }
 
-/// @brief Like getObject(), but returns a copy and erases the key from the parent. See popString().
+/**
+ * Like getObject(), but returns a copy and erases the key from the parent. See popString().
+ *
+ * @param[in,out] json The json object to read from and erase the key from
+ * @param[in] key The key to read and erase
+ * @return A copy of the object stored in the key entry
+ */
 __JAFFAR_COMMON_INLINE__ const object popObject(object& json, const std::string& key)
 {
   const object value = getObject(json, key);
@@ -147,7 +157,13 @@ __JAFFAR_COMMON_INLINE__ const object popObject(object& json, const std::string&
   return value;
 }
 
-/// @brief Like getArray(), but erases the key from the json object. See popString().
+/**
+ * Like getArray(), but erases the key from the json object. See popString().
+ *
+ * @param[in,out] json The json object to read from and erase the key from
+ * @param[in] key The key to read and erase
+ * @return The array stored in the key entry
+ */
 template <typename T>
 __JAFFAR_COMMON_INLINE__ const std::vector<T> popArray(object& json, const std::string& key)
 {
@@ -156,7 +172,13 @@ __JAFFAR_COMMON_INLINE__ const std::vector<T> popArray(object& json, const std::
   return value;
 }
 
-/// @brief Like getNumber(), but erases the key from the json object. See popString().
+/**
+ * Like getNumber(), but erases the key from the json object. See popString().
+ *
+ * @param[in,out] json The json object to read from and erase the key from
+ * @param[in] key The key to read and erase
+ * @return The number stored in the key entry
+ */
 template <typename T>
 __JAFFAR_COMMON_INLINE__ const T popNumber(object& json, const std::string& key)
 {
@@ -165,7 +187,13 @@ __JAFFAR_COMMON_INLINE__ const T popNumber(object& json, const std::string& key)
   return value;
 }
 
-/// @brief Like getBoolean(), but erases the key from the json object. See popString().
+/**
+ * Like getBoolean(), but erases the key from the json object. See popString().
+ *
+ * @param[in,out] json The json object to read from and erase the key from
+ * @param[in] key The key to read and erase
+ * @return The boolean stored in the key entry
+ */
 __JAFFAR_COMMON_INLINE__ const bool popBoolean(object& json, const std::string& key)
 {
   const bool value = getBoolean(json, key);

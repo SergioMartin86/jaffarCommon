@@ -9,7 +9,7 @@
  * Motivation: a best-first search keeps a large frontier of states, each of which needs to remember the
  * path (sequence of moves/inputs) that produced it. Storing the whole path in every state duplicates the
  * long prefixes that sibling states share. This trie stores each path once: a state keeps only a 4-byte
- * @ref nodeId_t, and `extend(parent, element)` adds one element on top of an existing path. Nodes are
+ * @c nodeId_t, and `extend(parent, element)` adds one element on top of an existing path. Nodes are
  * reference counted so the structure stays bounded by the paths of *live* states: when the last holder of
  * a leaf releases it, the leaf (and any ancestors that become childless and unreferenced) are recycled.
  *
@@ -53,6 +53,7 @@ public:
 
   /**
    * @brief Constructs an empty trie containing only @ref ROOT.
+   * @param numShards Number of independent free-list shards used to reduce contention (default 1).
    * @param chunkSizeLog2 Log2 of the number of nodes per storage chunk (default 2^20 nodes/chunk).
    */
   explicit SequenceTrie(uint32_t numShards = 1, uint32_t chunkSizeLog2 = 20)
@@ -86,6 +87,7 @@ public:
    * @brief Appends @p element after @p parent, returning a handle to the new sequence.
    * @param parent A node the caller holds a reference to (e.g. ROOT, or a state's stored node).
    * @param element The element to append.
+   * @param shard Free-list shard to allocate the new node from (default 0).
    * @return The new node, carrying one reference owned by the caller (balance with @ref release).
    * @details Thread-safe. The new node adds a child link to @p parent, which keeps @p parent alive for
    * at least as long as the new node.
@@ -103,11 +105,16 @@ public:
     return id;
   }
 
-  /// @brief Adds one reference to @p id (when a new holder starts referencing it). Thread-safe.
+  /**
+   * @brief Adds one reference to @p id (when a new holder starts referencing it). Thread-safe.
+   * @param id The node to add a reference to.
+   */
   void acquire(nodeId_t id) { node(id).refCount.fetch_add(1, std::memory_order_relaxed); }
 
   /**
    * @brief Drops one reference from @p id. Thread-safe.
+   * @param id The node to drop a reference from.
+   * @param shard Free-list shard that recycled node slots are returned to (default 0).
    * @details When a node's reference count reaches zero (no holders and no children) it is recycled and
    * the drop cascades to its parent (whose child edge just disappeared). ROOT's permanent reference keeps
    * the cascade from ever freeing it.
@@ -143,7 +150,11 @@ public:
     std::reverse(out.begin(), out.end());
   }
 
-  /// @brief Number of elements from ROOT to @p id (its depth in the trie).
+  /**
+   * @brief Number of elements from ROOT to @p id (its depth in the trie).
+   * @param id The node whose depth is measured.
+   * @return The number of elements on the path from ROOT to @p id.
+   */
   size_t getDepth(nodeId_t id) const
   {
     size_t d = 0;
@@ -151,11 +162,17 @@ public:
     return d;
   }
 
-  /// @brief Total node slots ever bump-allocated (high-water of simultaneously-live nodes, since freed
-  /// nodes are recycled before fresh ids are bumped). A good proxy for the trie's resident memory.
+  /**
+   * @brief Total node slots ever bump-allocated (high-water of simultaneously-live nodes, since freed
+   * nodes are recycled before fresh ids are bumped). A good proxy for the trie's resident memory.
+   * @return The number of node slots ever bump-allocated.
+   */
   size_t getAllocatedNodeCount() const { return _bump.load(std::memory_order_relaxed); }
 
-  /// @brief Approximate resident memory of the trie's node storage, in bytes.
+  /**
+   * @brief Approximate resident memory of the trie's node storage, in bytes.
+   * @return The approximate node-storage footprint in bytes.
+   */
   size_t getApproxMemoryBytes() const { return getAllocatedNodeCount() * sizeof(Node); }
 
 private:

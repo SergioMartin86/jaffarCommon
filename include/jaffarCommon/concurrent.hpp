@@ -75,6 +75,8 @@ public:
   /**
    * Appends an element during the (single-threaded) fill phase.
    *
+   * @param[in] element The element to append to the buffer
+   *
    * @note Not thread safe -- intended to be called by a single filler thread between clear() and
    *       the start of the concurrent drain.
    */
@@ -137,6 +139,8 @@ public:
 
   /**
    * Number of elements not yet claimed, at the time of checking. Safe to call concurrently.
+   *
+   * @return The number of elements not yet claimed at the moment of the call
    */
   __JAFFAR_COMMON_INLINE__ size_t wasSize() const
   {
