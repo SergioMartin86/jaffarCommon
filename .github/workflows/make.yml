@@ -26,7 +26,9 @@ jobs:
     - name: Installing meson and ninja
       run: python3 -m pip install meson ninja
     - name: Installing apt packages
-      run: sudo apt install libgtest-dev gcovr libtbb-dev libsdl2-dev libsdl2-image-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev gcovr libtbb-dev libsdl2-dev libsdl2-image-dev
     - name: Run meson configuration
       run: meson setup build -Dbuildtype=debug -Db_coverage=true
     - name: Building project
@@ -58,7 +60,10 @@ jobs:
       with:
         submodules: recursive
     - name: Installing apt packages
-      run: sudo apt install clang-format doxygen graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format-14 doxygen graphviz
+        sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-14 100
     - name: Checking proper code styling
       run:  .build-tools/check-style.sh check include
     - name: Building documentation
