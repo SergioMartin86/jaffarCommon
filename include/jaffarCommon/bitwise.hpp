@@ -38,7 +38,7 @@ inline constexpr uint8_t bitNotMaskTable[8] = {0b11111110, 0b11111101, 0b1111101
  * @param[in] elementBitSize The size of each element (expressed in bits)
  */
 __JAFFAR_COMMON_INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBufferSize, const size_t dstBufferOffset, const void* srcBufferPtr, const size_t srcBufferSize,
-                                       const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
+                                      const size_t srcBufferOffset, const size_t count, const size_t elementBitSize)
 {
   if (elementBitSize == 0) JAFFAR_THROW_LOGIC("Element bit size must be a positive number greater than zero");
 
@@ -56,12 +56,12 @@ __JAFFAR_COMMON_INLINE__ void bitcopy(void* dstBufferPtr, const size_t dstBuffer
   if (srcOffsetBits + totalBitCount > srcBufferSizeBits)
     JAFFAR_THROW_LOGIC("The operation will overflow source buffer (%lu + %lu > %lu)", srcOffsetBits, totalBitCount, srcBufferSizeBits);
 
-  uint8_t*       dstBuffer     = (uint8_t*)dstBufferPtr;
-  const uint8_t* srcBuffer     = (const uint8_t*)srcBufferPtr;
-  size_t         dstPosByte    = dstOffsetBits / 8;
-  uint8_t        dstPosBit     = dstOffsetBits % 8;
-  size_t         srcPosByte    = srcOffsetBits / 8;
-  uint8_t        srcPosBit     = srcOffsetBits % 8;
+  uint8_t*       dstBuffer  = (uint8_t*)dstBufferPtr;
+  const uint8_t* srcBuffer  = (const uint8_t*)srcBufferPtr;
+  size_t         dstPosByte = dstOffsetBits / 8;
+  uint8_t        dstPosBit  = dstOffsetBits % 8;
+  size_t         srcPosByte = srcOffsetBits / 8;
+  uint8_t        srcPosBit  = srcOffsetBits % 8;
 
   for (size_t i = 0; i < totalBitCount; i++)
   {

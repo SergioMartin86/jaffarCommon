@@ -64,9 +64,9 @@ public:
 
     // Allocate ROOT (id 0). It carries a permanent self-reference so it is never recycled.
     const nodeId_t root = allocNode(0);
-    Node& r            = node(root);
-    r.parent           = NONE;
-    r.element          = Element{};
+    Node&          r    = node(root);
+    r.parent            = NONE;
+    r.element           = Element{};
     r.refCount.store(1, std::memory_order_relaxed);
   }
 
@@ -169,10 +169,7 @@ private:
   // Fixed cap on chunks so the chunk-pointer array never reallocates (handles stay valid lock-free).
   static constexpr size_t MAX_CHUNKS = 4096;
 
-  __attribute__((always_inline)) Node& node(nodeId_t id) const
-  {
-    return _chunks[id >> _chunkBits].load(std::memory_order_acquire)[id & _chunkMask];
-  }
+  __attribute__((always_inline)) Node& node(nodeId_t id) const { return _chunks[id >> _chunkBits].load(std::memory_order_acquire)[id & _chunkMask]; }
 
   // Obtain a node slot: reuse one recycled into this shard's (thread-private) free list if available,
   // otherwise bump-allocate a fresh id. The per-shard free list needs no atomics because a given shard

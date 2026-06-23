@@ -95,12 +95,12 @@ public:
     uint32_t front;
     size_t   take;
     do {
-      front              = (uint32_t)(observed & 0xFFFFFFFFULL);
+      front               = (uint32_t)(observed & 0xFFFFFFFFULL);
       const uint32_t back = (uint32_t)(observed >> 32);
       if ((size_t)front + (size_t)back >= _count) return 0; // empty
       const size_t available = _count - (size_t)front - (size_t)back;
-      take                    = maxCount < available ? maxCount : available;
-      desired                 = (observed & 0xFFFFFFFF00000000ULL) | (uint64_t)(front + (uint32_t)take);
+      take                   = maxCount < available ? maxCount : available;
+      desired                = (observed & 0xFFFFFFFF00000000ULL) | (uint64_t)(front + (uint32_t)take);
     } while (_claim.compare_exchange_weak(observed, desired, std::memory_order_acq_rel, std::memory_order_acquire) == false);
 
     memcpy(elements, &_buffer[front], take * sizeof(T));
@@ -217,7 +217,11 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element) { _internalDeque.push_back(element); _size.fetch_add(1, std::memory_order_relaxed); }
+  __JAFFAR_COMMON_INLINE__ void push_back_no_lock(T element)
+  {
+    _internalDeque.push_back(element);
+    _size.fetch_add(1, std::memory_order_relaxed);
+  }
 
   /**
    * Pushes an element to the back of the deque with locking protection
@@ -241,7 +245,11 @@ public:
    *
    * @param[in] element The input element to push
    */
-  __JAFFAR_COMMON_INLINE__ void push_front_no_lock(T element) { _internalDeque.push_front(element); _size.fetch_add(1, std::memory_order_relaxed); }
+  __JAFFAR_COMMON_INLINE__ void push_front_no_lock(T element)
+  {
+    _internalDeque.push_front(element);
+    _size.fetch_add(1, std::memory_order_relaxed);
+  }
 
   /**
    * Pushes an element to the front of the deque with locking protection
