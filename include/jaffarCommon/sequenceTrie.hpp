@@ -177,9 +177,10 @@ public:
 
   /**
    * @brief Hard upper bound on the trie's node storage, in bytes: the most it can ever occupy before
-   *        @ref allocNode throws "exceeded maximum capacity". The live trie is otherwise unbounded (it
+   *        node allocation throws "exceeded maximum capacity". The live trie is otherwise unbounded (it
    *        grows ~ live-states x depth), so callers that must reserve RAM up front (e.g. the engine's
    *        memory guard) use this fixed ceiling. = MAX_CHUNKS * nodes-per-chunk * sizeof(Node).
+   * @return The hard upper bound on the trie's node-storage footprint, in bytes.
    */
   size_t getMaxMemoryBytes() const { return MAX_CHUNKS * (size_t)_chunkSize * sizeof(Node); }
 
