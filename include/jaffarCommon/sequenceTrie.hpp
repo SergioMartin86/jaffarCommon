@@ -138,7 +138,8 @@ public:
    * @param id  A node the caller keeps alive for the duration of the call.
    * @param out Cleared and filled with the sequence (ROOT contributes no element).
    */
-  template <typename OutElem = Element> void reconstruct(nodeId_t id, std::vector<OutElem>& out) const
+  template <typename OutElem = Element>
+  void reconstruct(nodeId_t id, std::vector<OutElem>& out) const
   {
     out.clear();
     for (nodeId_t cur = id; cur != ROOT && cur != NONE;)
