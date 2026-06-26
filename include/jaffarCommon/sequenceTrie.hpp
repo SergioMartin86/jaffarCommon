@@ -101,7 +101,7 @@ public:
     n.refCount.store(1, std::memory_order_relaxed); // the caller's reference
 
     // Account for the new child edge on the parent (kept alive by its children).
-    node(parent).refCount.fetch_add(1, std::memory_order_relaxed);
+    incRef(node(parent));
     return id;
   }
 
@@ -109,7 +109,7 @@ public:
    * @brief Adds one reference to @p id (when a new holder starts referencing it). Thread-safe.
    * @param id The node to add a reference to.
    */
-  void acquire(nodeId_t id) { node(id).refCount.fetch_add(1, std::memory_order_relaxed); }
+  void acquire(nodeId_t id) { incRef(node(id)); }
 
   /**
    * @brief Drops one reference from @p id. Thread-safe.
@@ -138,13 +138,13 @@ public:
    * @param id  A node the caller keeps alive for the duration of the call.
    * @param out Cleared and filled with the sequence (ROOT contributes no element).
    */
-  void reconstruct(nodeId_t id, std::vector<Element>& out) const
+  template <typename OutElem = Element> void reconstruct(nodeId_t id, std::vector<OutElem>& out) const
   {
     out.clear();
     for (nodeId_t cur = id; cur != ROOT && cur != NONE;)
     {
       const Node& n = node(cur);
-      out.push_back(n.element);
+      out.push_back(static_cast<OutElem>(n.element)); // widen the 16-bit stored element to the caller's type
       cur = n.parent;
     }
     std::reverse(out.begin(), out.end());
@@ -175,18 +175,40 @@ public:
    */
   size_t getApproxMemoryBytes() const { return getAllocatedNodeCount() * sizeof(Node); }
 
+  /**
+   * @brief Hard upper bound on the trie's node storage, in bytes: the most it can ever occupy before
+   *        @ref allocNode throws "exceeded maximum capacity". The live trie is otherwise unbounded (it
+   *        grows ~ live-states x depth), so callers that must reserve RAM up front (e.g. the engine's
+   *        memory guard) use this fixed ceiling. = MAX_CHUNKS * nodes-per-chunk * sizeof(Node).
+   */
+  size_t getMaxMemoryBytes() const { return MAX_CHUNKS * (size_t)_chunkSize * sizeof(Node); }
+
 private:
   struct Node
   {
     uint32_t              parent;   ///< Parent node id when live; next-free id when on the free list.
     Element               element;  ///< The element on the edge from parent to this node.
-    std::atomic<uint32_t> refCount; ///< (# external holders) + (# child edges). Zero => recyclable.
+    std::atomic<uint16_t> refCount; ///< (# external holders) + (# child edges). Zero => recyclable. 16-bit:
+                                    ///< this is a node's local out-degree + holders (never its subtree
+                                    ///< size), bounded by the input-set size; @ref incRef guards overflow.
   };
 
   // Fixed cap on chunks so the chunk-pointer array never reallocates (handles stay valid lock-free).
   static constexpr size_t MAX_CHUNKS = 4096;
 
   __attribute__((always_inline)) Node& node(nodeId_t id) const { return _chunks[id >> _chunkBits].load(std::memory_order_acquire)[id & _chunkMask]; }
+
+  /// @brief Adds one reference, guarding the 16-bit refCount width. A node's refCount is its local
+  /// out-degree plus the few holders pointing at it (NOT its subtree size), so it is bounded by the
+  /// input-set size and never approaches 65535 in practice; this guard turns a would-be silent
+  /// wraparound (which would prematurely free a live node) into a hard error.
+  __attribute__((always_inline)) void incRef(Node& n) const
+  {
+    if (n.refCount.fetch_add(1, std::memory_order_relaxed) == UINT16_MAX)
+      JAFFAR_THROW_RUNTIME("SequenceTrie node refCount overflowed 16 bits (out-degree + holders > %u); the "
+                           "input set is too large for the 16-bit-refCount trie node.",
+                           (unsigned)UINT16_MAX);
+  }
 
   // Obtain a node slot: reuse one recycled into this shard's (thread-private) free list if available,
   // otherwise bump-allocate a fresh id. The per-shard free list needs no atomics because a given shard
