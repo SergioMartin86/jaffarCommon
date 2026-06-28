@@ -8,7 +8,7 @@
  *
  * Motivation: a best-first search keeps a large frontier of states, each of which needs to remember the
  * path (sequence of moves/inputs) that produced it. Storing the whole path in every state duplicates the
- * long prefixes that sibling states share. This trie stores each path once: a state keeps only a 4-byte
+ * long prefixes that sibling states share. This trie stores each path once: a state keeps only an 8-byte
  * @c nodeId_t, and `extend(parent, element)` adds one element on top of an existing path. Nodes are
  * reference counted so the structure stays bounded by the paths of *live* states: when the last holder of
  * a leaf releases it, the leaf (and any ancestors that become childless and unreferenced) are recycled.
@@ -43,13 +43,16 @@ class SequenceTrie
 {
 public:
   /// @brief Handle identifying a node (a stored sequence). Stable for the node's lifetime.
-  using nodeId_t = uint32_t;
+  /// 64-bit so the node-id space (and thus the live-node ceiling) exceeds 2^32: a deep, many-state
+  /// search (e.g. a full-race input trie) accumulates more than 4.29 B path nodes. Widening this to
+  /// uint64 grows Node from 8 to 16 bytes (the `parent` field), so the trie costs ~2x RAM per node.
+  using nodeId_t = uint64_t;
 
   /// @brief The empty sequence. Always valid, never recycled; the base of every path.
   static constexpr nodeId_t ROOT = 0;
 
   /// @brief Sentinel for "no node" (also the free-list terminator).
-  static constexpr nodeId_t NONE = 0xFFFFFFFFu;
+  static constexpr nodeId_t NONE = 0xFFFFFFFFFFFFFFFFull;
 
   /**
    * @brief Constructs an empty trie containing only @ref ROOT.
@@ -95,9 +98,10 @@ public:
   nodeId_t extend(nodeId_t parent, Element element, uint32_t shard = 0)
   {
     const nodeId_t id = allocNode(shard);
-    Node&          n  = node(id);
-    n.parent          = parent;
-    n.element         = element;
+    if (id == NONE) return NONE; // trie exhausted (hard ceiling): propagate "couldn't store" to the caller
+    Node& n   = node(id);
+    n.parent  = parent;
+    n.element = element;
     n.refCount.store(1, std::memory_order_relaxed); // the caller's reference
 
     // Account for the new child edge on the parent (kept alive by its children).
@@ -185,10 +189,15 @@ public:
    */
   size_t getMaxMemoryBytes() const { return MAX_CHUNKS * (size_t)_chunkSize * sizeof(Node); }
 
+  /// @brief True once node allocation has hit the hard capacity ceiling (@ref getMaxMemoryBytes). Latched
+  /// and never cleared. After this, @ref extend returns @ref NONE ("couldn't store") instead of throwing,
+  /// so a caller (e.g. a search driver) can poll this and stop the run gracefully rather than terminate.
+  bool isExhausted() const { return _exhausted.load(std::memory_order_relaxed); }
+
 private:
   struct Node
   {
-    uint32_t              parent;   ///< Parent node id when live; next-free id when on the free list.
+    nodeId_t              parent;   ///< Parent node id when live; next-free id when on the free list.
     Element               element;  ///< The element on the edge from parent to this node.
     std::atomic<uint16_t> refCount; ///< (# external holders) + (# child edges). Zero => recyclable. 16-bit:
                                     ///< this is a node's local out-degree + holders (never its subtree
@@ -196,7 +205,9 @@ private:
   };
 
   // Fixed cap on chunks so the chunk-pointer array never reallocates (handles stay valid lock-free).
-  static constexpr size_t MAX_CHUNKS = 4096;
+  // 24576 chunks x 2^20 nodes x 16 B/node => a ~384 GiB hard ceiling (the engine memory guard reserves
+  // this). With 64-bit node ids the count is no longer 2^32-bound; physical RAM is the practical limit.
+  static constexpr size_t MAX_CHUNKS = 24576;
 
   __attribute__((always_inline)) Node& node(nodeId_t id) const { return _chunks[id >> _chunkBits].load(std::memory_order_acquire)[id & _chunkMask]; }
 
@@ -229,7 +240,15 @@ private:
     // Free list empty: bump-allocate a fresh id, faulting in its chunk on first use.
     const nodeId_t id    = (nodeId_t)_bump.fetch_add(1, std::memory_order_relaxed);
     const size_t   chunk = id >> _chunkBits;
-    if (chunk >= MAX_CHUNKS) JAFFAR_THROW_RUNTIME("SequenceTrie exceeded its maximum capacity (%zu chunks)", MAX_CHUNKS);
+    // Capacity reached: do NOT throw here. This runs inside the parallel search region across many worker
+    // threads; a throw escaping an OpenMP region calls std::terminate (often "terminate called recursively"
+    // as every thread throws at once). Instead, latch an exhausted flag and return NONE -- callers (extend)
+    // propagate NONE as "couldn't store", and the driver polls isExhausted() to stop the run gracefully.
+    if (chunk >= MAX_CHUNKS)
+    {
+      _exhausted.store(true, std::memory_order_relaxed);
+      return NONE;
+    }
     if (_chunks[chunk].load(std::memory_order_acquire) == nullptr) ensureChunk(chunk);
     return id;
   }
@@ -264,6 +283,7 @@ private:
   std::atomic<uint64_t>                              _bump; ///< Next fresh node id (only touched when a shard's free list is empty).
   std::vector<FreeShard>                             _shards;
   std::mutex                                         _growMutex;
+  std::atomic<bool>                                  _exhausted{false}; ///< Latched when the node-id ceiling is hit (see @ref isExhausted).
 };
 
 } // namespace sequenceTrie

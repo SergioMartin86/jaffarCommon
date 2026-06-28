@@ -16,6 +16,7 @@ unitTestSet = [
   'string',
   'timing',
   'serialization',
+  'sequenceTrie',
   'dethreader'
 ]
 
