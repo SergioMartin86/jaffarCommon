@@ -12,6 +12,7 @@
 #include <cstring>
 #include <deque>
 #include <mutex>
+#include <new>
 #include <oneapi/tbb/concurrent_map.h>
 #include <phmap/parallel_hashmap/phmap.h>
 #include <stddef.h>
@@ -55,11 +56,13 @@ public:
   /**
    * Allocates the backing storage. Must be called once before use.
    * @param[in] capacity Maximum number of elements the buffer will ever hold in a single fill phase
+   * @throws std::bad_alloc if the storage cannot be allocated
    */
   __JAFFAR_COMMON_INLINE__ void reserve(const size_t capacity)
   {
     _capacity = capacity;
     _buffer   = (T*)malloc(capacity * sizeof(T));
+    if (_buffer == nullptr && capacity > 0) throw std::bad_alloc();
   }
 
   /**
@@ -117,25 +120,38 @@ public:
   __JAFFAR_COMMON_INLINE__ bool pop_front_get(T& element) { return pop_front_get_batch(&element, 1) == 1; }
 
   /**
-   * Claims a single element from the back. Lock-free.
-   * @param[out] element Storage for the claimed element
-   * @return True if an element was claimed; false if empty
+   * Claims up to maxCount elements from the back in a single lock-free step, copying them into the
+   * provided buffer in back-to-front order (the last element of the buffer first).
+   *
+   * @param[out] elements Destination buffer; room for at least maxCount elements
+   * @param[in] maxCount Maximum number of elements to claim
+   * @return The number of elements actually claimed (0 if empty)
    */
-  __JAFFAR_COMMON_INLINE__ bool pop_back_get(T& element)
+  __JAFFAR_COMMON_INLINE__ size_t pop_back_get_batch(T* elements, const size_t maxCount)
   {
     uint64_t observed = _claim.load(std::memory_order_acquire);
     uint64_t desired;
     uint32_t back;
+    size_t   take;
     do {
       const uint32_t front = (uint32_t)(observed & 0xFFFFFFFFULL);
       back                 = (uint32_t)(observed >> 32);
-      if ((size_t)front + (size_t)back >= _count) return false; // empty
-      desired = (observed & 0x00000000FFFFFFFFULL) | ((uint64_t)(back + 1) << 32);
+      if ((size_t)front + (size_t)back >= _count) return 0; // empty
+      const size_t available = _count - (size_t)front - (size_t)back;
+      take                   = maxCount < available ? maxCount : available;
+      desired                = (observed & 0x00000000FFFFFFFFULL) | ((uint64_t)(back + (uint32_t)take) << 32);
     } while (_claim.compare_exchange_weak(observed, desired, std::memory_order_acq_rel, std::memory_order_acquire) == false);
 
-    element = _buffer[_count - 1 - (size_t)back];
-    return true;
+    for (size_t i = 0; i < take; i++) elements[i] = _buffer[_count - 1 - (size_t)back - i];
+    return take;
   }
+
+  /**
+   * Claims a single element from the back. Lock-free.
+   * @param[out] element Storage for the claimed element
+   * @return True if an element was claimed; false if empty
+   */
+  __JAFFAR_COMMON_INLINE__ bool pop_back_get(T& element) { return pop_back_get_batch(&element, 1) == 1; }
 
   /**
    * Number of elements not yet claimed, at the time of checking. Safe to call concurrently.
