@@ -60,3 +60,27 @@ TEST(sequenceTrie, capacityGuardSoftFails)
   EXPECT_EQ(seq.size(), ok);
   EXPECT_EQ(t.extend(node, 1, 0), Trie::NONE);
 }
+
+// A cursor left at NONE after exhaustion must stay NONE (it indexed the chunk table out of bounds), and a
+// lowered memory cap is honoured.
+TEST(sequenceTrie, extendFromNoneAndMemoryCap)
+{
+  Trie t(/*numShards=*/2, /*chunkSizeLog2=*/4); // 16 nodes per chunk
+  t.setMaxMemoryBytes(4 * 16 * 16);              // 4 chunks of 16 nodes of 16 bytes
+  EXPECT_EQ(t.getMaxMemoryBytes(), 4u * 16u * 16u);
+
+  Trie::nodeId_t node = Trie::ROOT;
+  size_t         ok   = 0;
+  while (true)
+  {
+    const auto next = t.extend(node, 1, 1);
+    if (next == Trie::NONE) break;
+    node = next;
+    ok++;
+  }
+  EXPECT_TRUE(t.isExhausted());
+  EXPECT_LE(ok, 64u);
+  EXPECT_EQ(t.extend(Trie::NONE, 1, 1), Trie::NONE);
+  EXPECT_EQ(t.extend(Trie::NONE, 1, 0), Trie::NONE);
+  t.release(Trie::NONE, 1); // no-op
+}

@@ -13,11 +13,18 @@
  * reference counted so the structure stays bounded by the paths of *live* states: when the last holder of
  * a leaf releases it, the leaf (and any ancestors that become childless and unreferenced) are recycled.
  *
- * Concurrency: `extend`, `acquire`, `release` and `reconstruct` are all safe to call concurrently. Node
- * storage is a fixed array of lazily-allocated fixed-size chunks (handles are stable indices that never
- * move), recycled through a lock-free (ABA-tagged) free list; only the rare allocation of a brand-new
- * chunk takes a mutex. The reference-count invariant is the usual one: you may only `extend` from, or
- * `acquire`, a node you already hold a reference to, so a node at refcount zero can never be revived.
+ * Concurrency: `extend`, `acquire`, `release` and `reconstruct` are all safe to call concurrently, with
+ * one rule: each free-list *shard* belongs to one thread at a time (pass each thread its own shard id;
+ * shard 0 is the default). Node storage is a fixed array of lazily-allocated fixed-size chunks (handles
+ * are stable indices that never move). Freed nodes go to the releasing thread's shard, a plain stack
+ * with no atomics; fresh ids are handed to each shard in blocks, so the shared id counter is touched once
+ * per block; only the rare allocation of a brand-new chunk takes a mutex. The reference-count invariant
+ * is the usual one: you may only `extend` from, or `acquire`, a node you already hold a reference to, so
+ * a node at refcount zero can never be revived.
+ *
+ * Memory: a node takes 16 bytes (8-byte parent id, 2-byte element, 2-byte reference count, padding). The
+ * node storage is capped at @ref getMaxMemoryBytes (by default the full chunk table, 24576 chunks; lower
+ * it with @ref setMaxMemoryBytes); past the cap, @ref extend returns @ref NONE.
  */
 
 #include "exceptions.hpp"
@@ -65,6 +72,7 @@ public:
     for (auto& c : _chunks) c.store(nullptr, std::memory_order_relaxed);
     for (auto& s : _shards) s.head = NONE;
     _bump.store(0, std::memory_order_relaxed);
+    _maxNodes = MAX_CHUNKS * (uint64_t)_chunkSize;
 
     // Allocate ROOT (id 0). It carries a permanent self-reference so it is never recycled.
     const nodeId_t root = allocNode(0);
@@ -97,6 +105,8 @@ public:
    */
   nodeId_t extend(nodeId_t parent, Element element, uint32_t shard = 0)
   {
+    // A cursor left at NONE (a previous extend failed at the ceiling) stays NONE: there is no path to extend
+    if (parent == NONE) return NONE;
     const nodeId_t id = allocNode(shard);
     if (id == NONE) return NONE; // trie exhausted (hard ceiling): propagate "couldn't store" to the caller
     Node& n   = node(id);
@@ -168,11 +178,12 @@ public:
   }
 
   /**
-   * @brief Total node slots ever bump-allocated (high-water of simultaneously-live nodes, since freed
-   * nodes are recycled before fresh ids are bumped). A good proxy for the trie's resident memory.
-   * @return The number of node slots ever bump-allocated.
+   * @brief Total node slots ever handed out as fresh ids (high-water of simultaneously-live nodes, since
+   * freed nodes are recycled before fresh ids are used; it includes the unused rest of each shard's
+   * current block of fresh ids). A good proxy for the trie's resident memory.
+   * @return The number of node slots ever taken from the fresh-id counter.
    */
-  size_t getAllocatedNodeCount() const { return _bump.load(std::memory_order_relaxed); }
+  size_t getAllocatedNodeCount() const { return std::min<uint64_t>(_bump.load(std::memory_order_relaxed), _maxNodes); }
 
   /**
    * @brief Approximate resident memory of the trie's node storage, in bytes.
@@ -187,7 +198,20 @@ public:
    *        memory guard) use this fixed ceiling. = MAX_CHUNKS * nodes-per-chunk * sizeof(Node).
    * @return The hard upper bound on the trie's node-storage footprint, in bytes.
    */
-  size_t getMaxMemoryBytes() const { return MAX_CHUNKS * (size_t)_chunkSize * sizeof(Node); }
+  size_t getMaxMemoryBytes() const { return _maxNodes * sizeof(Node); }
+
+  /**
+   * @brief Lowers the cap on the trie's node storage (by default the whole chunk table: 24576 chunks).
+   * @param bytes The most node storage the trie may take; rounded down to whole chunks, at least one chunk
+   *              and at most the default.
+   * @note Call before the trie is used concurrently.
+   */
+  void setMaxMemoryBytes(const size_t bytes)
+  {
+    const size_t chunkBytes = (size_t)_chunkSize * sizeof(Node);
+    const size_t chunks     = std::clamp<size_t>(bytes / chunkBytes, 1, MAX_CHUNKS);
+    _maxNodes               = chunks * (uint64_t)_chunkSize;
+  }
 
   /// @brief True once node allocation has hit the hard capacity ceiling (@ref getMaxMemoryBytes). Latched
   /// and never cleared. After this, @ref extend returns @ref NONE ("couldn't store") instead of throwing,
@@ -204,10 +228,13 @@ private:
                                     ///< size), bounded by the input-set size; @ref incRef guards overflow.
   };
 
-  // Fixed cap on chunks so the chunk-pointer array never reallocates (handles stay valid lock-free).
-  // 24576 chunks x 2^20 nodes x 16 B/node => a ~384 GiB hard ceiling (the engine memory guard reserves
-  // this). With 64-bit node ids the count is no longer 2^32-bound; physical RAM is the practical limit.
+  // Fixed size of the chunk-pointer array, so it never reallocates (handles stay valid lock-free). With the
+  // default 2^20 nodes per chunk and 16 B per node this allows up to ~384 GiB of nodes; setMaxMemoryBytes()
+  // lowers the actual cap. With 64-bit node ids the count is not 2^32-bound.
   static constexpr size_t MAX_CHUNKS = 24576;
+
+  // Fresh ids are handed to a shard this many at a time, so the shared counter is touched once per block.
+  static constexpr uint64_t FRESH_BLOCK = 256;
 
   __attribute__((always_inline)) Node& node(nodeId_t id) const { return _chunks[id >> _chunkBits].load(std::memory_order_acquire)[id & _chunkMask]; }
 
@@ -224,9 +251,9 @@ private:
   }
 
   // Obtain a node slot: reuse one recycled into this shard's (thread-private) free list if available,
-  // otherwise bump-allocate a fresh id. The per-shard free list needs no atomics because a given shard
-  // is only ever touched by its owning thread -- removing the single-free-list contention that otherwise
-  // serializes all workers. Only the rare fresh-id bump (free list empty) touches a shared atomic.
+  // otherwise take the next id of the shard's current block of fresh ids, getting a new block from the
+  // shared counter when it runs out. Neither the free list nor the block needs atomics because a given
+  // shard is only ever touched by its owning thread; the shared counter is touched once per block.
   nodeId_t allocNode(uint32_t shard)
   {
     FreeShard& fs = _shards[shard];
@@ -237,18 +264,25 @@ private:
       return top;
     }
 
-    // Free list empty: bump-allocate a fresh id, faulting in its chunk on first use.
-    const nodeId_t id    = (nodeId_t)_bump.fetch_add(1, std::memory_order_relaxed);
-    const size_t   chunk = id >> _chunkBits;
-    // Capacity reached: do NOT throw here. This runs inside the parallel search region across many worker
-    // threads; a throw escaping an OpenMP region calls std::terminate (often "terminate called recursively"
-    // as every thread throws at once). Instead, latch an exhausted flag and return NONE -- callers (extend)
-    // propagate NONE as "couldn't store", and the driver polls isExhausted() to stop the run gracefully.
-    if (chunk >= MAX_CHUNKS)
+    // Free list empty: take a fresh id, faulting in its chunk on first use.
+    if (fs.freshNext == fs.freshEnd)
     {
-      _exhausted.store(true, std::memory_order_relaxed);
-      return NONE;
+      // Capacity reached: do NOT throw here. This runs inside the parallel search region across many worker
+      // threads; a throw escaping an OpenMP region calls std::terminate. Instead, latch an exhausted flag and
+      // return NONE -- callers (extend) propagate NONE as "couldn't store", and the driver polls isExhausted()
+      // to stop the run gracefully. Once latched, the shared counter is no longer touched.
+      if (_exhausted.load(std::memory_order_relaxed)) return NONE;
+      const uint64_t base = _bump.fetch_add(FRESH_BLOCK, std::memory_order_relaxed);
+      if (base >= _maxNodes)
+      {
+        _exhausted.store(true, std::memory_order_relaxed);
+        return NONE;
+      }
+      fs.freshNext = base;
+      fs.freshEnd  = std::min(base + FRESH_BLOCK, _maxNodes);
     }
+    const nodeId_t id    = fs.freshNext++;
+    const size_t   chunk = id >> _chunkBits;
     if (_chunks[chunk].load(std::memory_order_acquire) == nullptr) ensureChunk(chunk);
     return id;
   }
@@ -268,11 +302,13 @@ private:
     _chunks[chunk].store(p, std::memory_order_release);
   }
 
-  /// @brief A per-shard recycled-node free list. Cache-line aligned so adjacent shards never share a
-  /// line; touched only by the shard's owning thread, so its head needs no atomics.
+  /// @brief A per-shard recycled-node free list and block of fresh ids. Cache-line aligned so adjacent
+  /// shards never share a line; touched only by the shard's owning thread, so it needs no atomics.
   struct alignas(64) FreeShard
   {
-    nodeId_t head = NONE;
+    nodeId_t head      = NONE; ///< Top of the recycled-node stack.
+    uint64_t freshNext = 0;    ///< Next unused fresh id of the shard's current block.
+    uint64_t freshEnd  = 0;    ///< End (exclusive) of the shard's current block of fresh ids.
   };
 
   const uint32_t _chunkBits;
@@ -280,10 +316,11 @@ private:
   const uint32_t _chunkMask;
 
   mutable std::array<std::atomic<Node*>, MAX_CHUNKS> _chunks;
-  std::atomic<uint64_t>                              _bump; ///< Next fresh node id (only touched when a shard's free list is empty).
-  std::vector<FreeShard>                             _shards;
-  std::mutex                                         _growMutex;
-  std::atomic<bool>                                  _exhausted{false}; ///< Latched when the node-id ceiling is hit (see @ref isExhausted).
+  uint64_t                                           _maxNodes = 0; ///< Node-id ceiling (see @ref setMaxMemoryBytes).
+  alignas(64) std::atomic<uint64_t> _bump;                          ///< Start of the next block of fresh node ids (on its own cache line).
+  std::vector<FreeShard> _shards;
+  alignas(64) std::mutex _growMutex;
+  std::atomic<bool> _exhausted{false}; ///< Latched when the node-id ceiling is hit (see @ref isExhausted).
 };
 
 } // namespace sequenceTrie
