@@ -26,13 +26,15 @@ static bool _useNCurses = false;
 /**
  * Prints the specified formatted string to the NCurses or normal terminal, as configured
  *
- * @param[in] f The formatted string
- * @param[in] args The arguments to the formatted string
+ * @param[in] f The formatted string (checked against the arguments by the compiler)
+ * @param[in] ... The arguments to the formatted string
  */
-template <typename... Args>
-__JAFFAR_COMMON_INLINE__ void log(const char* f, Args... args)
+__attribute__((format(printf, 1, 2))) __JAFFAR_COMMON_INLINE__ void log(const char* f, ...)
 {
-  auto string = jaffarCommon::string::formatString(f, args...);
+  va_list ap;
+  va_start(ap, f);
+  const auto string = jaffarCommon::string::vformatString(f, ap);
+  va_end(ap);
   if (_useNCurses == true) printw("%s", string.c_str());
   if (_useNCurses == false) printf("%s", string.c_str());
 }

@@ -5,8 +5,11 @@
  * @brief Contains common functions related to JSON manipulation
  */
 #include "exceptions.hpp"
+#include <cmath>
 #include <json/single_include/nlohmann/json.hpp>
+#include <limits>
 #include <stdlib.h>
+#include <type_traits>
 
 namespace jaffarCommon
 {
@@ -96,6 +99,8 @@ __JAFFAR_COMMON_INLINE__ const std::vector<T> getArray(const object& json, const
  * @note An exception will occur if the input is not a json object (e.g., is an array)
  * @note An exception will occur if the given key does not exist in the json object
  * @note An exception will occur if the given key is not a number
+ * @note For an integer type, an exception will occur if the number is not an integer or does not fit
+ *       the type (e.g., -1 for an unsigned type), instead of silently wrapping or truncating it
  *
  * @param[in] json The json object to look into
  * @param[in] key The key to look for inside the json object
@@ -105,8 +110,28 @@ template <typename T>
 __JAFFAR_COMMON_INLINE__ const T getNumber(const object& json, const std::string& key)
 {
   checkEntry(json, key);
-  if (json[key].is_number() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a number. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
-  return json.at(key).get<T>();
+  const auto& value = json.at(key);
+  if (value.is_number() == false) JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' is not a number. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
+  if constexpr (std::is_integral_v<T> && std::is_same_v<T, bool> == false)
+  {
+    bool fits = false;
+    if (value.is_number_unsigned())
+      fits = value.get<uint64_t>() <= (uint64_t)std::numeric_limits<T>::max();
+    else if (value.is_number_integer())
+    {
+      const int64_t v = value.get<int64_t>();
+      fits            = v >= 0 ? (uint64_t)v <= (uint64_t)std::numeric_limits<T>::max() : (std::is_signed_v<T> && v >= (int64_t)std::numeric_limits<T>::min());
+    }
+    else
+    {
+      const long double v = value.get<double>();
+      fits                = v == std::trunc(v) && v >= (long double)std::numeric_limits<T>::min() && v <= (long double)std::numeric_limits<T>::max();
+    }
+    if (fits == false)
+      JAFFAR_THROW_LOGIC("[Error] Configuration key '%s' must be an integer between %lld and %llu (got %s)\n", key.c_str(), (long long)std::numeric_limits<T>::min(),
+                         (unsigned long long)std::numeric_limits<T>::max(), value.dump().c_str());
+  }
+  return value.get<T>();
 }
 
 /**

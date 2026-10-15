@@ -35,29 +35,13 @@ namespace exceptions
  * @param[in] format A constant formatted string
  * @param[in] ... parameters for the formatted string
  */
-__JAFFAR_COMMON_INLINE__ void throwException [[noreturn]] (const char* exceptionType, const char* fileName, const int lineNumber, const char* format, ...)
+__attribute__((format(printf, 4, 5))) __JAFFAR_COMMON_INLINE__ void throwException
+    [[noreturn]] (const char* exceptionType, const char* fileName, const int lineNumber, const char* format, ...)
 {
-  char*   outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vsnprintf(nullptr, 0, format, ap);
+  std::string outString = string::vformatString(format, ap);
   va_end(ap);
-  if (ret < 0) throw std::invalid_argument("Failed processing exception reason");
-
-  outstr = (char*)malloc(ret + 1);
-  if (outstr == nullptr) throw std::invalid_argument("Failed processing exception reason");
-
-  va_start(ap, format);
-  ret = vsnprintf(outstr, ret + 1, format, ap);
-  va_end(ap);
-  if (ret < 0)
-  {
-    free(outstr);
-    throw std::invalid_argument("Failed processing exception reason");
-  }
-
-  std::string outString = outstr;
-  free(outstr);
 
   char info[1024];
 

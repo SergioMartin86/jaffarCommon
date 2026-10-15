@@ -97,8 +97,8 @@ public:
 
     // If an error happened, print it here
     if (ret != 0)
-      JAFFAR_THROW_RUNTIME("[Error] unexpected error while encoding differential compression. Probably maximum size increased: (%lu + %lu > %lu)", _outputDataBufferPos, *diffCount,
-                           _outputDataBufferSize);
+      JAFFAR_THROW_RUNTIME("[Error] unexpected error while encoding differential compression. Probably maximum size increased: (%lu + %lu > %lu)", _outputDataBufferPos,
+                           (size_t)*diffCount, _outputDataBufferSize);
 
     // Increasing output data position pointer
     _outputDataBufferPos += *diffCount;

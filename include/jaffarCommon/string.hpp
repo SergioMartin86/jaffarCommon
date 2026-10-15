@@ -53,35 +53,44 @@ __JAFFAR_COMMON_INLINE__ std::vector<std::string> split(const std::string& s, ch
 }
 
 /**
+ * Converts a C-formatted string into a C++ string, taking the arguments as a va_list
+ *
+ * @param[in] format The format string
+ * @param[in] ap The arguments to the format string (not consumed: the caller still owns and ends it)
+ * @return The C++ string produced
+ */
+__JAFFAR_COMMON_INLINE__ std::string vformatString(const char* format, va_list ap)
+{
+  va_list sizing;
+  va_copy(sizing, ap);
+  const int size = vsnprintf(nullptr, 0, format, sizing);
+  va_end(sizing);
+  if (size < 0) return "";
+
+  std::string outString((size_t)size + 1, '\0');
+  va_list     writing;
+  va_copy(writing, ap);
+  const int ret = vsnprintf(outString.data(), outString.size(), format, writing);
+  va_end(writing);
+  if (ret < 0) return "";
+
+  outString.resize((size_t)size);
+  return outString;
+}
+
+/**
  * Converts a C-formatted string into a C++ string
  *
  * @param[in] format The format string
  * @param[in] ... The arguments to the format string
  * @return The C++ string produced
  */
-__JAFFAR_COMMON_INLINE__ std::string formatString(const char* format, ...)
+__attribute__((format(printf, 1, 2))) __JAFFAR_COMMON_INLINE__ std::string formatString(const char* format, ...)
 {
-  char*   outstr = 0;
   va_list ap;
   va_start(ap, format);
-  int ret = vsnprintf(nullptr, 0, format, ap);
+  auto outString = vformatString(format, ap);
   va_end(ap);
-  if (ret < 0) return "";
-
-  outstr = (char*)malloc(ret + 1);
-  if (outstr == nullptr) return "";
-
-  va_start(ap, format);
-  ret = vsnprintf(outstr, ret + 1, format, ap);
-  va_end(ap);
-  if (ret < 0)
-  {
-    free(outstr);
-    return "";
-  }
-
-  std::string outString = outstr;
-  free(outstr);
   return outString;
 }
 

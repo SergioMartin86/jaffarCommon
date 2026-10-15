@@ -93,3 +93,27 @@ TEST(json, boolean)
   EXPECT_NO_THROW(result = getBoolean(input, "Boolean"));
   EXPECT_EQ(result, true);
 }
+TEST(json, integerRange)
+{
+  object input;
+  input["Negative"]   = -1;
+  input["Large"]      = 300;
+  input["Fraction"]   = 2.5;
+  input["Integral"]   = 64.0;
+  input["Max"]        = 255;
+  input["MinSigned"]  = -128;
+
+  // Values that do not fit the requested integer type are rejected instead of wrapping or truncating
+  EXPECT_THROW(getNumber<size_t>(input, "Negative"), std::logic_error);
+  EXPECT_THROW(getNumber<uint8_t>(input, "Large"), std::logic_error);
+  EXPECT_THROW(getNumber<int>(input, "Fraction"), std::logic_error);
+  EXPECT_THROW(getNumber<int8_t>(input, "Max"), std::logic_error);
+
+  // Values that fit are returned unchanged (an integral float included); floating types take anything
+  EXPECT_EQ(getNumber<ssize_t>(input, "Negative"), -1);
+  EXPECT_EQ(getNumber<uint8_t>(input, "Max"), 255);
+  EXPECT_EQ(getNumber<int8_t>(input, "MinSigned"), -128);
+  EXPECT_EQ(getNumber<size_t>(input, "Integral"), 64);
+  EXPECT_EQ(getNumber<float>(input, "Fraction"), 2.5f);
+  EXPECT_EQ(getNumber<double>(input, "Negative"), -1.0);
+}

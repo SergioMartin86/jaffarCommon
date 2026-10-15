@@ -13,5 +13,5 @@ TEST(exceptions, logic)
 
 TEST(exceptions, badCall)
 { 
-  ASSERT_THROW(jaffarCommon::exceptions::throwException("", "", 1, ""), std::invalid_argument);
+  ASSERT_THROW(jaffarCommon::exceptions::throwException("", "", 1, "Bad exception type"), std::invalid_argument);
 }

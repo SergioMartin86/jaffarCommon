@@ -196,9 +196,13 @@ using atomicQueue_t = atomic_queue::AtomicQueueB<T>;
 
 /**
  * Definition for a parallel hash set. It enables concurrent inserts and queries
+ *
+ * @tparam V The element type
+ * @tparam SubmapBits The set is split into 2^SubmapBits submaps, each with its own mutex: more submaps
+ *         means less contention among many threads, at a fixed cost of about 90 bytes per submap
  */
-template <class V>
-using HashSet_t = phmap::parallel_flat_hash_set<V, phmap::priv::hash_default_hash<V>, phmap::priv::hash_default_eq<V>, std::allocator<V>, 8, std::mutex>;
+template <class V, size_t SubmapBits = 8>
+using HashSet_t = phmap::parallel_flat_hash_set<V, phmap::priv::hash_default_hash<V>, phmap::priv::hash_default_eq<V>, std::allocator<V>, SubmapBits, std::mutex>;
 
 /**
  * Definition for a parallel hash map. It enables concurrent inserts and queries

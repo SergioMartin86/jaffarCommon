@@ -96,7 +96,7 @@ public:
     if (ret != 0)
       JAFFAR_THROW_RUNTIME(
           "[Error] unexpected error while decoding differential decompression. Probably maximum input data position reached after differential decode (%lu + %lu > %lu)",
-          _inputDataBufferPos, diffCount, _inputDataBufferSize);
+          _inputDataBufferPos, (size_t)diffCount, _inputDataBufferSize);
 
     // Increasing output data position pointer
     _inputDataBufferPos += diffCount;

@@ -186,3 +186,34 @@ TEST(file, memFileDirectory)
   ASSERT_EQ(d.fopen(fileName, "r"), (MemoryFile*)NULL);
   ASSERT_NE(f = d.fopen(fileName, "w"), (MemoryFile*)NULL);
 }
+TEST(file, saveReplacesAndFollowsLinks)
+{
+  const std::string target = "saveTarget.txt";
+  const std::string link   = "saveLink.txt";
+  std::remove(target.c_str());
+  std::remove(link.c_str());
+
+  // A save replaces the whole file
+  ASSERT_TRUE(saveStringToFile("first, longer contents", target));
+  ASSERT_TRUE(saveStringToFile("second", target));
+  std::string contents;
+  ASSERT_TRUE(loadStringFromFile(contents, target));
+  ASSERT_EQ(contents, "second");
+
+  // Through a symbolic link, the linked file is replaced and the link is kept
+  std::filesystem::create_symlink(target, link);
+  ASSERT_TRUE(saveStringToFile("third", link));
+  ASSERT_TRUE(std::filesystem::is_symlink(link));
+  ASSERT_TRUE(loadStringFromFile(contents, target));
+  ASSERT_EQ(contents, "third");
+
+  // A missing directory or a full disk is reported
+  ASSERT_FALSE(saveStringToFile("x", "no_such_directory/file.txt"));
+  if (std::filesystem::exists("/dev/full"))
+  {
+    ASSERT_FALSE(saveStringToFile("x", "/dev/full"));
+  }
+
+  std::remove(link.c_str());
+  std::remove(target.c_str());
+}

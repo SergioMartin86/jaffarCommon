@@ -5,8 +5,11 @@
  * @brief Contains common functions related to file manipulation
  */
 
+#include <atomic>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -59,22 +62,64 @@ static __JAFFAR_COMMON_INLINE__ bool loadStringFromFile(std::string& dst, const 
 }
 
 /**
- * Write a string into a file
+ * Writes a string into a file, and checks that every byte reached it
  *
  * @param[in] src The source string to save into the file
  * @param[in] fileName The name of the file to write to
- * @return Whether the save operation succeded (true) or failed (fail)
+ * @return Whether the whole string was written and the file closed without error
+ */
+static __JAFFAR_COMMON_INLINE__ bool writeStringToFile(const std::string& src, const std::string& fileName)
+{
+  FILE* fid = fopen(fileName.c_str(), "w");
+  if (fid == NULL) return false;
+  const bool written = fwrite(src.c_str(), 1, src.size(), fid) == src.size();
+  const bool closed  = fclose(fid) == 0;
+  return written && closed;
+}
+
+/**
+ * Write a string into a file
+ *
+ * The string goes to a temporary file in the same directory, which then replaces the target, so the
+ * target is never left half written (a reader, or a crash, sees the old or the new contents). A
+ * symbolic link is followed (its target is replaced, not the link), and a target that is not a
+ * regular file (a device, a pipe) is written to directly.
+ *
+ * @param[in] src The source string to save into the file
+ * @param[in] fileName The name of the file to write to
+ * @return Whether the save operation succeded (true) or failed (fail): the file could not be
+ *         created, the disk is full, or the replacement failed
  */
 static __JAFFAR_COMMON_INLINE__ bool saveStringToFile(const std::string& src, const std::string& fileName)
 {
-  FILE* fid = fopen(fileName.c_str(), "w");
-  if (fid != NULL)
+  namespace fs = std::filesystem;
+  std::error_code ec;
+
+  // Following a symbolic link to the file it names
+  fs::path target = fileName;
+  if (fs::is_symlink(target, ec)) target = fs::weakly_canonical(target, ec);
+  if (ec) target = fileName;
+
+  // Special files (devices, pipes) cannot be replaced: write them directly
+  const auto status = fs::status(target, ec);
+  if (!ec && fs::exists(status) && fs::is_regular_file(status) == false) return writeStringToFile(src, target.string());
+
+  // Writing next to the target (under a name unique to this call: a counter and the time) and replacing it
+  static std::atomic<uint64_t> counter{0};
+  const std::string            tmp =
+      target.string() + ".tmp." + std::to_string(counter.fetch_add(1)) + "." + std::to_string((uint64_t)std::chrono::steady_clock::now().time_since_epoch().count());
+  if (writeStringToFile(src, tmp) == false)
   {
-    fwrite(src.c_str(), 1, src.size(), fid);
-    fclose(fid);
-    return true;
+    fs::remove(tmp, ec);
+    return false;
   }
-  return false;
+  fs::rename(tmp, target, ec);
+  if (ec)
+  {
+    fs::remove(tmp, ec);
+    return false;
+  }
+  return true;
 }
 
 class MemoryFileDirectory;

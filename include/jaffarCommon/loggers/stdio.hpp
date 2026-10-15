@@ -16,11 +16,18 @@ namespace jaffarCommon
 namespace logger
 {
 
-template <typename... Args>
-__JAFFAR_COMMON_INLINE__ void log(const char* f, Args... args)
+/**
+ * Prints the specified formatted string to the terminal
+ *
+ * @param[in] f The formatted string (checked against the arguments by the compiler)
+ * @param[in] ... The arguments to the formatted string
+ */
+__attribute__((format(printf, 1, 2))) __JAFFAR_COMMON_INLINE__ void log(const char* f, ...)
 {
-  auto string = jaffarCommon::string::formatString(f, args...);
-  printf("%s", string.c_str());
+  va_list ap;
+  va_start(ap, f);
+  vprintf(f, ap);
+  va_end(ap);
 }
 
 __JAFFAR_COMMON_INLINE__ int  waitForKeyPress() { return getchar(); }
