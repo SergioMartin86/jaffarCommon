@@ -8,7 +8,9 @@
 #include <cmath>
 #include <json/single_include/nlohmann/json.hpp>
 #include <limits>
+#include <set>
 #include <stdlib.h>
+#include <string>
 #include <type_traits>
 
 namespace jaffarCommon
@@ -21,6 +23,57 @@ namespace json
  *  Masks the use of nlohmann namespace in favor or an implementation-agnostic naming
  */
 typedef nlohmann::json object;
+
+/**
+ * The object whose key reads are being recorded on this thread (see KeyReadRecorder), or nullptr
+ */
+inline thread_local const object* _recordedObject = nullptr;
+
+/**
+ * Where the keys read from @ref _recordedObject are recorded on this thread, or nullptr
+ */
+inline thread_local std::set<std::string>* _recordedKeys = nullptr;
+
+/**
+ * Records which keys of one json object are read through this namespace's accessors while it exists,
+ * so a parser that reads its configuration with them can be checked for keys it never read (e.g. a
+ * misspelled optional key). Recorders nest: the previous one is restored on destruction.
+ */
+class KeyReadRecorder
+{
+public:
+  /**
+   * Starts recording the keys read from @p json on this thread
+   *
+   * @param[in] json The object whose key reads are recorded
+   */
+  KeyReadRecorder(const object& json) : _previousObject(_recordedObject), _previousKeys(_recordedKeys)
+  {
+    _recordedObject = &json;
+    _recordedKeys   = &_keys;
+  }
+
+  ~KeyReadRecorder()
+  {
+    _recordedObject = _previousObject;
+    _recordedKeys   = _previousKeys;
+  }
+
+  KeyReadRecorder(const KeyReadRecorder&)            = delete;
+  KeyReadRecorder& operator=(const KeyReadRecorder&) = delete;
+
+  /**
+   * Gets the keys read so far
+   *
+   * @return The keys read from the object since the recorder was created
+   */
+  const std::set<std::string>& getKeys() const { return _keys; }
+
+private:
+  const object*          _previousObject;
+  std::set<std::string>* _previousKeys;
+  std::set<std::string>  _keys;
+};
 
 /**
  * Verifies the given key exists in the given json object
@@ -36,6 +89,7 @@ __JAFFAR_COMMON_INLINE__ const void checkEntry(const object& json, const std::st
   if (json.is_object() == false)
     JAFFAR_THROW_LOGIC("[Error] JSON passed is not a key/value object. Happened when trying to obtain string key '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
   if (json.contains(key) == false) JAFFAR_THROW_LOGIC("[Error] JSON contains no field called '%s'. JSON Dump: %s\n", key.c_str(), json.dump(2).c_str());
+  if (_recordedObject == &json) _recordedKeys->insert(key);
 }
 
 /**

@@ -117,3 +117,33 @@ TEST(json, integerRange)
   EXPECT_EQ(getNumber<float>(input, "Fraction"), 2.5f);
   EXPECT_EQ(getNumber<double>(input, "Negative"), -1.0);
 }
+
+TEST(json, keyReadRecorder)
+{
+  object input;
+  input["A"] = 1;
+  input["B"] = "two";
+  input["C"] = 3.0;
+  object other;
+  other["A"] = 5;
+
+  {
+    KeyReadRecorder recorder(input);
+    getNumber<int>(input, "A");
+    getString(input, "B");
+    getNumber<int>(other, "A"); // another object: not recorded
+    EXPECT_EQ(recorder.getKeys(), (std::set<std::string>{"A", "B"}));
+
+    // Recorders nest; the outer one resumes afterwards
+    {
+      KeyReadRecorder inner(other);
+      getNumber<int>(other, "A");
+      EXPECT_EQ(inner.getKeys(), (std::set<std::string>{"A"}));
+    }
+    getNumber<double>(input, "C");
+    EXPECT_EQ(recorder.getKeys(), (std::set<std::string>{"A", "B", "C"}));
+  }
+
+  // Nothing is recorded once the recorder is gone
+  getNumber<int>(input, "A");
+}
