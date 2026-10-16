@@ -30,7 +30,7 @@ typedef nlohmann::json object;
 inline thread_local const object* _recordedObject = nullptr;
 
 /**
- * Where the keys read from @ref _recordedObject are recorded on this thread, or nullptr
+ * Where the keys read from _recordedObject are recorded on this thread, or nullptr
  */
 inline thread_local std::set<std::string>* _recordedKeys = nullptr;
 

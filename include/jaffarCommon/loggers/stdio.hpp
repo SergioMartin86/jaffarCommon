@@ -16,12 +16,8 @@ namespace jaffarCommon
 namespace logger
 {
 
-/**
- * Prints the specified formatted string to the terminal
- *
- * @param[in] f The formatted string (checked against the arguments by the compiler)
- * @param[in] ... The arguments to the formatted string
- */
+// Prints the specified formatted string to the terminal (documented with the ncurses logger's log,
+// which Doxygen merges this one into)
 __attribute__((format(printf, 1, 2))) __JAFFAR_COMMON_INLINE__ void log(const char* f, ...)
 {
   va_list ap;

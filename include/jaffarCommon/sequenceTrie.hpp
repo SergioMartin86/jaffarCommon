@@ -23,8 +23,8 @@
  * a node at refcount zero can never be revived.
  *
  * Memory: a node takes 16 bytes (8-byte parent id, 2-byte element, 2-byte reference count, padding). The
- * node storage is capped at @ref getMaxMemoryBytes (by default the full chunk table, 24576 chunks; lower
- * it with @ref setMaxMemoryBytes); past the cap, @ref extend returns @ref NONE.
+ * node storage is capped at `getMaxMemoryBytes` (by default the full chunk table, 24576 chunks; lower
+ * it with `setMaxMemoryBytes`); past the cap, `extend` returns `NONE`.
  */
 
 #include "exceptions.hpp"
@@ -216,6 +216,7 @@ public:
   /// @brief True once node allocation has hit the hard capacity ceiling (@ref getMaxMemoryBytes). Latched
   /// and never cleared. After this, @ref extend returns @ref NONE ("couldn't store") instead of throwing,
   /// so a caller (e.g. a search driver) can poll this and stop the run gracefully rather than terminate.
+  /// @return Whether node allocation has hit the capacity ceiling.
   bool isExhausted() const { return _exhausted.load(std::memory_order_relaxed); }
 
 private:
